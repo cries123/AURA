@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import ROICalculator from './ROICalculator';
 
 export default function Hero() {
@@ -69,9 +70,9 @@ export default function Hero() {
           </motion.p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-20">
-            <button className="w-full sm:w-auto px-10 py-5 bg-white text-aura-black font-bold rounded-2xl hover:bg-aura-gold hover:scale-105 transition-all shadow-xl shadow-aura-gold/10">
+            <Link to="/pricing" className="w-full sm:w-auto px-10 py-5 bg-white text-aura-black font-bold rounded-2xl hover:bg-aura-gold hover:scale-105 transition-all shadow-xl shadow-aura-gold/10 inline-block text-center">
               Get Started Now
-            </button>
+            </Link>
             <button 
               onClick={() => setIsROIModalOpen(true)}
               className="w-full sm:w-auto px-10 py-5 bg-zinc-900/50 border border-zinc-800 text-zinc-300 font-bold rounded-2xl hover:bg-zinc-800 hover:text-white transition-all backdrop-blur-sm"

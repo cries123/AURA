@@ -29,6 +29,9 @@ export default function ProfileDashboard() {
   const [displayName, setDisplayName] = useState(userProfile?.displayName || '');
   const [links, setLinks] = useState<AuraLink[]>(userProfile?.links || []);
   const [avatarUrl, setAvatarUrl] = useState(userProfile?.avatarUrl || '');
+  const [jobTitle, setJobTitle] = useState(userProfile?.jobTitle || '');
+  const [location, setLocation] = useState(userProfile?.location || '');
+  const [tagsText, setTagsText] = useState(userProfile?.tags ? userProfile.tags.join(', ') : '');
   const [isSaving, setIsSaving] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -40,6 +43,9 @@ export default function ProfileDashboard() {
       if (userProfile.displayName !== undefined) setDisplayName(userProfile.displayName || '');
       if (userProfile.links !== undefined) setLinks(userProfile.links || []);
       if (userProfile.avatarUrl !== undefined) setAvatarUrl(userProfile.avatarUrl || '');
+      if (userProfile.jobTitle !== undefined) setJobTitle(userProfile.jobTitle || '');
+      if (userProfile.location !== undefined) setLocation(userProfile.location || '');
+      if (userProfile.tags !== undefined) setTagsText(userProfile.tags.join(', ') || '');
     }
   }, [userProfile]);
 
@@ -48,7 +54,10 @@ export default function ProfileDashboard() {
     bio,
     links,
     avatarUrl: avatarUrl,
-    username: username || 'handle'
+    username: username || 'handle',
+    jobTitle,
+    location,
+    tags: tagsText.split(',').map(t => t.trim()).filter(Boolean),
   };
 
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
@@ -175,6 +184,9 @@ export default function ProfileDashboard() {
         bio,
         links,
         avatarUrl,
+        jobTitle,
+        location,
+        tags: tagsText.split(',').map(t => t.trim()).filter(Boolean),
         updatedAt: new Date().toISOString()
       });
 
@@ -317,6 +329,41 @@ export default function ProfileDashboard() {
                 onChange={(e) => setDisplayName(e.target.value)}
                 className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-aura-gold transition-colors text-sm" 
                 placeholder="John Doe" 
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2 ml-1">Job Title / Role</label>
+                <input 
+                  type="text" 
+                  value={jobTitle}
+                  onChange={(e) => setJobTitle(e.target.value)}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-aura-gold transition-colors text-sm" 
+                  placeholder="e.g. Stock Trader" 
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2 ml-1">Location / Base</label>
+                <input 
+                  type="text" 
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-aura-gold transition-colors text-sm" 
+                  placeholder="e.g. New York, NY" 
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2 ml-1">Industry Tags / Skills (Comma Separated)</label>
+              <input 
+                type="text" 
+                value={tagsText}
+                onChange={(e) => setTagsText(e.target.value)}
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-aura-gold transition-colors text-sm" 
+                placeholder="Real Estate, Investor, Stock Trading" 
               />
             </div>
 
