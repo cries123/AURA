@@ -238,7 +238,7 @@ export default function Portal() {
   }
 
   return (
-    <div className="min-h-screen bg-aura-black pt-40 px-6 pb-24 relative overflow-hidden">
+    <div className="min-h-screen bg-aura-black pt-40 px-6 pb-24 relative overflow-y-auto">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl aspect-square bg-aura-gold/5 rounded-full blur-[120px] -translate-y-1/2" />
       
       <div className="max-w-lg mx-auto relative z-10">

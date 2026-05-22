@@ -44,32 +44,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (authUser) {
-        unsubscribeProfile = onSnapshot(doc(db, 'users', authUser.uid), async (snapshot) => {
-          if (snapshot.exists()) {
-            setUserProfile(snapshot.data());
-            setLoading(false);
-          } else {
-            // check if user email matches the owner email provided in metadata/chat
-            const isAdminBootstrap = authUser.email?.toLowerCase() === 'jaryn.b.healey@gmail.com';
-            const newProfile = {
-              uid: authUser.uid,
-              email: authUser.email,
-              role: isAdminBootstrap ? 'admin' : 'user',
-              createdAt: new Date().toISOString(),
-            };
-            try {
-              await setDoc(doc(db, 'users', authUser.uid), newProfile);
-              // snapshot will trigger again with new data
-            } catch (e) {
-              console.error('Failed to create user profile:', e);
-              setUserProfile({ ...newProfile, error: 'Profile creation pending rules deployment' });
+        try {
+          unsubscribeProfile = onSnapshot(doc(db, 'users', authUser.uid), async (snapshot) => {
+            if (snapshot.exists()) {
+              setUserProfile(snapshot.data());
               setLoading(false);
+            } else {
+              // check if user email matches the owner email provided in metadata/chat
+              const isAdminBootstrap = authUser.email?.toLowerCase() === 'jaryn.b.healey@gmail.com';
+              const newProfile = {
+                uid: authUser.uid,
+                email: authUser.email,
+                role: isAdminBootstrap ? 'admin' : 'user',
+                createdAt: new Date().toISOString(),
+              };
+              try {
+                await setDoc(doc(db, 'users', authUser.uid), newProfile);
+                // snapshot will trigger again with new data
+              } catch (e) {
+                console.error('Failed to create user profile:', e);
+                setUserProfile({ ...newProfile, error: 'Profile creation pending rules deployment' });
+                setLoading(false);
+              }
             }
-          }
-        }, (err) => {
-          console.error('Profile listener error:', err);
+          }, (err) => {
+            console.error('Profile listener error:', err);
+            setLoading(false);
+          });
+        } catch (subErr) {
+          console.error('Failed to subscribe to user profile updates:', subErr);
           setLoading(false);
-        });
+        }
       } else {
         setUserProfile(null);
         setLoading(false);

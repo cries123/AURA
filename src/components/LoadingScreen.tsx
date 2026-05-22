@@ -10,6 +10,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
   const [status, setStatus] = useState<'waiting' | 'tapped' | 'zooming'>('waiting');
 
   const handleTapComplete = () => {
+    if (status !== 'waiting') return;
     setStatus('tapped');
     // Show preview for 1 second then zoom
     setTimeout(() => {
@@ -19,6 +20,17 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
       }, 1200);
     }, 1200);
   };
+
+  useEffect(() => {
+    // Automatically trigger NFC tap simulation after 4 seconds of inactivity
+    const timer = setTimeout(() => {
+      if (status === 'waiting') {
+        handleTapComplete();
+      }
+    }, 4500);
+
+    return () => clearTimeout(timer);
+  }, [status]);
 
   return (
     <div className="fixed inset-0 z-[200] bg-aura-black flex flex-col items-center justify-center overflow-hidden px-6">

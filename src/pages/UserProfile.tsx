@@ -122,46 +122,11 @@ export default function UserProfile() {
     };
   }, [username, lowerUsername, cacheKey]);
 
-  // Premium Custom Brand Loader (Fulfilling image reference request)
+  // Minimal subtle loading spinner
   if (loading && !profile) {
     return (
-      <div className="min-h-screen bg-black text-white relative flex flex-col items-center justify-center px-6">
-        <div className="flex flex-col items-center justify-center gap-10 text-center">
-          {/* Logo */}
-          <motion.h1 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-4xl sm:text-5xl font-display font-black italic tracking-[0.12em] text-white"
-          >
-            AURA
-          </motion.h1>
-
-          {/* Golden Spinner Circle */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="relative w-14 h-14 flex items-center justify-center"
-          >
-            <div className="absolute inset-0 border-2 border-zinc-900/60 rounded-full" />
-            <motion.div 
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 border-2 border-t-aura-gold border-r-aura-gold/20 border-b-transparent border-l-transparent rounded-full"
-            />
-          </motion.div>
-
-          {/* Loading Aura Status Title */}
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.5 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] text-zinc-400 mt-2 font-sans"
-          >
-            LOADING AURA
-          </motion.p>
-        </div>
+      <div id="loading-spinner-container" className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <div id="subtle-spinner" className="w-6 h-6 border-2 border-aura-gold/20 border-t-aura-gold rounded-full animate-spin" />
       </div>
     );
   }
@@ -196,32 +161,9 @@ export default function UserProfile() {
       >
         <ProfileCard data={profile} isMockup={false} />
 
-        <div className="mt-12 text-center text-zinc-500">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/50 border border-zinc-800 text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em] mb-8">
-            Verified Aura Member
-          </div>
-          
-          <div className="flex justify-center gap-4">
-            <button 
-              onClick={() => {
-                navigator.share({
-                  title: `${profile.displayName ?? 'Aura'}'s Aura Card`,
-                  url: window.location.href
-                }).catch(() => {
-                  navigator.clipboard.writeText(window.location.href);
-                });
-              }}
-              className="w-14 h-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white hover:text-aura-gold transition-colors"
-            >
-              <Share2 className="w-5 h-5" />
-            </button>
-            <Link 
-              to="/"
-              className="px-8 h-14 bg-white text-aura-black font-bold text-[10px] uppercase tracking-widest rounded-2xl hover:bg-aura-gold transition-all flex items-center gap-3"
-            >
-              Get Your Card <ExternalLink className="w-4 h-4" />
-            </Link>
-          </div>
+        <div className="mt-8 text-center text-zinc-600 font-sans tracking-wide text-[8.5px] uppercase font-bold flex flex-col items-center gap-2">
+          <div className="w-1 h-1 bg-aura-gold rounded-full shadow-[0_0_8px_#d4af37] animate-pulse" />
+          <span>Verified Aura Member</span>
         </div>
       </motion.div>
     </div>

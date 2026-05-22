@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { motion } from 'motion/react';
-import { Instagram, Twitter, Linkedin, Globe, Phone, Mail, ExternalLink, ChevronRight, Link as LinkIcon } from 'lucide-react';
+import { Instagram, Twitter, Linkedin, Globe, Phone, Mail, ChevronRight, UserPlus, Sparkles, Share2 } from 'lucide-react';
 
 interface AuraLink {
   type: string;
@@ -17,6 +17,26 @@ interface ProfileData {
   themeColor?: string;
 }
 
+// Ensure external URLs do not resolve as relative links inside the app routing environment
+function ensureAbsoluteUrl(url: string) {
+  if (!url) return '';
+  const trimmed = url.trim();
+  // Standard protocol check
+  if (/^(?:f|ht)tps?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+  // No-protocol double-slash fallback
+  if (trimmed.startsWith('//')) {
+    return trimmed;
+  }
+  // Return early for communication URI components
+  if (/^(?:mailto|tel):/i.test(trimmed)) {
+    return trimmed;
+  }
+  // Otherwise prepend protocol for secure browsing
+  return `https://${trimmed}`;
+}
+
 export default function ProfileCard({ data, isMockup = true }: { data: ProfileData; isMockup?: boolean }) {
   const getIcon = (type: string) => {
     switch (type) {
@@ -31,17 +51,16 @@ export default function ProfileCard({ data, isMockup = true }: { data: ProfileDa
 
   const getColor = (type: string) => {
     switch (type) {
-      case 'instagram': return 'text-pink-500';
-      case 'twitter': return 'text-blue-400';
-      case 'linkedin': return 'text-blue-600';
-      case 'phone': return 'text-green-500';
-      case 'email': return 'text-purple-400';
-      default: return 'text-emerald-400';
+      case 'instagram': return 'text-pink-400 group-hover:text-pink-300';
+      case 'twitter': return 'text-sky-400 group-hover:text-sky-300';
+      case 'linkedin': return 'text-indigo-400 group-hover:text-indigo-300';
+      case 'phone': return 'text-emerald-400 group-hover:text-emerald-300';
+      case 'email': return 'text-purple-400 group-hover:text-purple-300';
+      default: return 'text-amber-400 group-hover:text-[#f3d078]';
     }
   };
 
   const handleSaveContact = () => {
-    // Generate simple vCard data
     const phoneLink = data.links.find(l => l.type === 'phone')?.value || '';
     const emailLink = data.links.find(l => l.type === 'email')?.value || '';
     
@@ -65,13 +84,13 @@ END:VCARD`;
 
   if (isMockup) {
     return (
-      <div className="max-w-[325px] mx-auto relative aspect-[9/18.5] bg-[#070707] rounded-[3rem] border-[8px] border-zinc-900 shadow-2xl overflow-hidden shadow-aura-gold/5">
+      <div className="max-w-[325px] mx-auto relative aspect-[9/18.5] bg-[#050506] rounded-[3rem] border-[8px] border-zinc-900 shadow-2xl overflow-hidden shadow-aura-gold/5 flex flex-col justify-between">
         {/* Dynamic Notch */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-6 bg-zinc-900 rounded-b-2xl z-20" />
         
         {/* Content wrapper */}
-        <div className="h-full w-full overflow-y-auto no-scrollbar bg-[#070707] text-white p-6 pt-12">
-          <ProfileContent data={data} handleSaveContact={handleSaveContact} getIcon={getIcon} getColor={getColor} />
+        <div className="h-full w-full overflow-y-auto no-scrollbar bg-gradient-to-b from-[#070709] to-[#030304] text-white p-5 pt-10 pb-6 flex flex-col">
+          <ProfileContent data={data} isMockup={true} handleSaveContact={handleSaveContact} getIcon={getIcon} getColor={getColor} />
         </div>
       </div>
     );
@@ -79,105 +98,209 @@ END:VCARD`;
 
   // Live screen landing preview (full screen adapted container)
   return (
-    <div className="w-full max-w-lg mx-auto bg-zinc-950/40 backdrop-blur-md rounded-3xl border border-zinc-800/80 p-8 shadow-2xl shadow-aura-gold/5">
-      <ProfileContent data={data} handleSaveContact={handleSaveContact} getIcon={getIcon} getColor={getColor} />
+    <div className="w-full max-w-lg mx-auto bg-gradient-to-b from-zinc-950/80 to-[#040405] backdrop-blur-xl rounded-[2.5rem] border border-zinc-900/85 p-6 md:p-8 shadow-[0_24px_80px_rgba(0,0,0,0.8)] relative overflow-hidden">
+      {/* Decorative luxury metallic lines */}
+      <div className="absolute top-0 left-0 w-full h-[1.5px] bg-gradient-to-r from-transparent via-aura-gold/45 to-transparent" />
+      <ProfileContent data={data} isMockup={false} handleSaveContact={handleSaveContact} getIcon={getIcon} getColor={getColor} />
     </div>
   );
 }
 
 function ProfileContent({ 
   data, 
+  isMockup,
   handleSaveContact, 
   getIcon, 
   getColor 
 }: { 
   data: ProfileData; 
+  isMockup: boolean;
   handleSaveContact: () => void; 
   getIcon: (type: string) => ReactNode; 
   getColor: (type: string) => string; 
 }) {
+  const [copied, setCopied] = useState(false);
+
+  // Partition links for professional balance: Compact socials vs detail cards
+  const socials = data.links.filter(l => l.value && ['instagram', 'twitter', 'linkedin'].includes(l.type));
+  const otherLinks = data.links.filter(l => l.value && !['instagram', 'twitter', 'linkedin'].includes(l.type));
+
+  const handleShareProfile = () => {
+    const profileUrl = `${window.location.origin}/${data.username || ''}`;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: `${data.displayName || 'Aura Member'} - Digital Card`,
+        text: data.bio || `Check out my Aura digital card!`,
+        url: profileUrl,
+      }).catch(() => {
+        copyFallback(profileUrl);
+      });
+    } else {
+      copyFallback(profileUrl);
+    }
+  };
+
+  const copyFallback = (url: string) => {
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
   return (
-    <div className="flex flex-col items-center gap-6">
+    <div className="flex flex-col items-center gap-5 flex-grow justify-start">
       
-      {/* Avatar Area */}
-      <div className="w-24 h-24 rounded-full bg-zinc-900 border-2 border-zinc-800 flex items-center justify-center overflow-hidden shadow-lg shadow-black/40">
-        {data.avatarUrl ? (
-          <img 
-            src={data.avatarUrl} 
-            alt={data.displayName} 
-            className="w-full h-full object-cover" 
-            referrerPolicy="no-referrer" 
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-aura-gold/20 to-zinc-900 flex items-center justify-center bg-zinc-950">
-            <span className="text-2xl font-bold text-aura-gold">
-              {(data.displayName || 'A').charAt(0)}
-            </span>
+      {/* Wave Signal Branding */}
+      <div className="flex justify-center items-center gap-1 opacity-25 mt-1 animate-pulse">
+        <div className="w-[3px] h-[8px] rounded bg-white"></div>
+        <div className="w-[3px] h-[12px] rounded bg-white"></div>
+        <div className="w-[3px] h-[16px] rounded bg-white"></div>
+        <span className="text-[6px] uppercase tracking-[0.4em] font-mono whitespace-nowrap ml-1.5 font-bold">Aura Secure NFC</span>
+      </div>
+
+      {/* Avatar Area with Premium Gold Ripple Ring */}
+      <div className="relative group/avatar mt-2">
+        <div className="absolute -inset-2 rounded-full bg-gradient-radial from-aura-gold/40 via-yellow-600/5 to-transparent blur-lg opacity-60 group-hover/avatar:opacity-90 transition-opacity duration-700" />
+        <div className="relative w-24 h-24 rounded-full p-[2.5px] bg-gradient-to-tr from-[#c49215] via-zinc-800 to-white/40 hover:via-aura-gold/50 transition-all duration-700 flex items-center justify-center shadow-[0_0_20px_rgba(196,146,21,0.15)] group-hover/avatar:shadow-[0_0_30px_rgba(196,146,21,0.3)]">
+          <div className="w-full h-full rounded-full bg-[#0a0a0c] overflow-hidden flex items-center justify-center">
+            {data.avatarUrl ? (
+              <img 
+                src={data.avatarUrl} 
+                alt={data.displayName} 
+                className="w-full h-full object-cover group-hover/avatar:scale-105 transition-transform duration-500" 
+                referrerPolicy="no-referrer" 
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-aura-gold/15 to-zinc-950 flex items-center justify-center">
+                <span className="text-3xl font-display font-medium italic text-aura-gold">
+                  {(data.displayName || 'A').charAt(0)}
+                </span>
+              </div>
+            )}
           </div>
-        )}
+        </div>
+        {/* Floating member sparkle */}
+        <div className="absolute -bottom-1 -right-1 bg-zinc-950 border border-zinc-800/80 rounded-full p-1.5 shadow-lg flex items-center justify-center">
+          <Sparkles className="w-3.5 h-3.5 text-aura-gold animate-pulse duration-[3s]" />
+        </div>
       </div>
       
-      {/* User Meta */}
+      {/* User Meta with Luxury Editorial Styling */}
       <div className="text-center w-full">
-        <h2 className="text-xl font-display font-medium italic text-white truncate px-2">
-          {data.displayName || 'Aura User'}
+        <h2 className="text-2xl font-display font-medium tracking-tight bg-gradient-to-b from-white via-zinc-100 to-zinc-400 bg-clip-text text-transparent italic px-2">
+          {data.displayName || 'Aura Member'}
         </h2>
-        <p className="text-aura-gold text-[10px] font-bold uppercase tracking-[0.2em] mt-1.5">
-          @{data.username || 'handle'}
-        </p>
-        <p className="text-zinc-500 text-xs mt-4 line-clamp-3 leading-relaxed px-4">
-          {data.bio || 'Your bio will appear here once you type something...'}
+        
+        {/* Verified Handle Badge */}
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-b from-[#111] to-[#060607] border border-zinc-900 shadow-inner mt-2.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-aura-gold shadow-[0_0_8px_rgba(196,146,21,1)]" />
+          <p className="text-zinc-300 text-[9.5px] font-mono tracking-wider">
+            {data.username ? `@${data.username}` : 'member'}
+          </p>
+        </div>
+
+        <p className="text-zinc-400 text-[11px] leading-relaxed mt-4 px-4 max-w-sm mx-auto font-sans font-light">
+          {data.bio || 'Your personalized professional bio will appear beautifully here once setup.'}
         </p>
       </div>
 
-      {/* Actions & Links */}
-      <div className="w-full space-y-3 mt-2 pb-2">
+      {/* Actions & Links Area */}
+      <div className="w-full space-y-4 mt-2">
+        {/* Gold Shimmer Save Contact Button */}
         <button 
           onClick={handleSaveContact}
-          className="w-full py-3 bg-white text-black hover:bg-aura-gold hover:text-black transition-colors rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-md shadow-white/5 active:scale-95 duration-150"
+          className="relative w-full py-[13px] bg-gradient-to-b from-white via-zinc-100 to-zinc-200 text-black hover:from-white hover:to-aura-gold transition-all duration-500 rounded-2xl text-[9px] font-bold uppercase tracking-[0.25em] flex items-center justify-center gap-2 overflow-hidden shadow-lg hover:shadow-aura-gold/10 hover:scale-[1.01] active:scale-[0.98] outline-none border border-white/10 group/btn"
         >
-          Save Contact
+          <UserPlus className="w-3.5 h-3.5 group-hover/btn:scale-110 transition-transform text-current" />
+          Add to Contacts
         </button>
-        
-        {data.links.filter(l => l.value).map((link, idx) => (
-          <motion.div 
-            key={idx}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.05 }}
-          >
-            <a 
-              href={link.type === 'phone' ? `tel:${link.value}` : link.type === 'email' ? `mailto:${link.value}` : link.value}
-              target={link.type !== 'phone' && link.type !== 'email' ? "_blank" : undefined}
-              rel="noreferrer"
-              className="w-full p-4 bg-zinc-900/50 hover:bg-zinc-900/80 hover:border-aura-gold/30 border border-zinc-800/80 rounded-2xl flex items-center justify-between group transition-all"
-            >
-              <div className="flex items-center gap-4 min-w-0">
-                <div className={`w-10 h-10 rounded-xl bg-zinc-950 border border-zinc-800/80 flex items-center justify-center shrink-0 ${getColor(link.type)}`}>
+
+        {/* Dynamic Social Network Grid (Instagram, Twitter, LinkedIn) */}
+        {socials.length > 0 && (
+          <div className="grid grid-cols-3 gap-2">
+            {socials.map((link, idx) => (
+              <a
+                key={idx}
+                href={ensureAbsoluteUrl(link.value)}
+                target="_blank"
+                rel="noreferrer"
+                className="py-3 px-1.5 bg-gradient-to-b from-[#0b0b0d] to-[#040405] border border-zinc-900/90 hover:border-aura-gold/40 hover:bg-[#0c0c0e] rounded-xl flex flex-col items-center justify-center gap-1.5 group transition-all duration-300 shadow-sm"
+              >
+                <div className={`${getColor(link.type)} group-hover:scale-110 transition-transform duration-300`}>
                   {getIcon(link.type)}
                 </div>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-white truncate">
-                    {link.label || link.type}
-                  </p>
-                  <p className="text-[9px] text-zinc-500 mt-0.5 truncate max-w-[130px] whitespace-nowrap overflow-hidden">
-                    {link.value}
-                  </p>
-                </div>
-              </div>
-              <ChevronRight className="w-3.5 h-3.5 text-zinc-600 group-hover:text-aura-gold transition-colors shrink-0" />
-            </a>
-          </motion.div>
-        ))}
-
-        {data.links.filter(l => l.value).length === 0 && (
-          <div className="text-center py-8 border border-dashed border-zinc-800 rounded-2xl">
-            <p className="text-zinc-600 text-[10px] uppercase font-bold tracking-widest">No Links Added Yet</p>
+                <span className="text-[7.5px] font-mono tracking-widest text-zinc-500 group-hover:text-zinc-300 transition-colors truncate max-w-full font-semibold uppercase">
+                  {link.label || link.type}
+                </span>
+              </a>
+            ))}
           </div>
         )}
+        
+        {/* Detailed direct/other link list rows */}
+        <div className="space-y-2.5">
+          {otherLinks.map((link, idx) => (
+            <motion.div 
+              key={idx}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.04 }}
+            >
+              <a 
+                href={link.type === 'phone' ? `tel:${link.value}` : link.type === 'email' ? `mailto:${link.value}` : ensureAbsoluteUrl(link.value)}
+                target={link.type !== 'phone' && link.type !== 'email' ? "_blank" : undefined}
+                rel="noreferrer"
+                className="w-full p-4 bg-gradient-to-b from-[#0b0b0c]/90 to-[#040405]/95 hover:bg-[#0e0e11] hover:border-aura-gold/30 border border-zinc-900/95 rounded-2xl flex items-center justify-between group transition-all duration-300 shadow-sm"
+              >
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className={`w-9 h-9 rounded-xl bg-[#030304] border border-zinc-900 flex items-center justify-center shrink-0 ${getColor(link.type)} group-hover:scale-105 duration-300`}>
+                    {getIcon(link.type)}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[9.5px] font-bold uppercase tracking-[0.15em] text-zinc-300 group-hover:text-white transition-colors truncate">
+                      {link.label || link.type}
+                    </p>
+                    <p className="text-[9px] text-[#555] group-hover:text-zinc-500 mt-0.5 truncate max-w-[155px] whitespace-nowrap overflow-hidden transition-colors">
+                      {link.value}
+                    </p>
+                  </div>
+                </div>
+                <div className="w-7 h-7 rounded-lg bg-zinc-950 border border-zinc-900 flex items-center justify-center group-hover:border-aura-gold/20 group-hover:bg-[#060608] transition-all shrink-0">
+                  <ChevronRight className="w-3.5 h-3.5 text-zinc-600 group-hover:text-aura-gold transition-colors" />
+                </div>
+              </a>
+            </motion.div>
+          ))}
+        </div>
+
+        {socials.length === 0 && otherLinks.length === 0 && (
+          <div className="text-center py-7 border border-dashed border-zinc-805/50 rounded-2xl bg-zinc-950/20">
+            <p className="text-zinc-650 text-[8.5px] uppercase font-bold tracking-[0.2em]">Contact Card Live</p>
+            <p className="text-zinc-700 text-[8px] mt-1">Configure active links in your workspace dashboard</p>
+          </div>
+        )}
+
+        {/* Footer Brand Call-To-Action buttons strictly at the bottom of the Card */}
+        <div className="pt-4 border-t border-zinc-900/80 flex items-center gap-2.5 w-full shrink-0">
+          <a
+            href="/"
+            className="flex-1 h-11 bg-gradient-to-r from-aura-gold via-[#dfba49] to-[#c49215] text-zinc-950 hover:brightness-110 active:scale-[0.97] transition-all duration-300 rounded-xl text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-[0_4px_15px_rgba(196,146,21,0.25)]"
+          >
+            <Sparkles className="w-3.5 h-3.5 shrink-0" />
+            Get Your Card
+          </a>
+          <button
+            onClick={handleShareProfile}
+            className="flex-1 h-11 bg-gradient-to-b from-[#0e0e11] to-[#050507] hover:from-[#131318] hover:to-[#09090c] border border-zinc-850 hover:border-aura-gold/45 text-zinc-300 hover:text-white active:scale-[0.97] transition-all duration-300 rounded-xl text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm"
+          >
+            <Share2 className="w-3.5 h-3.5 shrink-0" />
+            {copied ? "Copied!" : "Share Link"}
+          </button>
+        </div>
+
       </div>
 
     </div>
   );
 }
-

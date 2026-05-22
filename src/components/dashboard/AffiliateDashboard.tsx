@@ -60,12 +60,32 @@ export default function AffiliateDashboard() {
     // Fetch sales by affiliateId
     const q = query(
       collection(db, 'sales'), 
-      where('affiliateId', '==', user.uid),
-      orderBy('timestamp', 'desc')
+      where('affiliateId', '==', user.uid)
     );
     
     const unsubscribeSales = onSnapshot(q, (snapshot) => {
-      setSales(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+      const fetchedSales = snapshot.docs.map(d => {
+        const data = d.data();
+        let timestamp = data.timestamp;
+        // Normalize timestamp to ISO string or Javascript.Date/number so new Date(sale.timestamp) works perfectly
+        if (timestamp) {
+          if (typeof timestamp.toDate === 'function') {
+            timestamp = timestamp.toDate().toISOString();
+          } else if (timestamp && typeof timestamp === 'object' && 'seconds' in timestamp) {
+            timestamp = new Date(timestamp.seconds * 1000).toISOString();
+          }
+        }
+        return { id: d.id, ...data, timestamp };
+      });
+
+      // Sort client-side by timestamp descending
+      fetchedSales.sort((a: any, b: any) => {
+        const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+        const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+        return timeB - timeA;
+      });
+
+      setSales(fetchedSales);
       setLoading(false);
     }, (err) => {
       handleFirestoreError(err, 'list', 'sales');
