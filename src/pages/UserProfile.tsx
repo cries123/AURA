@@ -52,17 +52,24 @@ export default function UserProfile() {
       try {
         // Promise timeout wrapper (4 seconds max before fallback or error)
         const fetchPromise = (async () => {
-          const usernameDoc = await getDoc(doc(db, 'usernames', lowerUsername));
-          
-          if (!usernameDoc.exists()) {
+          try {
+            // Attempt 1: Direct fast query on 'users' collection (1 network roundtrip instead of 2)
             const usersRef = collection(db, 'users');
             const q = query(usersRef, where('username', '==', lowerUsername));
             const querySnapshot = await getDocs(q);
             
-            if (querySnapshot.empty) {
-              return { error: 'Aura Profile not found' };
+            if (!querySnapshot.empty) {
+              return { data: querySnapshot.docs[0].data() };
             }
-            return { data: querySnapshot.docs[0].data() };
+          } catch (queryErr) {
+            console.warn('Direct users query failed, trying sequential path:', queryErr);
+          }
+
+          // Attempt 2: Fallback to sequential path check
+          const usernameDoc = await getDoc(doc(db, 'usernames', lowerUsername));
+          
+          if (!usernameDoc.exists()) {
+            return { error: 'Aura Profile not found' };
           } else {
             const { uid } = usernameDoc.data();
             const userDoc = await getDoc(doc(db, 'users', uid));
