@@ -148,7 +148,10 @@ function AppContent() {
 }
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(true);
+  const systemPaths = ['/', '/platform', '/pricing', '/faq', '/warranty', '/affiliate', '/portal'];
+  const path = window.location.pathname.replace(/\/$/, '') || '/';
+  const isProfilePage = !systemPaths.includes(path);
+  const [isLoading, setIsLoading] = useState(!isProfilePage);
 
   if (isLoading) {
     return (
