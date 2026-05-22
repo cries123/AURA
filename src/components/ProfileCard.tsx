@@ -82,6 +82,14 @@ END:VCARD`;
     document.body.removeChild(link);
   };
 
+  if (!isMockup) {
+    return (
+      <div className="w-full max-w-[412px] mx-auto min-h-screen bg-gradient-to-b from-[#070709] to-[#030304] text-white p-6 pt-10 pb-8 flex flex-col justify-between relative shadow-2xl">
+        <ProfileContent data={data} isMockup={isMockup} handleSaveContact={handleSaveContact} getIcon={getIcon} getColor={getColor} />
+      </div>
+    );
+  }
+
   // We unify the card views to render the exact same premium, high-fidelity smartphone device card
   return (
     <div className="max-w-[340px] mx-auto relative aspect-[9/18.5] bg-[#050506] rounded-[3.2rem] border-[10px] border-zinc-900 shadow-2xl overflow-hidden shadow-aura-gold/10 flex flex-col justify-between">
@@ -287,6 +295,12 @@ function ProfileContent({
             <Share2 className="w-3.5 h-3.5 shrink-0" />
             {copied ? "Copied!" : "Share Link"}
           </button>
+        </div>
+
+        {/* Verified Badge */}
+        <div className="pt-3 text-center text-zinc-500 font-mono tracking-[0.2em] text-[8px] uppercase font-bold flex items-center justify-center gap-1.5 opacity-60">
+          <span className="w-1 h-1 bg-aura-gold rounded-full shadow-[0_0_6px_#c49215] animate-pulse" />
+          <span>Verified Aura Member</span>
         </div>
 
       </div>

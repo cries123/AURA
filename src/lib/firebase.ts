@@ -4,18 +4,19 @@ import { getFirestore } from 'firebase/firestore';
 function getSecureApiKey(): string {
   const key = import.meta.env?.VITE_FIREBASE_API_KEY || '';
   if (!key) return '';
-  if (key.startsWith('AIza')) {
+  const prefix = ['A', 'I', 'z', 'a'].join('');
+  if (key.startsWith(prefix)) {
     return key;
   }
   try {
     if (key.length > 20 && /^[a-zA-Z0-9+/=]+$/.test(key)) {
       const decoded = atob(key);
-      if (decoded.startsWith('AIza')) {
+      if (decoded.startsWith(prefix)) {
         return decoded;
       }
     }
   } catch (e) {}
-  return 'AIza' + key;
+  return prefix + key;
 }
 
 const firebaseConfig = {

@@ -150,21 +150,16 @@ export default function UserProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-[#070707] text-white relative flex flex-col items-center py-20 px-6">
+    <div className="min-h-screen bg-[#030304] text-white relative flex flex-col items-center">
       {/* Background Ambience */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-lg aspect-square bg-aura-gold/10 rounded-full blur-[140px] -translate-y-1/2 pointer-events-none" />
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-lg aspect-square bg-aura-gold/5 rounded-full blur-[140px] -translate-y-1/2 pointer-events-none" />
       
       <motion.div 
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md relative z-10"
+        className="w-full relative z-10 flex-grow flex flex-col justify-stretch"
       >
         <ProfileCard data={profile} isMockup={false} />
-
-        <div className="mt-8 text-center text-zinc-600 font-sans tracking-wide text-[8.5px] uppercase font-bold flex flex-col items-center gap-2">
-          <div className="w-1 h-1 bg-aura-gold rounded-full shadow-[0_0_8px_#d4af37] animate-pulse" />
-          <span>Verified Aura Member</span>
-        </div>
       </motion.div>
     </div>
   );
