@@ -1,66 +1,151 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Share2, ExternalLink, AlertCircle, X } from 'lucide-react';
+import { Share2, ExternalLink, AlertCircle } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import ProfileCard from '../components/ProfileCard';
 
 export default function UserProfile() {
   const { username } = useParams<{ username: string }>();
-  const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const lowerUsername = username?.toLowerCase() || '';
+  const cacheKey = `aura_profile_cache_${lowerUsername}`;
+
+  // State initialized with cached profile for instant (0ms) render if visited before
+  const [profile, setProfile] = useState<any>(() => {
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch (e) {
+      console.warn('Cache read error:', e);
+    }
+    return null;
+  });
+
+  // If we have cached profile data, we can show it immediately (not loading) while refreshing in background
+  const [loading, setLoading] = useState(!profile);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (profile?.displayName) {
+      document.title = `${profile.displayName} (@${profile.username || username}) | Aura`;
+    } else {
+      document.title = `Aura Profile | @${username}`;
+    }
+  }, [profile, username]);
+
+  useEffect(() => {
+    let active = true;
+
     async function fetchProfile() {
       if (!username) return;
-      setLoading(true);
+      
+      // If we don't have cached profile, show loading skeleton
+      if (!profile) {
+        setLoading(true);
+      }
       setError(null);
 
       try {
-        const usernameDoc = await getDoc(doc(db, 'usernames', username.toLowerCase()));
-        
-        if (!usernameDoc.exists()) {
-          const usersRef = collection(db, 'users');
-          const q = query(usersRef, where('username', '==', username.toLowerCase()));
-          const querySnapshot = await getDocs(q);
+        // Promise timeout wrapper (4 seconds max before fallback or error)
+        const fetchPromise = (async () => {
+          const usernameDoc = await getDoc(doc(db, 'usernames', lowerUsername));
           
-          if (querySnapshot.empty) {
-            setError('Aura Profile not found');
-            setLoading(false);
-            return;
-          }
-          setProfile(querySnapshot.docs[0].data());
-        } else {
-          const { uid } = usernameDoc.data();
-          const userDoc = await getDoc(doc(db, 'users', uid));
-          if (userDoc.exists()) {
-            setProfile(userDoc.data());
+          if (!usernameDoc.exists()) {
+            const usersRef = collection(db, 'users');
+            const q = query(usersRef, where('username', '==', lowerUsername));
+            const querySnapshot = await getDocs(q);
+            
+            if (querySnapshot.empty) {
+              return { error: 'Aura Profile not found' };
+            }
+            return { data: querySnapshot.docs[0].data() };
           } else {
-            setError('Aura Profile disconnected');
+            const { uid } = usernameDoc.data();
+            const userDoc = await getDoc(doc(db, 'users', uid));
+            if (userDoc.exists()) {
+              return { data: userDoc.data() };
+            } else {
+              return { error: 'Aura Profile disconnected' };
+            }
+          }
+        })();
+
+        const timeoutPromise = new Promise<{ error?: string; data?: any }>((_, reject) =>
+          setTimeout(() => reject(new Error('Network timeout')), 4000)
+        );
+
+        const result = await Promise.race([fetchPromise, timeoutPromise]);
+
+        if (!active) return;
+
+        if (result.error) {
+          // If we have cached profile, don't break the screen, just keep showing cached version
+          if (!profile) {
+            setError(result.error);
+          }
+        } else if (result.data) {
+          setProfile(result.data);
+          try {
+            // Update cache silently
+            localStorage.setItem(cacheKey, JSON.stringify(result.data));
+          } catch (e) {
+            console.warn('Cache write error:', e);
           }
         }
       } catch (err: any) {
         console.error('Fetch profile error:', err);
-        setError(err.message);
+        if (!profile) {
+          setError(err.message || 'Failed to fetch profile');
+        }
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     }
 
     fetchProfile();
-  }, [username]);
 
-  if (loading) {
+    return () => {
+      active = false;
+    };
+  }, [username, lowerUsername, cacheKey]);
+
+  // Premium Shimmer Skeleton Card Loader
+  if (loading && !profile) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <motion.div 
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-2 border-aura-gold border-t-transparent rounded-full"
-        />
+      <div className="min-h-screen bg-[#070707] text-white relative flex flex-col items-center py-20 px-6">
+        <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-lg aspect-square bg-aura-gold/5 rounded-full blur-[140px] -translate-y-1/2 pointer-events-none" />
+        
+        <div className="w-full max-w-md relative z-10">
+          {/* Shimmer Layout */}
+          <div className="w-full max-w-lg mx-auto bg-zinc-950/40 backdrop-blur-md rounded-3xl border border-zinc-900 p-8 shadow-2xl flex flex-col items-center gap-6 animate-pulse">
+            {/* Avatar Circle */}
+            <div className="w-24 h-24 rounded-full bg-zinc-900 border-2 border-zinc-800" />
+            
+            {/* Text blocks */}
+            <div className="w-full flex flex-col items-center gap-3">
+              <div className="h-6 w-3/5 bg-zinc-900 rounded-lg" />
+              <div className="h-4 w-2/5 bg-zinc-900/60 rounded-md" />
+              <div className="h-3 w-4/5 bg-zinc-900/40 rounded-md mt-2" />
+            </div>
+
+            {/* Buttons & Links Shimmer */}
+            <div className="w-full space-y-3 mt-4">
+              <div className="h-12 w-full bg-zinc-900/80 rounded-xl" />
+              <div className="h-16 w-full bg-zinc-900/40 rounded-2xl border border-zinc-900/60" />
+              <div className="h-16 w-full bg-zinc-900/40 rounded-2xl border border-zinc-900/60" />
+            </div>
+          </div>
+
+          <div className="mt-12 text-center text-zinc-700">
+            <p className="text-[10px] uppercase font-bold tracking-widest animate-pulse">Establishing secure link...</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -104,7 +189,7 @@ export default function UserProfile() {
             <button 
               onClick={() => {
                 navigator.share({
-                  title: `${profile.displayName}'s Aura Card`,
+                  title: `${profile.displayName ?? 'Aura'}'s Aura Card`,
                   url: window.location.href
                 }).catch(() => {
                   navigator.clipboard.writeText(window.location.href);
