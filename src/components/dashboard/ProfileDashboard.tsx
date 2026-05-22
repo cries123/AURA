@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Share2, Link as LinkIcon, Instagram, Twitter, Linkedin, ExternalLink, Save, CheckCircle2, AlertCircle, Trash2, Plus, Globe, Phone, Mail, Eye, X } from 'lucide-react';
+import { Share2, Link as LinkIcon, Instagram, Twitter, Linkedin, ExternalLink, Save, CheckCircle2, AlertCircle, Trash2, Plus, Globe, Phone, Mail, Eye, X, Camera, Upload, Image as ImageIcon } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { doc, updateDoc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
@@ -28,16 +28,72 @@ export default function ProfileDashboard() {
   const [bio, setBio] = useState(userProfile?.bio || '');
   const [displayName, setDisplayName] = useState(userProfile?.displayName || '');
   const [links, setLinks] = useState<AuraLink[]>(userProfile?.links || []);
+  const [avatarUrl, setAvatarUrl] = useState(userProfile?.avatarUrl || '');
   const [isSaving, setIsSaving] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  useEffect(() => {
+    if (userProfile) {
+      if (userProfile.username !== undefined) setUsername(userProfile.username || '');
+      if (userProfile.bio !== undefined) setBio(userProfile.bio || '');
+      if (userProfile.displayName !== undefined) setDisplayName(userProfile.displayName || '');
+      if (userProfile.links !== undefined) setLinks(userProfile.links || []);
+      if (userProfile.avatarUrl !== undefined) setAvatarUrl(userProfile.avatarUrl || '');
+    }
+  }, [userProfile]);
 
   const currentProfileData = {
     displayName,
     bio,
     links,
-    avatarUrl: userProfile?.avatarUrl,
+    avatarUrl: avatarUrl,
     username: username || 'handle'
+  };
+
+  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 8 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'Image fits under 8MB please.' });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 150;
+        const MAX_HEIGHT = 150;
+        const width = img.width;
+        const height = img.height;
+
+        // Force an elegant square crop
+        const minSize = Math.min(width, height);
+        canvas.width = MAX_WIDTH;
+        canvas.height = MAX_HEIGHT;
+
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          const sourceX = (width - minSize) / 2;
+          const sourceY = (height - minSize) / 2;
+          ctx.drawImage(
+            img, 
+            sourceX, sourceY, minSize, minSize,
+            0, 0, MAX_WIDTH, MAX_HEIGHT
+          );
+          // High-grade Jpeg compression saves on Firestore space and loads instantly!
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+          setAvatarUrl(compressedBase64);
+          setMessage({ type: 'success', text: 'Custom photo applied! Tap Save Profile to publish.' });
+          setTimeout(() => setMessage(null), 3500);
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
   };
 
   function handleFirestoreError(error: unknown, operationType: string, path: string | null) {
@@ -118,6 +174,7 @@ export default function ProfileDashboard() {
         displayName,
         bio,
         links,
+        avatarUrl,
         updatedAt: new Date().toISOString()
       });
 
@@ -162,6 +219,67 @@ export default function ProfileDashboard() {
           </h3>
           
           <div className="space-y-6">
+            {/* Elegant Profile Avatar Uploader */}
+            <div className="flex flex-col sm:flex-row items-center gap-6 p-5 rounded-2xl bg-zinc-950 border border-zinc-800/80 mb-2">
+              <div className="relative group w-24 h-24 rounded-full bg-zinc-900 border-2 border-zinc-800 flex items-center justify-center overflow-hidden shrink-0 shadow-lg cursor-pointer">
+                {avatarUrl ? (
+                  <img 
+                    src={avatarUrl} 
+                    alt="Profile Avatar" 
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-aura-gold/20 to-zinc-900 flex items-center justify-center">
+                    <span className="text-2xl font-bold text-aura-gold">{(displayName || 'A').charAt(0)}</span>
+                  </div>
+                )}
+                
+                <label className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-1 transition-opacity duration-200 cursor-pointer text-white">
+                  <Camera className="w-4 h-4 text-aura-gold" />
+                  <span className="text-[8px] font-bold uppercase tracking-wider">Change</span>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleImageUpload} 
+                    className="hidden" 
+                  />
+                </label>
+              </div>
+
+              <div className="flex-1 space-y-2 text-center sm:text-left">
+                <p className="text-xs font-bold text-white uppercase tracking-wider">Tap Profile Photo</p>
+                <p className="text-[11px] text-zinc-500 leading-relaxed">
+                  Make your tap profile distinct. Upload a custom photo. Supports dragging and standard uploading. Max: 8MB.
+                </p>
+                <div className="flex flex-wrap gap-2 justify-center sm:justify-start pt-1">
+                  <label className="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-aura-gold/30 rounded-lg text-[9px] font-bold uppercase tracking-wider text-zinc-300 hover:text-white cursor-pointer transition-all flex items-center gap-1.5">
+                    <Upload className="w-3 h-3 text-aura-gold" /> Upload Custom Photo
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleImageUpload} 
+                      className="hidden" 
+                    />
+                  </label>
+
+                  {avatarUrl && (
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setAvatarUrl('');
+                        setMessage({ type: 'success', text: 'Photo cleared! Tap Save Profile to apply.' });
+                        setTimeout(() => setMessage(null), 3000);
+                      }}
+                      className="px-3 py-1.5 bg-zinc-900/30 hover:bg-red-950/20 hover:text-red-400 border border-zinc-800 hover:border-red-900/50 rounded-lg text-[9px] font-bold uppercase tracking-widest text-zinc-400 transition-all flex items-center gap-1.5"
+                    >
+                      <Trash2 className="w-3 h-3" /> Clear Image
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
             <div>
               <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2 ml-1">Custom Handle (aurataps.net/handle)</label>
               <div className="flex gap-3">
