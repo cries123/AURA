@@ -82,26 +82,16 @@ END:VCARD`;
     document.body.removeChild(link);
   };
 
-  if (isMockup) {
-    return (
-      <div className="max-w-[325px] mx-auto relative aspect-[9/18.5] bg-[#050506] rounded-[3rem] border-[8px] border-zinc-900 shadow-2xl overflow-hidden shadow-aura-gold/5 flex flex-col justify-between">
-        {/* Dynamic Notch */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-6 bg-zinc-900 rounded-b-2xl z-20" />
-        
-        {/* Content wrapper */}
-        <div className="h-full w-full overflow-y-auto no-scrollbar bg-gradient-to-b from-[#070709] to-[#030304] text-white p-5 pt-10 pb-6 flex flex-col">
-          <ProfileContent data={data} isMockup={true} handleSaveContact={handleSaveContact} getIcon={getIcon} getColor={getColor} />
-        </div>
-      </div>
-    );
-  }
-
-  // Live screen landing preview (full screen adapted container)
+  // We unify the card views to render the exact same premium, high-fidelity smartphone device card
   return (
-    <div className="w-full max-w-lg mx-auto bg-gradient-to-b from-zinc-950/80 to-[#040405] backdrop-blur-xl rounded-[2.5rem] border border-zinc-900/85 p-6 md:p-8 shadow-[0_24px_80px_rgba(0,0,0,0.8)] relative overflow-hidden">
-      {/* Decorative luxury metallic lines */}
-      <div className="absolute top-0 left-0 w-full h-[1.5px] bg-gradient-to-r from-transparent via-aura-gold/45 to-transparent" />
-      <ProfileContent data={data} isMockup={false} handleSaveContact={handleSaveContact} getIcon={getIcon} getColor={getColor} />
+    <div className="max-w-[340px] mx-auto relative aspect-[9/18.5] bg-[#050506] rounded-[3.2rem] border-[10px] border-zinc-900 shadow-2xl overflow-hidden shadow-aura-gold/10 flex flex-col justify-between">
+      {/* Dynamic Notch */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-6 bg-zinc-900 rounded-b-2xl z-20" />
+      
+      {/* Content wrapper */}
+      <div className="h-full w-full overflow-y-auto no-scrollbar bg-gradient-to-b from-[#070709] to-[#030304] text-white p-5 pt-10 pb-6 flex flex-col">
+        <ProfileContent data={data} isMockup={isMockup} handleSaveContact={handleSaveContact} getIcon={getIcon} getColor={getColor} />
+      </div>
     </div>
   );
 }
