@@ -115,36 +115,45 @@ export default function UserProfile() {
     };
   }, [username, lowerUsername, cacheKey]);
 
-  // Premium Shimmer Skeleton Card Loader
+  // Premium Custom Brand Loader (Fulfilling image reference request)
   if (loading && !profile) {
     return (
-      <div className="min-h-screen bg-[#070707] text-white relative flex flex-col items-center py-20 px-6">
-        <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-lg aspect-square bg-aura-gold/5 rounded-full blur-[140px] -translate-y-1/2 pointer-events-none" />
-        
-        <div className="w-full max-w-md relative z-10">
-          {/* Shimmer Layout */}
-          <div className="w-full max-w-lg mx-auto bg-zinc-950/40 backdrop-blur-md rounded-3xl border border-zinc-900 p-8 shadow-2xl flex flex-col items-center gap-6 animate-pulse">
-            {/* Avatar Circle */}
-            <div className="w-24 h-24 rounded-full bg-zinc-900 border-2 border-zinc-800" />
-            
-            {/* Text blocks */}
-            <div className="w-full flex flex-col items-center gap-3">
-              <div className="h-6 w-3/5 bg-zinc-900 rounded-lg" />
-              <div className="h-4 w-2/5 bg-zinc-900/60 rounded-md" />
-              <div className="h-3 w-4/5 bg-zinc-900/40 rounded-md mt-2" />
-            </div>
+      <div className="min-h-screen bg-black text-white relative flex flex-col items-center justify-center px-6">
+        <div className="flex flex-col items-center justify-center gap-10 text-center">
+          {/* Logo */}
+          <motion.h1 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-4xl sm:text-5xl font-display font-black italic tracking-[0.12em] text-white"
+          >
+            AURA
+          </motion.h1>
 
-            {/* Buttons & Links Shimmer */}
-            <div className="w-full space-y-3 mt-4">
-              <div className="h-12 w-full bg-zinc-900/80 rounded-xl" />
-              <div className="h-16 w-full bg-zinc-900/40 rounded-2xl border border-zinc-900/60" />
-              <div className="h-16 w-full bg-zinc-900/40 rounded-2xl border border-zinc-900/60" />
-            </div>
-          </div>
+          {/* Golden Spinner Circle */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="relative w-14 h-14 flex items-center justify-center"
+          >
+            <div className="absolute inset-0 border-2 border-zinc-900/60 rounded-full" />
+            <motion.div 
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-0 border-2 border-t-aura-gold border-r-aura-gold/20 border-b-transparent border-l-transparent rounded-full"
+            />
+          </motion.div>
 
-          <div className="mt-12 text-center text-zinc-700">
-            <p className="text-[10px] uppercase font-bold tracking-widest animate-pulse">Establishing secure link...</p>
-          </div>
+          {/* Loading Aura Status Title */}
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.5 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.3em] text-zinc-400 mt-2 font-sans"
+          >
+            LOADING AURA
+          </motion.p>
         </div>
       </div>
     );
