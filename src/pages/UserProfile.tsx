@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Instagram, Twitter, Linkedin, Globe, Phone, Mail, Link as LinkIcon, Share2, Download, ExternalLink, ChevronRight, AlertCircle } from 'lucide-react';
-import { db } from '@/src/lib/firebase';
+import { db } from '../lib/firebase';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 
 interface AuraLink {
@@ -50,6 +50,11 @@ export default function UserProfile() {
   useEffect(() => {
     async function fetchProfile() {
       if (!username) return;
+      if (!db) {
+        setLoading(false);
+        setError('Firebase not configured. Please add API keys.');
+        return;
+      }
       setLoading(true);
       setError(null);
 

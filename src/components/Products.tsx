@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { ShoppingBag, Minus, Plus, Check, Share2 } from 'lucide-react';
 import { useState } from 'react';
-import { useCart } from '@/src/context/CartContext';
+import { useCart } from '../context/CartContext';
 
 const products = [
   {

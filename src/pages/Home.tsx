@@ -1,7 +1,7 @@
-import Hero from '@/src/components/Hero';
+import Hero from '../components/Hero';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
-import Testimonials from '@/src/components/Testimonials';
+import Testimonials from '../components/Testimonials';
 
 export default function Home() {
   return (

@@ -1,6 +1,6 @@
-import PricingHeader from '@/src/components/PricingHeader';
-import Products from '@/src/components/Products';
-import PricingDetails from '@/src/components/PricingDetails';
+import PricingHeader from '../components/PricingHeader';
+import Products from '../components/Products';
+import PricingDetails from '../components/PricingDetails';
 
 export default function Pricing() {
   return (

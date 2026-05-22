@@ -58,15 +58,17 @@ export default function AuraPlatform() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             className="lg:w-1/2"
+            style={{ willChange: 'transform, opacity' }}
           >
-             <div className="relative rounded-3xl overflow-hidden border border-zinc-800 group">
+             <div className="relative rounded-3xl overflow-hidden border border-zinc-800 group bg-zinc-900">
                 <img 
                   src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1200" 
                   alt="Dashboard" 
-                  className="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" 
+                  className="w-full h-full object-cover opacity-30 group-hover:opacity-100 transition-opacity duration-700" 
+                  loading="lazy"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-aura-black/80 to-transparent" />
-                <div className="absolute bottom-6 left-6 text-white">
+                <div className="absolute inset-0 bg-gradient-to-t from-aura-black/90 to-transparent" />
+                <div className="absolute bottom-6 left-6 text-white group-hover:translate-x-2 transition-transform duration-500">
                    <p className="font-display font-medium text-lg">Professional-grade profiles</p>
                    <p className="text-zinc-400 text-sm italic">Configured for maximum conversion</p>
                 </div>

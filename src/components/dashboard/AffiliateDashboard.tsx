@@ -2,8 +2,8 @@ import { motion } from 'motion/react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 import { DollarSign, ShoppingCart, TrendingUp, Award, CheckCircle2, ChevronRight, Package, Users } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/src/context/AuthContext';
-import { db } from '@/src/lib/firebase';
+import { useAuth } from '../../context/AuthContext';
+import { db } from '../../lib/firebase';
 import { collection, query, where, getDocs, orderBy, onSnapshot, doc } from 'firebase/firestore';
 
 
@@ -45,7 +45,10 @@ export default function AffiliateDashboard() {
   }
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !db) {
+      setLoading(false);
+      return;
+    }
 
     // Fetch stats
     const unsubscribeStats = onSnapshot(doc(db, 'affiliates', user.uid), (doc) => {

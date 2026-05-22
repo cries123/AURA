@@ -26,8 +26,14 @@ export default function Testimonials() {
   return (
     <section className="py-24 bg-aura-black relative overflow-hidden">
       {/* Subtle Background Accents */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-aura-gold/5 rounded-full blur-[100px] -mr-48 -mt-48" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-aura-gold/5 rounded-full blur-[100px] -ml-48 -mb-48" />
+      <div 
+        className="absolute top-0 right-0 w-96 h-96 bg-aura-gold/5 rounded-full blur-[60px] -mr-48 -mt-48" 
+        style={{ willChange: 'filter' }}
+      />
+      <div 
+        className="absolute bottom-0 left-0 w-96 h-96 bg-aura-gold/5 rounded-full blur-[60px] -ml-48 -mb-48" 
+        style={{ willChange: 'filter' }}
+      />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="text-center mb-16">

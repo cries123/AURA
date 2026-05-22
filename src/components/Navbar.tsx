@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Menu, X, Smartphone, ShoppingBag, Trash2 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { useCart } from '@/src/context/CartContext';
+import { useCart } from '../context/CartContext';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -14,8 +14,17 @@ export default function Navbar() {
   const { items, totalItems, totalPrice, removeFromCart } = useCart();
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 20);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -39,89 +48,116 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-aura-black/80 backdrop-blur-md py-4 border-b border-zinc-800' : 'bg-transparent py-6'}`}>
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-lg bg-aura-gold flex items-center justify-center group-hover:rotate-12 transition-transform">
-              <Smartphone className="text-aura-black w-6 h-6" />
-            </div>
-            <span className="text-xl font-display font-medium tracking-[0.1em] text-white">AURA <span className="text-aura-gold font-bold">TAP</span></span>
-          </Link>
+      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+        scrolled 
+          ? 'bg-aura-black/90 backdrop-blur-md py-3 md:py-4 border-b border-zinc-800' 
+          : 'bg-aura-black/60 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none py-3 md:py-6 border-b border-zinc-900 md:border-none'
+      }`}>
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-2 group">
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-aura-gold flex items-center justify-center group-hover:rotate-12 transition-transform">
+                <Smartphone className="text-aura-black w-5 h-5 md:w-6 md:h-6" />
+              </div>
+              <span className="text-lg md:text-xl font-display font-medium tracking-[0.1em] text-white">AURA <span className="text-aura-gold font-bold">TAP</span></span>
+            </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-10">
-            <div className="flex items-center gap-8">
-              {navLinks.slice(0, 6).map((link) => (
+            {/* Desktop Nav */}
+            <div className="hidden md:flex items-center gap-10">
+              <div className="flex items-center gap-8">
+                {navLinks.slice(0, 6).map((link) => (
+                  <Link 
+                    key={link.name} 
+                    to={link.href} 
+                    className={`text-[11px] font-bold uppercase tracking-[0.2em] transition-colors ${location.pathname === link.href ? 'text-white' : 'text-zinc-500 hover:text-white'}`}
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+              </div>
+              
+              <div className="h-4 w-px bg-zinc-800" />
+              
+              <div className="flex items-center gap-6">
                 <Link 
-                  key={link.name} 
-                  to={link.href} 
-                  className={`text-[11px] font-bold uppercase tracking-[0.2em] transition-colors ${location.pathname === link.href ? 'text-white' : 'text-zinc-500 hover:text-white'}`}
+                  to="/portal" 
+                  className={`text-[11px] font-bold uppercase tracking-[0.2em] transition-colors ${location.pathname === '/portal' ? 'text-white' : 'text-zinc-500 hover:text-white'}`}
                 >
-                  {link.name}
+                  Portal
                 </Link>
-              ))}
+                <button 
+                  onClick={() => setCartOpen(true)}
+                  className={`relative transition-all duration-300 p-2 rounded-lg flex items-center justify-center ${
+                    cartOpen 
+                      ? 'bg-aura-gold text-white shadow-lg shadow-aura-gold/20' 
+                      : 'text-zinc-500 hover:text-white'
+                  }`}
+                >
+                  <ShoppingBag className="w-5 h-5" />
+                  {totalItems > 0 && (
+                    <span className={`absolute -top-1 -right-1 text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center transition-colors ${
+                      cartOpen ? 'bg-white text-aura-gold' : 'bg-aura-gold text-aura-black'
+                    }`}>
+                      {totalItems}
+                    </span>
+                  )}
+                </button>
+                <a 
+                  href="#contact" 
+                  className="px-6 py-2.5 bg-white text-black text-[10px] font-bold uppercase tracking-[0.2em] rounded-full hover:bg-aura-gold transition-all"
+                >
+                  Contact Us
+                </a>
+              </div>
             </div>
-            
-            <div className="h-4 w-px bg-zinc-800" />
-            
-            <div className="flex items-center gap-6">
-              <Link 
-                to="/portal" 
-                className={`text-[11px] font-bold uppercase tracking-[0.2em] transition-colors ${location.pathname === '/portal' ? 'text-white' : 'text-zinc-500 hover:text-white'}`}
-              >
-                Portal
-              </Link>
+
+            {/* Mobile Actions */}
+            <div className="flex items-center gap-4 md:hidden">
               <button 
                 onClick={() => setCartOpen(true)}
                 className={`relative transition-all duration-300 p-2 rounded-lg flex items-center justify-center ${
                   cartOpen 
-                    ? 'bg-aura-gold text-white shadow-lg shadow-aura-gold/20' 
-                    : 'text-zinc-500 hover:text-white'
+                    ? 'bg-aura-gold text-white' 
+                    : 'text-white'
                 }`}
               >
-                <ShoppingBag className="w-5 h-5" />
+                <ShoppingBag className="w-6 h-6" />
                 {totalItems > 0 && (
-                  <span className={`absolute -top-1 -right-1 text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center transition-colors ${
+                  <span className={`absolute -top-1 -right-1 text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center transition-colors ${
                     cartOpen ? 'bg-white text-aura-gold' : 'bg-aura-gold text-aura-black'
                   }`}>
                     {totalItems}
                   </span>
                 )}
               </button>
-              <a 
-                href="#contact" 
-                className="px-6 py-2.5 bg-white text-black text-[10px] font-bold uppercase tracking-[0.2em] rounded-full hover:bg-aura-gold transition-all"
+              <button 
+                className="text-white p-1"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
-                Contact Us
-              </a>
+                {mobileMenuOpen ? <X /> : <Menu />}
+              </button>
             </div>
           </div>
 
-          {/* Mobile Actions */}
-          <div className="flex items-center gap-4 md:hidden">
-            <button 
-              onClick={() => setCartOpen(true)}
-              className={`relative transition-all duration-300 p-2 rounded-lg flex items-center justify-center ${
-                cartOpen 
-                  ? 'bg-aura-gold text-white' 
-                  : 'text-white'
-              }`}
-            >
-              <ShoppingBag className="w-6 h-6" />
-              {totalItems > 0 && (
-                <span className={`absolute -top-1 -right-1 text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center transition-colors ${
-                  cartOpen ? 'bg-white text-aura-gold' : 'bg-aura-gold text-aura-black'
-                }`}>
-                  {totalItems}
-                </span>
-              )}
-            </button>
-            <button 
-              className="text-white"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X /> : <Menu />}
-            </button>
+          {/* Mobile Tab Navigator - Visible on Mobile only */}
+          <div className="md:hidden w-full overflow-x-auto no-scrollbar mt-4 pt-2 border-t border-zinc-800/50">
+            <div className="flex items-center gap-6 min-w-max pb-2">
+              {navLinks.slice(0, 6).map((link) => (
+                <Link 
+                  key={link.name} 
+                  to={link.href} 
+                  className={`text-[9px] font-bold uppercase tracking-[0.15em] transition-colors whitespace-nowrap ${location.pathname === link.href ? 'text-aura-gold border-b border-aura-gold/50 pb-1' : 'text-zinc-500'}`}
+                >
+                  {link.name}
+                </Link>
+              ))}
+              <Link 
+                to="/portal" 
+                className={`text-[9px] font-bold uppercase tracking-[0.15em] transition-colors whitespace-nowrap ${location.pathname === '/portal' ? 'text-aura-gold border-b border-aura-gold/50 pb-1' : 'text-zinc-500'}`}
+              >
+                Portal
+              </Link>
+            </div>
           </div>
         </div>
 

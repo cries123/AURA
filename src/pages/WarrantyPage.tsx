@@ -1,4 +1,4 @@
-import Warranty from '@/src/components/Warranty';
+import Warranty from '../components/Warranty';
 
 export default function WarrantyPage() {
   return (

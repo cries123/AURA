@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { useState } from 'react';
-import ROICalculator from '@/src/components/ROICalculator';
+import ROICalculator from './ROICalculator';
 
 export default function Hero() {
   const [isROIModalOpen, setIsROIModalOpen] = useState(false);
@@ -10,9 +10,15 @@ export default function Hero() {
   return (
     <section className="relative min-h-[90vh] flex items-center pt-24 pb-12 overflow-hidden bg-aura-black">
       {/* Background Decorations */}
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-        <div className="absolute top-[10%] left-[5%] w-[40%] h-[40%] bg-aura-gold/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[10%] right-[5%] w-[40%] h-[40%] bg-aura-gold/5 rounded-full blur-[120px]" />
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
+        <div 
+          className="absolute top-[10%] left-[5%] w-[40%] h-[40%] bg-aura-gold/5 rounded-full blur-[80px]" 
+          style={{ willChange: 'filter' }}
+        />
+        <div 
+          className="absolute bottom-[10%] right-[5%] w-[40%] h-[40%] bg-aura-gold/5 rounded-full blur-[80px]" 
+          style={{ willChange: 'filter' }}
+        />
       </div>
       
       <div className="max-w-7xl mx-auto px-6 w-full relative z-10 flex flex-col items-center text-center">
@@ -37,6 +43,7 @@ export default function Hero() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
               className="block"
+              style={{ willChange: 'transform, opacity' }}
             >
               Deliver a <span className="text-white">professional</span>
             </motion.span>
@@ -45,6 +52,7 @@ export default function Hero() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 }}
               className="block"
+              style={{ willChange: 'transform, opacity' }}
             >
               first <span className="text-transparent bg-clip-text bg-gradient-to-r from-aura-gold to-[#e8d2a5] italic">impression.</span>
             </motion.span>

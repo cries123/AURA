@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Share2, Link as LinkIcon, Instagram, Twitter, Linkedin, ExternalLink, Save, CheckCircle2, AlertCircle, Trash2, Plus, Globe, Phone, Mail } from 'lucide-react';
-import { db } from '@/src/lib/firebase';
+import { db } from '../../lib/firebase';
 import { doc, updateDoc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
-import { useAuth } from '@/src/context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 interface AuraLink {
   type: string;
@@ -44,7 +44,10 @@ export default function ProfileDashboard() {
   }
 
   const handleUpdateProfile = async () => {
-    if (!user) return;
+    if (!user || !db) {
+      setMessage({ type: 'error', text: 'Firebase not configured. Please add API keys.' });
+      return;
+    }
     setIsSaving(true);
     setMessage(null);
 

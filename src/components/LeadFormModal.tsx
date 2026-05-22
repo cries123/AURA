@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Send, CheckCircle2 } from 'lucide-react';
 import React, { useState } from 'react';
-import { db, OperationType, handleFirestoreError } from '@/src/lib/firebase';
+import { db, OperationType, handleFirestoreError } from '../lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
 interface LeadFormModalProps {
@@ -23,6 +23,9 @@ export default function LeadFormModal({ isOpen, onClose, bundleName }: LeadFormM
     setStatus('submitting');
     
     try {
+      if (!db) {
+        throw new Error('Database not initialized. Please configure Firebase.');
+      }
       await addDoc(collection(db, 'leads'), {
         ...formData,
         bundleName,

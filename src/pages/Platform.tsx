@@ -1,5 +1,5 @@
-import AuraPlatform from '@/src/components/AuraPlatform';
-import Comparison from '@/src/components/Comparison';
+import AuraPlatform from '../components/AuraPlatform';
+import Comparison from '../components/Comparison';
 
 export default function Platform() {
   return (

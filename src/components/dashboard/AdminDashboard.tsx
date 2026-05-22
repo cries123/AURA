@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
 import { Users, Mail, Clock, CheckCircle2, ChevronRight, Search, Filter, ShieldCheck, MailWarning, Calendar, XCircle, Package } from 'lucide-react';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, getDocs, limit, setDoc } from 'firebase/firestore';
-import { db } from '@/src/lib/firebase';
+import { db } from '../../lib/firebase';
 
 export default function AdminDashboard() {
   const [leads, setLeads] = useState<any[]>([]);
@@ -20,6 +20,10 @@ export default function AdminDashboard() {
   }
 
   useEffect(() => {
+    if (!db) {
+      setLoading(false);
+      return;
+    }
     const qLeads = query(collection(db, 'leads'), orderBy('createdAt', 'desc'));
     const unsubscribeLeads = onSnapshot(qLeads, (snapshot) => {
       setLeads(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));

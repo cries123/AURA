@@ -1,13 +1,13 @@
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useEffect } from 'react';
 import { Shield, Users, Briefcase, LogIn, UserPlus, ArrowRight, LayoutDashboard, LogOut } from 'lucide-react';
-import { useAuth } from '@/src/context/AuthContext';
-import { auth, db } from '@/src/lib/firebase';
+import { useAuth } from '../context/AuthContext';
+import { auth, db } from '../lib/firebase';
 import { signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, getDoc, collection, query, where, getDocs, addDoc } from 'firebase/firestore';
-import AffiliateDashboard from '@/src/components/dashboard/AffiliateDashboard';
-import AdminDashboard from '@/src/components/dashboard/AdminDashboard';
-import ProfileDashboard from '@/src/components/dashboard/ProfileDashboard';
+import AffiliateDashboard from '../components/dashboard/AffiliateDashboard';
+import AdminDashboard from '../components/dashboard/AdminDashboard';
+import ProfileDashboard from '../components/dashboard/ProfileDashboard';
 
 type PortalView = 'selection' | 'login' | 'enroll' | 'dashboard';
 type UserRole = 'user' | 'affiliate' | 'admin';
@@ -48,7 +48,7 @@ export default function Portal() {
 
   useEffect(() => {
     async function checkApp() {
-      if (!user) return;
+      if (!user || !db) return;
       try {
         console.log('Checking application for UID:', user.uid);
         const q = query(collection(db, 'affiliate_applications'), where('uid', '==', user.uid), where('status', '==', 'pending'));
@@ -62,6 +62,10 @@ export default function Portal() {
   }, [user, userProfile]);
 
   const handleGoogleLogin = async () => {
+    if (!auth) {
+      setError('Firebase not configured. Please add API keys.');
+      return;
+    }
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
@@ -72,6 +76,10 @@ export default function Portal() {
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!auth || !db) {
+      setError('Firebase not configured. Please add API keys.');
+      return;
+    }
     setError('');
     setIsSubmitting(true);
     try {
@@ -110,7 +118,7 @@ export default function Portal() {
 
   if (user && userProfile) {
     const handleJoinProgram = async () => {
-      if (!user) return;
+      if (!user || !db) return;
       setIsSubmitting(true);
       try {
         await addDoc(collection(db, 'affiliate_applications'), {

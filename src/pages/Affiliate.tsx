@@ -1,10 +1,10 @@
 import { motion } from 'motion/react';
 import { DollarSign, BarChart3, Package, ArrowRight, ShieldCheck } from 'lucide-react';
-import Navbar from '@/src/components/Navbar';
-import Footer from '@/src/components/Footer';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { useState } from 'react';
-import LeadFormModal from '@/src/components/LeadFormModal';
-import { useAuth } from '@/src/context/AuthContext';
+import LeadFormModal from '../components/LeadFormModal';
+import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 
 const tiers = [

@@ -1,19 +1,19 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
-import { CartProvider } from '@/src/context/CartContext';
-import { AuthProvider } from '@/src/context/AuthContext';
-import Navbar from '@/src/components/Navbar';
-import Footer from '@/src/components/Footer';
-import Home from '@/src/pages/Home';
-import Platform from '@/src/pages/Platform';
-import Pricing from '@/src/pages/Pricing';
-import WarrantyPage from '@/src/pages/WarrantyPage';
-import FAQPage from '@/src/pages/FAQPage';
-import Affiliate from '@/src/pages/Affiliate';
-import Portal from '@/src/pages/Portal';
-import UserProfile from '@/src/pages/UserProfile';
-import LoadingScreen from '@/src/components/LoadingScreen';
+import { CartProvider } from './context/CartContext';
+import { AuthProvider } from './context/AuthContext';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import Home from './pages/Home';
+import Platform from './pages/Platform';
+import Pricing from './pages/Pricing';
+import WarrantyPage from './pages/WarrantyPage';
+import FAQPage from './pages/FAQPage';
+import Affiliate from './pages/Affiliate';
+import Portal from './pages/Portal';
+import UserProfile from './pages/UserProfile';
+import LoadingScreen from './components/LoadingScreen';
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -32,19 +32,6 @@ function AnimatedRoutes() {
               transition={{ duration: 0.3 }}
             >
               <Home />
-            </motion.div>
-          } 
-        />
-        <Route 
-          path="/:username" 
-          element={
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <UserProfile />
             </motion.div>
           } 
         />
@@ -126,25 +113,30 @@ function AnimatedRoutes() {
             </motion.div>
           } 
         />
+        <Route 
+          path="/:username" 
+          element={
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <UserProfile />
+            </motion.div>
+          } 
+        />
       </Routes>
     </AnimatePresence>
   );
 }
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(true);
-
   return (
     <Router>
       <AuthProvider>
         <CartProvider>
-          <AnimatePresence>
-            {isLoading && (
-              <LoadingScreen onComplete={() => setIsLoading(false)} />
-            )}
-          </AnimatePresence>
-
-          <div className={`min-h-screen selection:bg-aura-gold selection:text-aura-black transition-opacity duration-1000 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
+          <div className="min-h-screen bg-[#0a0a0a] text-white">
             <Navbar />
             <main>
               <AnimatedRoutes />
