@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Share2, Link as LinkIcon, Instagram, Twitter, Linkedin, ExternalLink, Save, CheckCircle2, AlertCircle, Trash2, Plus, Globe, Phone, Mail } from 'lucide-react';
+import { Share2, Link as LinkIcon, Instagram, Twitter, Linkedin, ExternalLink, Save, CheckCircle2, AlertCircle, Trash2, Plus, Globe, Phone, Mail, Eye, X } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { doc, updateDoc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
+import ProfileCard from '../ProfileCard';
 
 interface AuraLink {
   type: string;
@@ -28,7 +29,16 @@ export default function ProfileDashboard() {
   const [displayName, setDisplayName] = useState(userProfile?.displayName || '');
   const [links, setLinks] = useState<AuraLink[]>(userProfile?.links || []);
   const [isSaving, setIsSaving] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  const currentProfileData = {
+    displayName,
+    bio,
+    links,
+    avatarUrl: userProfile?.avatarUrl,
+    username: username || 'handle'
+  };
 
   function handleFirestoreError(error: unknown, operationType: string, path: string | null) {
     const errInfo = {
@@ -52,57 +62,80 @@ export default function ProfileDashboard() {
     setMessage(null);
 
     try {
-      // If username changed, handle uniqueness
-      if (username !== userProfile?.username) {
-        if (username) {
-          let usernameDoc;
+      const lowerUsername = username.toLowerCase();
+      
+      // If username changed, handle uniqueness and release old handle
+      if (lowerUsername !== (userProfile?.username || '')) {
+        // If they had an old username, release it first
+        if (userProfile?.username) {
           try {
-            usernameDoc = await getDoc(doc(db, 'usernames', username.toLowerCase()));
+            await deleteDoc(doc(db, 'usernames', userProfile.username.toLowerCase()));
           } catch (err) {
-            handleFirestoreError(err, 'get', `usernames/${username.toLowerCase()}`);
-            throw err;
+            console.warn('Could not release old handle:', err);
           }
+        }
 
-          if (usernameDoc.exists() && usernameDoc.data().uid !== user.uid) {
-            throw new Error('This handle is already taken');
-          }
-          
-          // Delete old one if exists
-          if (userProfile?.username) {
-            try {
-              await deleteDoc(doc(db, 'usernames', userProfile.username.toLowerCase()));
-            } catch (err) {
-              handleFirestoreError(err, 'delete', `usernames/${userProfile.username.toLowerCase()}`);
+        // If setting a NEW username, verify uniqueness and claim it
+        if (lowerUsername) {
+          const usernameDoc = await getDoc(doc(db, 'usernames', lowerUsername));
+          if (usernameDoc.exists()) {
+            const existingUid = usernameDoc.data().uid;
+            if (existingUid !== user.uid) {
+              const isUserAdmin = user.email?.toLowerCase() === 'jaryn.b.healey@gmail.com';
+              if (isUserAdmin) {
+                // Admin override! Delete the conflicting handle mapping first, releasing the handle
+                try {
+                  await deleteDoc(doc(db, 'usernames', lowerUsername));
+                  console.log('Admin override: freed handle', lowerUsername);
+                } catch (err) {
+                  console.warn('Could not force release handle:', err);
+                }
+              } else {
+                // Check if that user still exists (handle stale handles)
+                const existingUserDoc = await getDoc(doc(db, 'users', existingUid));
+                if (existingUserDoc.exists()) {
+                  throw new Error('This handle is already taken');
+                }
+                // If user record doesn't exist, delete the stale mapping to allow setDoc to succeed
+                try {
+                  await deleteDoc(doc(db, 'usernames', lowerUsername));
+                } catch (err) {
+                  console.warn('Could not clear stale username doc to allow setDoc:', err);
+                }
+              }
             }
           }
           
-          // Set new one
-          try {
-            await setDoc(doc(db, 'usernames', username.toLowerCase()), { uid: user.uid });
-          } catch (err) {
-            handleFirestoreError(err, 'write', `usernames/${username.toLowerCase()}`);
-            throw err;
-          }
+          await setDoc(doc(db, 'usernames', lowerUsername), { 
+            uid: user.uid,
+            claimedAt: new Date().toISOString()
+          });
         }
       }
 
       await updateDoc(doc(db, 'users', user.uid), {
-        username: username.toLowerCase(),
+        username: lowerUsername,
         displayName,
         bio,
         links,
         updatedAt: new Date().toISOString()
       });
 
-      setMessage({ type: 'success', text: 'Profile updated successfully!' });
+      setMessage({ type: 'success', text: 'Profile published successfully!' });
     } catch (err: any) {
-      if (err.message.includes('permission-denied') || err.message.includes('Missing or insufficient permissions')) {
-        handleFirestoreError(err, 'write', `users/${user.uid}`);
-      }
-      setMessage({ type: 'error', text: err.message });
+      console.error('Update error:', err);
+      setMessage({ type: 'error', text: err.message || 'Failed to update profile' });
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const copyProfileLink = () => {
+    if (!username) return;
+    const link = `https://aurataps.net/${username}`;
+    navigator.clipboard.writeText(link);
+    setMessage({ type: 'success', text: 'Link copied to clipboard!' });
+    setTimeout(() => setMessage(null), 3000);
   };
 
   const addLink = () => {
@@ -131,16 +164,31 @@ export default function ProfileDashboard() {
           <div className="space-y-6">
             <div>
               <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2 ml-1">Custom Handle (aurataps.net/handle)</label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 text-sm">@</span>
-                <input 
-                  type="text" 
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_-]/g, ''))}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-9 pr-4 py-4 text-white focus:outline-none focus:border-aura-gold transition-colors text-sm" 
-                  placeholder="yourname" 
-                />
+              <div className="flex gap-3">
+                <div className="relative flex-1">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 text-sm">@</span>
+                  <input 
+                    type="text" 
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase())}
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-9 pr-4 py-4 text-white focus:outline-none focus:border-aura-gold transition-colors text-sm" 
+                    placeholder="yourname" 
+                  />
+                </div>
+                {userProfile?.username && (
+                  <button 
+                    onClick={copyProfileLink}
+                    className="px-4 bg-zinc-800 text-aura-gold rounded-xl border border-zinc-700 hover:bg-zinc-700 transition-colors flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap"
+                  >
+                    <LinkIcon className="w-3 h-3" /> Copy Link
+                  </button>
+                )}
               </div>
+              {username && (
+                <p className="mt-2 ml-1 text-[9.5px] text-zinc-600 font-medium">
+                  Your live link: <span className="text-aura-gold/90 hover:text-aura-gold transition-colors hover:underline cursor-pointer font-semibold" onClick={copyProfileLink}>aurataps.net/{username}</span>
+                </p>
+              )}
             </div>
 
             <div>
@@ -225,6 +273,13 @@ export default function ProfileDashboard() {
 
         <div className="flex items-center gap-4">
           <button 
+            onClick={() => setIsPreviewOpen(true)}
+            className="px-6 py-5 bg-zinc-900 text-white rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest"
+          >
+            <Eye className="w-4 h-4" /> Preview
+          </button>
+          
+          <button 
             disabled={isSaving}
             onClick={handleUpdateProfile}
             className="flex-1 py-5 bg-white text-aura-black rounded-2xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-aura-gold transition-all shadow-xl shadow-white/5"
@@ -256,54 +311,47 @@ export default function ProfileDashboard() {
             <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600">Aura Live Preview</h3>
           </div>
           
-          {/* Mock Phone */}
-          <div className="max-w-[320px] mx-auto relative aspect-[9/18.5] bg-zinc-950 rounded-[3rem] border-[8px] border-zinc-900 shadow-2xl overflow-hidden shadow-aura-gold/5">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-6 bg-zinc-900 rounded-b-2xl z-20" />
-            
-            <div className="h-full w-full overflow-y-auto no-scrollbar bg-aura-black text-white p-8 pt-12">
-              <div className="flex flex-col items-center gap-6">
-                <div className="w-24 h-24 rounded-full bg-zinc-900 border-2 border-zinc-800 flex items-center justify-center overflow-hidden">
-                  <div className="w-full h-full bg-gradient-to-br from-aura-gold/20 to-zinc-900 flex items-center justify-center">
-                    <span className="text-2xl font-bold text-aura-gold">{(displayName || 'A').charAt(0)}</span>
-                  </div>
-                </div>
-                
-                <div className="text-center">
-                  <h2 className="text-xl font-display font-medium italic">{displayName || 'Aura User'}</h2>
-                  <p className="text-aura-gold text-[10px] font-bold uppercase tracking-widest mt-1">@{username || 'handle'}</p>
-                  <p className="text-zinc-500 text-xs mt-4 line-clamp-3 leading-relaxed">
-                    {bio || 'Your bio will appear here once you type something...'}
-                  </p>
-                </div>
-
-                <div className="w-full space-y-3 mt-4">
-                  <button className="w-full py-3 bg-zinc-900 hover:bg-zinc-800 transition-colors border border-zinc-800 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em]">
-                    Save Contact
-                  </button>
-                  
-                  {links.map((link, idx) => (
-                    <div 
-                      key={idx}
-                      className="w-full p-4 bg-zinc-900/50 border border-zinc-800 rounded-2xl flex items-center justify-between group"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center ${LINK_TYPES.find(t => t.id === link.type)?.color}`}>
-                          {LINK_TYPES.find(t => t.id === link.type)?.icon}
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-white">{link.label || link.type}</p>
-                          <p className="text-[9px] text-zinc-500 mt-0.5 truncate max-w-[140px]">{link.value || 'Add value...'}</p>
-                        </div>
-                      </div>
-                      <ExternalLink className="w-3 h-3 text-zinc-700" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+          <div className="max-w-[340px] mx-auto scale-90 origin-top">
+            <ProfileCard data={currentProfileData} isMockup={true} />
           </div>
         </div>
       </div>
+
+      {/* Mobile Preview Modal */}
+      <AnimatePresence>
+        {isPreviewOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsPreviewOpen(false)}
+              className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-sm flex flex-col items-center"
+            >
+              <div className="absolute -top-12 right-0">
+                <button 
+                  onClick={() => setIsPreviewOpen(false)}
+                  className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white"
+                >
+                  <X />
+                </button>
+              </div>
+              <div className="scale-95 origin-top">
+                <ProfileCard data={currentProfileData} isMockup={true} />
+              </div>
+              <p className="text-center mt-6 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                Preview Mode
+              </p>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

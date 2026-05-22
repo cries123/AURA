@@ -131,18 +131,38 @@ function AnimatedRoutes() {
   );
 }
 
+function AppContent() {
+  const location = useLocation();
+  const systemPaths = ['/', '/platform', '/pricing', '/faq', '/warranty', '/affiliate', '/portal'];
+  const isProfilePage = !systemPaths.includes(location.pathname);
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
+      {!isProfilePage && <Navbar />}
+      <main>
+        <AnimatedRoutes />
+      </main>
+      {!isProfilePage && <Footer />}
+    </div>
+  );
+}
+
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  if (isLoading) {
+    return (
+      <AuthProvider>
+        <LoadingScreen onComplete={() => setIsLoading(false)} />
+      </AuthProvider>
+    );
+  }
+
   return (
     <Router>
       <AuthProvider>
         <CartProvider>
-          <div className="min-h-screen bg-[#0a0a0a] text-white">
-            <Navbar />
-            <main>
-              <AnimatedRoutes />
-            </main>
-            <Footer />
-          </div>
+          <AppContent />
         </CartProvider>
       </AuthProvider>
     </Router>

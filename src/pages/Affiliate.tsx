@@ -163,8 +163,6 @@ export default function Affiliate() {
         </div>
       </section>
 
-      <Footer />
-      
       <LeadFormModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

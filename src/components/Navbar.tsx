@@ -59,7 +59,7 @@ export default function Navbar() {
               <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-aura-gold flex items-center justify-center group-hover:rotate-12 transition-transform">
                 <Smartphone className="text-aura-black w-5 h-5 md:w-6 md:h-6" />
               </div>
-              <span className="text-lg md:text-xl font-display font-medium tracking-[0.1em] text-white">AURA <span className="text-aura-gold font-bold">TAP</span></span>
+              <span className="text-lg md:text-xl font-display font-medium tracking-[0.1em] text-white uppercase">AURA <span className="text-aura-gold font-bold">TAP</span></span>
             </Link>
 
             {/* Desktop Nav */}
@@ -117,7 +117,7 @@ export default function Navbar() {
                 onClick={() => setCartOpen(true)}
                 className={`relative transition-all duration-300 p-2 rounded-lg flex items-center justify-center ${
                   cartOpen 
-                    ? 'bg-aura-gold text-white' 
+                    ? 'bg-aura-gold text-white shadow-lg shadow-aura-gold/20' 
                     : 'text-white'
                 }`}
               >
@@ -130,33 +130,13 @@ export default function Navbar() {
                   </span>
                 )}
               </button>
+              
               <button 
-                className="text-white p-1"
+                className="text-white p-1 hover:text-aura-gold transition-colors"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
-                {mobileMenuOpen ? <X /> : <Menu />}
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-7 h-7" />}
               </button>
-            </div>
-          </div>
-
-          {/* Mobile Tab Navigator - Visible on Mobile only */}
-          <div className="md:hidden w-full overflow-x-auto no-scrollbar mt-4 pt-2 border-t border-zinc-800/50">
-            <div className="flex items-center gap-6 min-w-max pb-2">
-              {navLinks.slice(0, 6).map((link) => (
-                <Link 
-                  key={link.name} 
-                  to={link.href} 
-                  className={`text-[9px] font-bold uppercase tracking-[0.15em] transition-colors whitespace-nowrap ${location.pathname === link.href ? 'text-aura-gold border-b border-aura-gold/50 pb-1' : 'text-zinc-500'}`}
-                >
-                  {link.name}
-                </Link>
-              ))}
-              <Link 
-                to="/portal" 
-                className={`text-[9px] font-bold uppercase tracking-[0.15em] transition-colors whitespace-nowrap ${location.pathname === '/portal' ? 'text-aura-gold border-b border-aura-gold/50 pb-1' : 'text-zinc-500'}`}
-              >
-                Portal
-              </Link>
             </div>
           </div>
         </div>
