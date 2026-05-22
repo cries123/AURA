@@ -1,9 +1,12 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+function getSecureApiKey(): string {
+  return import.meta.env?.VITE_FIREBASE_API_KEY || '';
+}
+
 const firebaseConfig = {
-  // Using string concatenation to bypass simple automated scanners for public keys
-  apiKey: "AIza" + "SyD8rlOL3mkuIaoPby39tFcheUM8aaSPe6Q",
+  apiKey: getSecureApiKey(),
   authDomain: "auratap-ee8a0.firebaseapp.com",
   projectId: "auratap-ee8a0",
   storageBucket: "auratap-ee8a0.firebasestorage.app",
