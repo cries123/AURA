@@ -1,0 +1,95 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() { return request.auth != null; }
+    function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isAdmin() { 
+      return isSignedIn() && (
+        (request.auth.token.keys().contains('email') && request.auth.token.email.lower() == 'jaryn.b.healey@gmail.com') ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    // --- Validation Helpers ---
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'role', 'createdAt']) &&
+             data.uid == request.auth.uid &&
+             data.email is string &&
+             data.role in ['user', 'admin', 'affiliate'];
+    }
+
+    function isValidLead(data) {
+      return data.keys().hasAll(['name', 'email', 'createdAt']) &&
+             data.name is string &&
+             data.email is string;
+    }
+
+    function isValidAffiliate(data) {
+      return data.keys().hasAll(['userId', 'cumulativeSales', 'totalUnits', 'currentTier']) &&
+             data.userId is string &&
+             data.cumulativeSales is number &&
+             data.totalUnits is number &&
+             data.currentTier is string;
+    }
+
+    // --- Match Groups ---
+
+    match /users/{userId} {
+      allow get: if true;
+      allow create: if isSignedIn() && isValidUser(incoming());
+      allow update: if (isOwner(userId) && (
+        incoming().diff(existing()).affectedKeys().hasAny(['displayName', 'username', 'bio', 'profileImage', 'links'])
+      )) || isAdmin();
+    }
+
+    match /usernames/{handle} {
+      allow get: if true;
+      allow create: if isSignedIn() && !exists(/databases/$(database)/documents/usernames/$(handle)) && incoming().uid == request.auth.uid;
+      allow delete: if isSignedIn() && existing().uid == request.auth.uid;
+    }
+
+    match /affiliate_applications/{appId} {
+      allow read: if isSignedIn() && (
+        (resource != null && resource.data.uid == request.auth.uid) || 
+        isAdmin()
+      );
+      allow create: if isSignedIn() && incoming().uid == request.auth.uid && incoming().status == 'pending';
+      allow update, delete: if isAdmin();
+    }
+
+    match /leads/{leadId} {
+      allow create: if isValidLead(incoming());
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /affiliates/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /sales/{saleId} {
+      allow read: if (isSignedIn() && (
+        (resource != null && resource.data.affiliateId == request.auth.uid) || 
+        isAdmin()
+      ));
+      allow write: if isAdmin();
+    }
+
+    match /admins/{userId} {
+      allow read: if isAdmin();
+      allow write: if false; // Managed via Firebase Console
+    }
+  }
+}

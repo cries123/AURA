@@ -1,0 +1,108 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User account and role information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "description": "User email address" },
+        "role": { "type": "string", "enum": ["admin", "user", "affiliate"], "description": "User access level" },
+        "displayName": { "type": "string" },
+        "username": { "type": "string", "description": "Unique Aura handle" },
+        "bio": { "type": "string" },
+        "profileImage": { "type": "string" },
+        "links": { 
+          "type": "array", 
+          "items": { 
+            "type": "object", 
+            "properties": {
+              "type": { "type": "string" },
+              "label": { "type": "string" },
+              "value": { "type": "string" }
+            }
+          } 
+        },
+        "affiliateCode": { "type": "string", "description": "Unique 7-character reseller code" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role", "createdAt"]
+    },
+    "AffiliateStats": {
+      "title": "Affiliate Performance",
+      "description": "Volume and tier tracking for affiliates",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "cumulativeSales": { "type": "number" },
+        "totalUnits": { "type": "number" },
+        "currentTier": { "type": "string" },
+        "discountCode": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "cumulativeSales", "totalUnits", "currentTier"]
+    },
+    "Lead": {
+      "title": "Lead Inquiry",
+      "description": "Enterprise and reseller contact requests",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "company": { "type": "string" },
+        "email": { "type": "string" },
+        "bundleName": { "type": "string" },
+        "status": { "type": "string", "enum": ["new", "contacted", "closed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "createdAt"]
+    },
+    "Sale": {
+      "title": "Affiliate Sale",
+      "description": "Record of a sale attributed to an affiliate",
+      "type": "object",
+      "properties": {
+        "affiliateId": { "type": "string" },
+        "promoCode": { "type": "string", "description": "The 7-character code used" },
+        "amount": { "type": "number" },
+        "units": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["affiliateId", "promoCode", "amount", "units", "timestamp"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User profiles and roles"
+    },
+    "affiliates/{userId}": {
+      "schema": "AffiliateStats",
+      "description": "Performance tracking for resellers"
+    },
+    "leads/{leadId}": {
+      "schema": "Lead",
+      "description": "Contact inquiries"
+    },
+    "sales/{saleId}": {
+      "schema": "Sale",
+      "description": "Transaction records for affiliate attribution"
+    },
+    "affiliate_applications/{applicationId}": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "uid": { "type": "string" },
+          "email": { "type": "string" },
+          "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+          "createdAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["uid", "email", "status", "createdAt"]
+      },
+      "description": "Pending requests to join the reseller program"
+    },
+    "usernames/{username}": {
+      "schema": { "type": "object", "properties": { "uid": { "type": "string" } } },
+      "description": "Mapping for unique Aura handles"
+    }
+  }
+}

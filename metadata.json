@@ -1,0 +1,6 @@
+{
+  "name": "Aura Tap",
+  "description": "Premium NFC cards and wristbands for modern networking. Tap to share contact info instantly.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
