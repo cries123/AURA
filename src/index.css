@@ -6,7 +6,7 @@
   --font-display: "Space Grotesk", sans-serif;
   
   --color-aura-black: #0a0a0a;
-  --color-aura-gold: #c5a059;
+  --color-aura-gold: #e8d7a2;
   --color-aura-lime: #b8ff2c;
   --color-aura-silver: #c0c0c0;
 }
@@ -28,8 +28,8 @@ body {
 
 .cinematic-noise {
   background-image:
-    radial-gradient(circle at 20% 20%, rgba(197, 160, 89, 0.09), transparent 24%),
-    radial-gradient(circle at 78% 38%, rgba(197, 160, 89, 0.07), transparent 26%),
+    radial-gradient(circle at 20% 20%, rgba(232, 215, 162, 0.09), transparent 24%),
+    radial-gradient(circle at 78% 38%, rgba(232, 215, 162, 0.07), transparent 26%),
     repeating-linear-gradient(
       0deg,
       rgba(255, 255, 255, 0.035) 0,
@@ -96,7 +96,7 @@ body {
 
 .aura-svg-node {
   animation: aura-svg-node 2.3s ease-in-out infinite;
-  filter: drop-shadow(0 0 14px rgba(197, 160, 89, 0.85));
+  filter: drop-shadow(0 0 14px rgba(232, 215, 162, 0.85));
   transform-box: fill-box;
   transform-origin: center;
 }

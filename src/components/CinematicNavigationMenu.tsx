@@ -66,7 +66,7 @@ export default function CinematicNavigationMenu({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-[#080704]/95 text-white backdrop-blur-2xl">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_24%_34%,rgba(197,160,89,0.22),transparent_28%),radial-gradient(circle_at_78%_72%,rgba(71,109,58,0.16),transparent_30%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_24%_34%,rgba(232,215,162,0.22),transparent_28%),radial-gradient(circle_at_78%_72%,rgba(71,109,58,0.16),transparent_30%)]" />
       <div className="cinematic-noise pointer-events-none absolute inset-0 opacity-30" />
 
       <div className="relative z-10 flex min-h-screen flex-col px-6 py-8 md:px-14">

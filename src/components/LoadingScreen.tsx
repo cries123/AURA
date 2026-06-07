@@ -35,7 +35,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
 
   return (
     <div className="fixed inset-0 z-[200] flex select-none flex-col items-center justify-center overflow-hidden bg-[#030303] px-6">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(197,160,89,0.18),transparent_28%),linear-gradient(115deg,rgba(3,3,3,1),rgba(16,12,6,0.9)_48%,rgba(3,3,3,1))]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(232,215,162,0.18),transparent_28%),linear-gradient(115deg,rgba(3,3,3,1),rgba(16,12,6,0.9)_48%,rgba(3,3,3,1))]" />
       <div className="cinematic-noise pointer-events-none absolute inset-0 opacity-30" />
       <div className="absolute h-72 w-72 animate-spin rounded-full border border-aura-gold/15 [animation-duration:18s]" />
       <div className="absolute h-44 w-44 animate-spin rounded-full border border-dashed border-aura-gold/25 [animation-direction:reverse] [animation-duration:24s]" />

@@ -69,19 +69,19 @@ function SmartCardModel() {
 
       <mesh position={[-0.86, 0.34, 0.06]}>
         <boxGeometry args={[0.38, 0.28, 0.012]} />
-        <meshStandardMaterial color="#c5a059" metalness={0.82} roughness={0.2} />
+        <meshStandardMaterial color="#e8d7a2" metalness={0.82} roughness={0.2} />
       </mesh>
 
       {contactNodes.map((node) => (
         <mesh key={`${node.x}-${node.y}`} position={[node.x, node.y, 0.068]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.026, 0.026, 0.012, 24]} />
-          <meshStandardMaterial color="#f5c765" emissive="#4a2b04" metalness={0.7} roughness={0.2} />
+          <meshStandardMaterial color="#f2e6b8" emissive="#5a4f2b" metalness={0.7} roughness={0.2} />
         </mesh>
       ))}
 
       <mesh position={[0, -0.56, 0.061]}>
         <boxGeometry args={[1.82, 0.018, 0.01]} />
-        <meshStandardMaterial color="#c5a059" emissive="#3d2b12" roughness={0.35} />
+        <meshStandardMaterial color="#e8d7a2" emissive="#5a4f2b" roughness={0.35} />
       </mesh>
 
       <mesh position={[0.78, 0.46, 0.061]}>
@@ -114,7 +114,7 @@ function SignalRings() {
         <mesh key={radius}>
           <torusGeometry args={[radius, 0.006, 12, 160]} />
           <meshBasicMaterial
-            color={index === 1 ? '#f5c765' : '#c5a059'}
+            color={index === 1 ? '#f2e6b8' : '#e8d7a2'}
             transparent
             opacity={0.22 - index * 0.045}
             blending={THREE.AdditiveBlending}
@@ -164,7 +164,7 @@ function Atmosphere() {
   return (
     <points ref={particlesRef} geometry={geometry}>
       <pointsMaterial
-        color="#d7a93e"
+        color="#e8d7a2"
         size={0.018}
         transparent
         opacity={0.42}
@@ -207,9 +207,9 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
         dots.forEach((dot, dotIndex) => {
           const isActive = dotIndex === safeIndex;
           dot.style.opacity = isActive ? '1' : '0.35';
-          dot.style.backgroundColor = isActive ? '#c5a059' : 'transparent';
+          dot.style.backgroundColor = isActive ? '#e8d7a2' : 'transparent';
           dot.style.transform = isActive ? 'scale(1.65)' : 'scale(1)';
-          dot.style.boxShadow = isActive ? '0 0 18px rgba(197,160,89,0.8)' : 'none';
+          dot.style.boxShadow = isActive ? '0 0 18px rgba(232,215,162,0.8)' : 'none';
         });
 
         if (currentIndex) {
@@ -351,10 +351,10 @@ export default function CinematicCardScene({
       <color attach="background" args={['#050505']} />
       <fog attach="fog" args={['#050505', 4.8, 8.2]} />
       <ambientLight intensity={0.28} />
-      <hemisphereLight args={['#f7d37a', '#050505', 0.82]} />
+      <hemisphereLight args={['#f2e6b8', '#050505', 0.82]} />
       <directionalLight position={[3.5, 4, 5]} intensity={2.5} castShadow />
-      <pointLight position={[-2.6, -1.8, 2.5]} color="#c5a059" intensity={7.8} distance={7} />
-      <pointLight position={[2.8, 1.2, 2]} color="#f5c765" intensity={3.4} distance={5.5} />
+      <pointLight position={[-2.6, -1.8, 2.5]} color="#e8d7a2" intensity={7.8} distance={7} />
+      <pointLight position={[2.8, 1.2, 2]} color="#f2e6b8" intensity={3.4} distance={5.5} />
       <Atmosphere />
       <CardRig pinContainerRef={pinContainerRef} sectionCount={sectionCount} />
     </Canvas>

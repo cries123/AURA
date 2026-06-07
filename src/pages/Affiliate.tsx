@@ -54,7 +54,7 @@ export default function Affiliate() {
           
           <h1 className="text-5xl md:text-8xl font-display font-medium tracking-tight mb-8 leading-[0.9]">
             Scale your <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-aura-gold to-[#e8d2a5] italic">revenue</span> with Aura.
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-aura-gold to-[#f2e6b8] italic">revenue</span> with Aura.
           </h1>
           
           <p className="text-zinc-500 text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed">

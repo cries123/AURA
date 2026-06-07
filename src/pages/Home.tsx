@@ -85,7 +85,7 @@ function CinematicHud({ onOpenMenu }: { onOpenMenu: () => void }) {
           <span
             key={panel.id}
             data-cinematic-dot
-            className="h-2 w-2 rounded-full border border-aura-gold/40 bg-transparent transition-all duration-300 first:bg-aura-gold first:shadow-[0_0_18px_rgba(197,160,89,0.8)]"
+            className="h-2 w-2 rounded-full border border-aura-gold/40 bg-transparent transition-all duration-300 first:bg-aura-gold first:shadow-[0_0_18px_rgba(232,215,162,0.8)]"
             aria-label={panel.label}
             style={{ opacity: index === 0 ? 1 : 0.35 }}
           />
@@ -107,12 +107,12 @@ function PanelVisuals({ index }: { index: number }) {
   if (index === 0) {
     return (
       <div aria-hidden="true" className="absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_62%_44%,rgba(197,160,89,0.14),transparent_22%),radial-gradient(circle_at_18%_68%,rgba(255,255,255,0.055),transparent_18%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_62%_44%,rgba(232,215,162,0.14),transparent_22%),radial-gradient(circle_at_18%_68%,rgba(255,255,255,0.055),transparent_18%)]" />
         <div className="absolute left-[45%] top-1/2 h-[58rem] w-[58rem] -translate-y-1/2 rounded-full border border-aura-gold/15 aura-spin-slow" />
         <div className="absolute left-[49%] top-1/2 h-[38rem] w-[38rem] -translate-y-1/2 rounded-full border border-dashed border-aura-gold/20 aura-spin-slow-reverse" />
         <div className="absolute right-[-8rem] top-[14%] h-[24rem] w-[24rem] rounded-full bg-aura-gold/10 blur-[90px]" />
         <div className="absolute bottom-[12%] left-[8%] h-40 w-40 rounded-full bg-aura-gold/10 blur-[70px]" />
-        <div className="absolute right-[18%] top-[36%] h-52 w-36 rounded-[1.8rem] border border-aura-gold/25 bg-black/30 shadow-[0_0_70px_rgba(197,160,89,0.12)] backdrop-blur aura-card-float" />
+        <div className="absolute right-[18%] top-[36%] h-52 w-36 rounded-[1.8rem] border border-aura-gold/25 bg-black/30 shadow-[0_0_70px_rgba(232,215,162,0.12)] backdrop-blur aura-card-float" />
         <div className="absolute right-[21%] top-[42%] h-20 w-24 rounded-2xl border border-aura-gold/30 bg-aura-gold/10 aura-card-float-delayed" />
         <div className="absolute right-[8%] top-[18%] grid grid-cols-4 gap-3 opacity-75">
           {Array.from({ length: 16 }, (_, tileIndex) => (
@@ -142,8 +142,8 @@ function PanelVisuals({ index }: { index: number }) {
   if (index === 1) {
     return (
       <div aria-hidden="true" className="absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute inset-y-0 right-0 w-[68%] bg-[linear-gradient(90deg,transparent,rgba(197,160,89,0.08)),linear-gradient(rgba(197,160,89,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(197,160,89,0.12)_1px,transparent_1px)] bg-[size:100%_100%,56px_56px,56px_56px] [transform:perspective(700px)_rotateX(58deg)_translateY(12%)] [transform-origin:center]" />
-        <div className="absolute right-[7%] top-[12%] h-[70vh] w-[46vw] min-w-[26rem] rounded-full border border-aura-gold/10 bg-[radial-gradient(circle,rgba(197,160,89,0.14),transparent_56%)] blur-[1px]" />
+        <div className="absolute inset-y-0 right-0 w-[68%] bg-[linear-gradient(90deg,transparent,rgba(232,215,162,0.08)),linear-gradient(rgba(232,215,162,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(232,215,162,0.12)_1px,transparent_1px)] bg-[size:100%_100%,56px_56px,56px_56px] [transform:perspective(700px)_rotateX(58deg)_translateY(12%)] [transform-origin:center]" />
+        <div className="absolute right-[7%] top-[12%] h-[70vh] w-[46vw] min-w-[26rem] rounded-full border border-aura-gold/10 bg-[radial-gradient(circle,rgba(232,215,162,0.14),transparent_56%)] blur-[1px]" />
         <div className="absolute right-[12%] top-[17%] h-[34rem] w-[34rem] rounded-full border border-aura-gold/20 aura-spin-slow" />
         <div className="absolute right-[18%] top-[24%] h-[22rem] w-[22rem] rounded-full border border-aura-gold/30 aura-pulse-ring" />
         {[
@@ -155,7 +155,7 @@ function PanelVisuals({ index }: { index: number }) {
         ].map(([x, y], nodeIndex) => (
           <span
             key={`${x}-${y}`}
-            className={`absolute ${x} ${y} h-3 w-3 rounded-full bg-aura-gold shadow-[0_0_28px_rgba(197,160,89,0.9)] aura-pulse-node`}
+            className={`absolute ${x} ${y} h-3 w-3 rounded-full bg-aura-gold shadow-[0_0_28px_rgba(232,215,162,0.9)] aura-pulse-node`}
             style={{ animationDelay: `${nodeIndex * 0.2}s` }}
           />
         ))}
@@ -181,12 +181,12 @@ function PanelVisuals({ index }: { index: number }) {
   if (index === 2) {
     return (
       <div aria-hidden="true" className="absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute inset-y-0 left-0 w-[60%] bg-[linear-gradient(90deg,rgba(197,160,89,0.08),transparent),repeating-linear-gradient(90deg,transparent_0_34px,rgba(255,255,255,0.045)_35px_36px)]" />
-        <div className="absolute left-[8%] top-[18%] h-[34rem] w-[30rem] rounded-[2rem] border border-white/10 bg-white/[0.035] shadow-[0_0_80px_rgba(197,160,89,0.08)] backdrop-blur-sm aura-float" />
+        <div className="absolute inset-y-0 left-0 w-[60%] bg-[linear-gradient(90deg,rgba(232,215,162,0.08),transparent),repeating-linear-gradient(90deg,transparent_0_34px,rgba(255,255,255,0.045)_35px_36px)]" />
+        <div className="absolute left-[8%] top-[18%] h-[34rem] w-[30rem] rounded-[2rem] border border-white/10 bg-white/[0.035] shadow-[0_0_80px_rgba(232,215,162,0.08)] backdrop-blur-sm aura-float" />
         <div className="absolute left-[12%] top-[24%] w-72 rounded-3xl border border-aura-gold/20 bg-black/45 p-5 backdrop-blur">
           <div className="mb-5 flex items-center justify-between">
             <span className="text-[10px] font-black uppercase tracking-[0.32em] text-aura-gold">Profile Sync</span>
-            <span className="h-2 w-2 rounded-full bg-aura-gold shadow-[0_0_18px_rgba(197,160,89,0.9)]" />
+            <span className="h-2 w-2 rounded-full bg-aura-gold shadow-[0_0_18px_rgba(232,215,162,0.9)]" />
           </div>
           <div className="space-y-3">
             {[88, 64, 76].map((width, rowIndex) => (
@@ -228,12 +228,12 @@ function PanelVisuals({ index }: { index: number }) {
 
   return (
     <div aria-hidden="true" className="absolute inset-0 z-0 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_34%_54%,rgba(197,160,89,0.12),transparent_28%),radial-gradient(circle_at_78%_22%,rgba(255,255,255,0.05),transparent_20%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_34%_54%,rgba(232,215,162,0.12),transparent_28%),radial-gradient(circle_at_78%_22%,rgba(255,255,255,0.05),transparent_20%)]" />
       <svg className="absolute left-[5%] top-[8%] h-[84vh] w-[60vw] opacity-70" viewBox="0 0 900 700">
         <defs>
           <linearGradient id="network-line" x1="0" x2="1" y1="0" y2="1">
-            <stop offset="0%" stopColor="#c5a059" stopOpacity="0" />
-            <stop offset="45%" stopColor="#c5a059" stopOpacity="0.75" />
+            <stop offset="0%" stopColor="#e8d7a2" stopOpacity="0" />
+            <stop offset="45%" stopColor="#e8d7a2" stopOpacity="0.75" />
             <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
           </linearGradient>
         </defs>
@@ -271,7 +271,7 @@ function PanelVisuals({ index }: { index: number }) {
             cx={cx}
             cy={cy}
             r={nodeIndex === 3 ? 12 : 8}
-            fill="#c5a059"
+            fill="#e8d7a2"
             className="aura-svg-node"
             style={{ animationDelay: `${nodeIndex * 0.14}s` }}
           />
