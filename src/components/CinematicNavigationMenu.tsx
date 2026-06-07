@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import LeadFormModal from './LeadFormModal';
 
 type StoryChapter = {
   id: string;
@@ -12,6 +14,13 @@ type CinematicNavigationMenuProps = {
   chapters?: StoryChapter[];
   chapterHrefPrefix?: string;
 };
+
+const homeStoryChapters: StoryChapter[] = [
+  { id: 'intro', chapter: '01', label: 'Genesis' },
+  { id: 'science', chapter: '02', label: 'Science' },
+  { id: 'system', chapter: '03', label: 'System' },
+  { id: 'contact', chapter: '04', label: 'Network' },
+];
 
 const siteNavLinks = [
   { label: 'Platform', to: '/platform' },
@@ -40,11 +49,19 @@ export function CinematicMenuButton({ onClick }: { onClick: () => void }) {
 export default function CinematicNavigationMenu({
   isOpen,
   onClose,
-  chapters = [],
-  chapterHrefPrefix = '',
+  chapters = homeStoryChapters,
+  chapterHrefPrefix = '/',
 }: CinematicNavigationMenuProps) {
+  const [isLeadFormOpen, setIsLeadFormOpen] = useState(false);
+
   if (!isOpen) {
-    return null;
+    return (
+      <LeadFormModal
+        isOpen={isLeadFormOpen}
+        onClose={() => setIsLeadFormOpen(false)}
+        bundleName="Sales Consultation"
+      />
+    );
   }
 
   return (
@@ -109,13 +126,13 @@ export default function CinematicNavigationMenu({
                 {link.label}
               </Link>
             ))}
-            <a
-              href="mailto:sales@auratap.net"
-              onClick={onClose}
+            <button
+              type="button"
+              onClick={() => setIsLeadFormOpen(true)}
               className="mt-8 flex min-h-14 items-center justify-center border-b border-aura-gold/35 px-6 text-center text-xs font-black uppercase tracking-[0.18em] text-aura-gold transition hover:text-white"
             >
               Contact sales
-            </a>
+            </button>
           </div>
         </div>
 
@@ -130,6 +147,11 @@ export default function CinematicNavigationMenu({
           <span className="md:ml-auto">Aura Tap</span>
         </div>
       </div>
+      <LeadFormModal
+        isOpen={isLeadFormOpen}
+        onClose={() => setIsLeadFormOpen(false)}
+        bundleName="Sales Consultation"
+      />
     </div>
   );
 }

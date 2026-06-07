@@ -1,38 +1,8 @@
-import { useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import CinematicNavigationMenu, { CinematicMenuButton } from './CinematicNavigationMenu';
-
-const chapterMap: Record<string, Array<{ id: string; chapter: string; label: string }>> = {
-  '/platform': [
-    { id: 'platform', chapter: '01', label: 'Platform' },
-    { id: 'comparison', chapter: '02', label: 'Compare' },
-  ],
-  '/pricing': [
-    { id: 'pricing-hero', chapter: '01', label: 'Pricing' },
-    { id: 'products', chapter: '02', label: 'Hardware' },
-    { id: 'pricing', chapter: '03', label: 'Bundles' },
-  ],
-  '/faq': [
-    { id: 'faq-top', chapter: '01', label: 'FAQ' },
-    { id: 'questions', chapter: '02', label: 'Answers' },
-  ],
-  '/warranty': [
-    { id: 'warranty', chapter: '01', label: 'Warranty' },
-  ],
-  '/affiliate': [
-    { id: 'affiliate-top', chapter: '01', label: 'Partner' },
-    { id: 'tiers', chapter: '02', label: 'Tiers' },
-    { id: 'workflow', chapter: '03', label: 'Workflow' },
-  ],
-  '/portal': [
-    { id: 'portal-top', chapter: '01', label: 'Portal' },
-  ],
-};
 
 export default function CinematicStandardChrome() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const location = useLocation();
-  const chapters = useMemo(() => chapterMap[location.pathname] ?? [], [location.pathname]);
 
   return (
     <>
@@ -61,7 +31,6 @@ export default function CinematicStandardChrome() {
       <CinematicNavigationMenu
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
-        chapters={chapters}
       />
     </>
   );

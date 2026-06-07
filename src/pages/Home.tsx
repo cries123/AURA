@@ -309,6 +309,7 @@ export default function Home() {
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
         chapters={panels}
+        chapterHrefPrefix=""
       />
       <div className="pointer-events-none fixed left-6 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-4 md:flex">
         <span className="h-24 w-px bg-gradient-to-b from-transparent via-aura-gold to-transparent" />
