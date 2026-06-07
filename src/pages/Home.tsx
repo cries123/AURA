@@ -44,6 +44,160 @@ const panels = [
   },
 ];
 
+function PanelVisuals({ index }: { index: number }) {
+  if (index === 0) {
+    return (
+      <div aria-hidden="true" className="absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute left-[45%] top-1/2 h-[58rem] w-[58rem] -translate-y-1/2 rounded-full border border-aura-gold/15 aura-spin-slow" />
+        <div className="absolute left-[49%] top-1/2 h-[38rem] w-[38rem] -translate-y-1/2 rounded-full border border-dashed border-aura-gold/20 aura-spin-slow-reverse" />
+        <div className="absolute right-[-8rem] top-[14%] h-[24rem] w-[24rem] rounded-full bg-aura-gold/10 blur-[90px]" />
+        <div className="absolute bottom-[12%] left-[8%] h-40 w-40 rounded-full bg-aura-gold/10 blur-[70px]" />
+        <div className="absolute right-[8%] top-[18%] grid grid-cols-4 gap-3 opacity-75">
+          {Array.from({ length: 16 }, (_, tileIndex) => (
+            <span
+              key={tileIndex}
+              className="h-10 w-10 rounded-lg border border-aura-gold/20 bg-aura-gold/[0.035] aura-float"
+              style={{ animationDelay: `${tileIndex * 0.08}s` }}
+            />
+          ))}
+        </div>
+        <div className="absolute bottom-[18%] right-[11%] flex items-end gap-2">
+          {[92, 54, 132, 76, 116, 42, 98].map((height, barIndex) => (
+            <span
+              key={height}
+              className="w-2 rounded-full bg-gradient-to-t from-aura-gold/10 via-aura-gold/70 to-white/70 aura-equalizer"
+              style={{ height, animationDelay: `${barIndex * 0.12}s` }}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (index === 1) {
+    return (
+      <div aria-hidden="true" className="absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute inset-y-0 right-0 w-[68%] bg-[linear-gradient(90deg,transparent,rgba(197,160,89,0.08)),linear-gradient(rgba(197,160,89,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(197,160,89,0.12)_1px,transparent_1px)] bg-[size:100%_100%,56px_56px,56px_56px] [transform:perspective(700px)_rotateX(58deg)_translateY(12%)] [transform-origin:center]" />
+        <div className="absolute right-[12%] top-[17%] h-[34rem] w-[34rem] rounded-full border border-aura-gold/20 aura-spin-slow" />
+        <div className="absolute right-[18%] top-[24%] h-[22rem] w-[22rem] rounded-full border border-aura-gold/30 aura-pulse-ring" />
+        {[
+          ['right-[34%]', 'top-[32%]'],
+          ['right-[18%]', 'top-[42%]'],
+          ['right-[28%]', 'top-[58%]'],
+          ['right-[10%]', 'top-[64%]'],
+          ['right-[42%]', 'top-[70%]'],
+        ].map(([x, y], nodeIndex) => (
+          <span
+            key={`${x}-${y}`}
+            className={`absolute ${x} ${y} h-3 w-3 rounded-full bg-aura-gold shadow-[0_0_28px_rgba(197,160,89,0.9)] aura-pulse-node`}
+            style={{ animationDelay: `${nodeIndex * 0.2}s` }}
+          />
+        ))}
+        <div className="absolute right-[9%] top-[24%] rounded-full border border-aura-gold/30 bg-black/30 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.32em] text-aura-gold/80 backdrop-blur">
+          NFC FIELD ACTIVE
+        </div>
+        <div className="absolute bottom-[18%] right-[18%] h-px w-[34rem] max-w-[62vw] bg-gradient-to-r from-transparent via-aura-gold/70 to-transparent aura-scan-drift" />
+      </div>
+    );
+  }
+
+  if (index === 2) {
+    return (
+      <div aria-hidden="true" className="absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute left-[8%] top-[18%] h-[34rem] w-[30rem] rounded-[2rem] border border-white/10 bg-white/[0.035] shadow-[0_0_80px_rgba(197,160,89,0.08)] backdrop-blur-sm aura-float" />
+        <div className="absolute left-[12%] top-[24%] w-72 rounded-3xl border border-aura-gold/20 bg-black/45 p-5 backdrop-blur">
+          <div className="mb-5 flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-[0.32em] text-aura-gold">Profile Sync</span>
+            <span className="h-2 w-2 rounded-full bg-aura-gold shadow-[0_0_18px_rgba(197,160,89,0.9)]" />
+          </div>
+          <div className="space-y-3">
+            {[88, 64, 76].map((width, rowIndex) => (
+              <div key={width} className="h-2 rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-aura-gold to-white aura-data-fill"
+                  style={{ width: `${width}%`, animationDelay: `${rowIndex * 0.18}s` }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="absolute bottom-[18%] left-[16%] grid w-[28rem] max-w-[70vw] grid-cols-3 gap-3">
+          {['CRM', 'LINKS', 'TEAM', 'LEADS', 'ROUTE', 'DATA'].map((label, tileIndex) => (
+            <span
+              key={label}
+              className="rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-5 text-center font-mono text-[10px] uppercase tracking-[0.26em] text-zinc-300 aura-float"
+              style={{ animationDelay: `${tileIndex * 0.1}s` }}
+            >
+              {label}
+            </span>
+          ))}
+        </div>
+        <div className="absolute left-[28%] top-[20%] h-[36rem] w-px rotate-12 bg-gradient-to-b from-transparent via-aura-gold/60 to-transparent" />
+      </div>
+    );
+  }
+
+  return (
+    <div aria-hidden="true" className="absolute inset-0 z-0 overflow-hidden">
+      <svg className="absolute left-[5%] top-[8%] h-[84vh] w-[60vw] opacity-70" viewBox="0 0 900 700">
+        <defs>
+          <linearGradient id="network-line" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stopColor="#c5a059" stopOpacity="0" />
+            <stop offset="45%" stopColor="#c5a059" stopOpacity="0.75" />
+            <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        {[
+          [110, 220, 260, 120],
+          [260, 120, 430, 260],
+          [430, 260, 620, 150],
+          [260, 120, 330, 450],
+          [330, 450, 610, 520],
+          [620, 150, 760, 340],
+          [760, 340, 610, 520],
+          [110, 220, 330, 450],
+        ].map(([x1, y1, x2, y2]) => (
+          <line
+            key={`${x1}-${y1}-${x2}-${y2}`}
+            x1={x1}
+            y1={y1}
+            x2={x2}
+            y2={y2}
+            stroke="url(#network-line)"
+            strokeWidth="2"
+          />
+        ))}
+        {[
+          [110, 220],
+          [260, 120],
+          [430, 260],
+          [620, 150],
+          [330, 450],
+          [610, 520],
+          [760, 340],
+        ].map(([cx, cy], nodeIndex) => (
+          <circle
+            key={`${cx}-${cy}`}
+            cx={cx}
+            cy={cy}
+            r={nodeIndex === 3 ? 12 : 8}
+            fill="#c5a059"
+            className="aura-svg-node"
+            style={{ animationDelay: `${nodeIndex * 0.14}s` }}
+          />
+        ))}
+      </svg>
+      <div className="absolute left-[10%] top-[18%] rounded-full border border-aura-gold/25 bg-aura-gold/10 px-5 py-3 font-mono text-[10px] uppercase tracking-[0.32em] text-aura-gold aura-float">
+        248 live taps
+      </div>
+      <div className="absolute bottom-[16%] left-[22%] rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 font-mono text-[10px] uppercase tracking-[0.32em] text-zinc-200 aura-float">
+        91% saved contact
+      </div>
+      <div className="absolute right-[12%] top-[18%] h-[26rem] w-[26rem] rounded-full bg-aura-gold/10 blur-[100px]" />
+    </div>
+  );
+}
+
 export default function Home() {
   const pinContainerRef = useRef<HTMLDivElement>(null);
 
@@ -73,20 +227,22 @@ export default function Home() {
             id={panel.id}
             key={panel.title}
             data-cinematic-panel
-            className={`absolute inset-0 flex h-screen overflow-hidden px-6 pt-28 md:px-12 ${panel.align}`}
+            className={`absolute inset-0 isolate flex h-screen overflow-hidden px-6 pt-28 md:px-12 ${panel.align}`}
           >
             <div
               aria-hidden="true"
-              className={`absolute inset-x-0 top-[16%] select-none text-center font-display text-[23vw] font-bold uppercase leading-none tracking-[-0.12em] text-white/[0.025] md:top-[10%] ${
+              className={`absolute inset-x-0 top-[16%] z-0 select-none text-center font-display text-[23vw] font-bold uppercase leading-none tracking-[-0.12em] text-white/[0.025] md:top-[10%] ${
                 index > 1 ? 'md:text-right md:pr-16' : 'md:text-left md:pl-16'
               }`}
             >
               {panel.ghost}
             </div>
 
+            <PanelVisuals index={index} />
+
             <div
               data-cinematic-copy
-              className="flex h-screen w-full max-w-7xl mx-auto flex-col justify-center"
+              className="relative z-10 flex h-screen w-full max-w-7xl mx-auto flex-col justify-center"
             >
               <div className={`relative max-w-2xl ${panel.copyAlign}`}>
                 <div className={`mb-8 flex items-center gap-4 ${index > 1 ? 'justify-end' : ''}`}>

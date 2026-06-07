@@ -51,6 +51,140 @@ body {
   opacity: 0.26;
 }
 
+.aura-spin-slow {
+  animation: aura-spin 32s linear infinite;
+}
+
+.aura-spin-slow-reverse {
+  animation: aura-spin 42s linear infinite reverse;
+}
+
+.aura-float {
+  animation: aura-float 5.5s ease-in-out infinite;
+}
+
+.aura-equalizer {
+  animation: aura-equalizer 1.8s ease-in-out infinite alternate;
+  transform-origin: bottom;
+}
+
+.aura-pulse-ring {
+  animation: aura-pulse-ring 2.8s ease-in-out infinite;
+}
+
+.aura-pulse-node {
+  animation: aura-pulse-node 1.9s ease-in-out infinite;
+}
+
+.aura-scan-drift {
+  animation: aura-scan-drift 3.4s ease-in-out infinite;
+}
+
+.aura-data-fill {
+  animation: aura-data-fill 2.8s ease-in-out infinite alternate;
+  transform-origin: left;
+}
+
+.aura-svg-node {
+  animation: aura-svg-node 2.3s ease-in-out infinite;
+  filter: drop-shadow(0 0 14px rgba(197, 160, 89, 0.85));
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes aura-spin {
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+@keyframes aura-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(0, -14px, 0);
+  }
+}
+
+@keyframes aura-equalizer {
+  from {
+    transform: scaleY(0.48);
+    opacity: 0.42;
+  }
+
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes aura-pulse-ring {
+  0%,
+  100% {
+    transform: scale(0.96);
+    opacity: 0.36;
+  }
+
+  50% {
+    transform: scale(1.08);
+    opacity: 0.9;
+  }
+}
+
+@keyframes aura-pulse-node {
+  0%,
+  100% {
+    transform: scale(0.85);
+    opacity: 0.55;
+  }
+
+  50% {
+    transform: scale(1.45);
+    opacity: 1;
+  }
+}
+
+@keyframes aura-scan-drift {
+  0%,
+  100% {
+    transform: translateX(-18%);
+    opacity: 0.2;
+  }
+
+  50% {
+    transform: translateX(18%);
+    opacity: 0.9;
+  }
+}
+
+@keyframes aura-data-fill {
+  from {
+    transform: scaleX(0.52);
+    opacity: 0.58;
+  }
+
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes aura-svg-node {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(0.92);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.18);
+  }
+}
+
 .font-display {
   font-family: var(--font-display);
 }
