@@ -191,6 +191,9 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
       const copies = panels
         .map((section) => section.querySelector<HTMLElement>('[data-cinematic-copy]'))
         .filter((copy): copy is HTMLElement => Boolean(copy));
+      const visuals = panels
+        .map((section) => section.querySelector<HTMLElement>('[data-cinematic-visual]'))
+        .filter((visual): visual is HTMLElement => Boolean(visual));
       const totalSections = Math.max(sectionCount, panels.length, 1);
       const totalTransitions = Math.max(totalSections - 1, 1);
       const scrollDistancePerPanel = 0.58;
@@ -247,8 +250,24 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
 
       gsap.set(panels, { autoAlpha: 0 });
       gsap.set(copies, { autoAlpha: 0, y: 54, filter: 'blur(12px)' });
+      gsap.set(visuals, {
+        autoAlpha: 0,
+        rotateY: 18,
+        rotateX: -4,
+        scale: 1.04,
+        filter: 'blur(8px)',
+        transformPerspective: 1200,
+        transformOrigin: '50% 50%',
+      });
       gsap.set(panels[0], { autoAlpha: 1 });
       gsap.set(copies[0], { autoAlpha: 1, y: 0, filter: 'blur(0px)' });
+      gsap.set(visuals[0], {
+        autoAlpha: 1,
+        rotateY: 0,
+        rotateX: 0,
+        scale: 1,
+        filter: 'blur(0px)',
+      });
       gsap.set(card.position, cardStates[0].position);
       gsap.set(card.rotation, cardStates[0].rotation);
       gsap.set(card.scale, { x: cardStates[0].scale, y: cardStates[0].scale, z: cardStates[0].scale });
@@ -281,6 +300,8 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
         const currentPanel = panels[index];
         const previousCopy = copies[index - 1];
         const currentCopy = copies[index];
+        const previousVisual = visuals[index - 1];
+        const currentVisual = visuals[index];
         const cardState = cardStates[index] ?? cardStates[cardStates.length - 1];
         const transitionStart = index - 1;
 
@@ -319,6 +340,43 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
               { autoAlpha: 0, y: 56, filter: 'blur(12px)' },
               { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.34, ease: 'power2.out' },
               transitionStart + 0.52,
+            );
+        }
+
+        if (previousVisual && currentVisual) {
+          timeline
+            .to(
+              previousVisual,
+              {
+                autoAlpha: 0,
+                rotateY: -22,
+                rotateX: 5,
+                scale: 0.96,
+                filter: 'blur(10px)',
+                duration: 0.36,
+                ease: 'power2.in',
+              },
+              transitionStart + 0.18,
+            )
+            .fromTo(
+              currentVisual,
+              {
+                autoAlpha: 0,
+                rotateY: 24,
+                rotateX: -6,
+                scale: 1.08,
+                filter: 'blur(12px)',
+              },
+              {
+                autoAlpha: 1,
+                rotateY: 0,
+                rotateX: 0,
+                scale: 1,
+                filter: 'blur(0px)',
+                duration: 0.46,
+                ease: 'power3.out',
+              },
+              transitionStart + 0.42,
             );
         }
       }

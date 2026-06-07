@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { type CSSProperties, type PointerEvent, useRef, useState } from 'react';
 import CinematicCardScene from '../components/CinematicCardScene';
 import CinematicNavigationMenu, {
   CinematicMenuButton,
@@ -106,10 +106,11 @@ function CinematicHud({ onOpenMenu }: { onOpenMenu: () => void }) {
 function HomeAtmosphere() {
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_0%,rgba(232,215,162,0.16),transparent_28%),radial-gradient(circle_at_92%_14%,rgba(184,255,44,0.07),transparent_20%),linear-gradient(180deg,rgba(3,3,3,0.72),transparent_44%,rgba(3,3,3,0.42))]" />
+      <div className="home-reactive-glow absolute inset-0" />
       <div className="absolute -right-32 -top-40 h-[42rem] w-[42rem] rounded-full border border-aura-gold/15 aura-spin-slow" />
       <div className="absolute right-12 top-10 h-[22rem] w-[22rem] rounded-full border border-dashed border-aura-gold/20 aura-spin-slow-reverse" />
-      <div className="absolute inset-x-0 top-0 h-48 bg-[linear-gradient(rgba(232,215,162,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(232,215,162,0.06)_1px,transparent_1px)] bg-[size:54px_54px] opacity-35" />
+      <div className="home-reactive-drift absolute right-[12%] top-[12%] h-52 w-52 rounded-full bg-aura-lime/10 blur-[80px]" />
+      <div className="home-reactive-drift-slow absolute inset-x-0 top-0 h-48 bg-[linear-gradient(rgba(232,215,162,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(232,215,162,0.06)_1px,transparent_1px)] bg-[size:54px_54px] opacity-35" />
       <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-aura-gold/35 to-transparent" />
     </div>
   );
@@ -305,10 +306,61 @@ function PanelVisuals({ index }: { index: number }) {
 
 export default function Home() {
   const pinContainerRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const mouseReactiveStyle = {
+    '--mouse-x': '0px',
+    '--mouse-y': '0px',
+    '--mouse-x-reverse': '0px',
+    '--mouse-y-reverse': '0px',
+    '--mouse-x-slow': '0px',
+    '--mouse-y-slow': '0px',
+    '--mouse-tilt-x': '0deg',
+    '--mouse-tilt-y': '0deg',
+  } as CSSProperties;
+
+  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const rect = root.getBoundingClientRect();
+    const normalizedX = (event.clientX - rect.left) / rect.width - 0.5;
+    const normalizedY = (event.clientY - rect.top) / rect.height - 0.5;
+    const x = normalizedX * 72;
+    const y = normalizedY * 56;
+
+    root.style.setProperty('--mouse-x', `${x}px`);
+    root.style.setProperty('--mouse-y', `${y}px`);
+    root.style.setProperty('--mouse-x-reverse', `${x * -0.55}px`);
+    root.style.setProperty('--mouse-y-reverse', `${y * -0.45}px`);
+    root.style.setProperty('--mouse-x-slow', `${x * -0.18}px`);
+    root.style.setProperty('--mouse-y-slow', `${y * -0.14}px`);
+    root.style.setProperty('--mouse-tilt-x', `${normalizedY * -7}deg`);
+    root.style.setProperty('--mouse-tilt-y', `${normalizedX * 9}deg`);
+  };
+
+  const handlePointerLeave = () => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    root.style.setProperty('--mouse-x', '0px');
+    root.style.setProperty('--mouse-y', '0px');
+    root.style.setProperty('--mouse-x-reverse', '0px');
+    root.style.setProperty('--mouse-y-reverse', '0px');
+    root.style.setProperty('--mouse-x-slow', '0px');
+    root.style.setProperty('--mouse-y-slow', '0px');
+    root.style.setProperty('--mouse-tilt-x', '0deg');
+    root.style.setProperty('--mouse-tilt-y', '0deg');
+  };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#030303] text-white">
+    <div
+      ref={rootRef}
+      className="relative min-h-screen overflow-hidden bg-[#030303] text-white"
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+      style={mouseReactiveStyle}
+    >
       <CinematicCardScene
         pinContainerRef={pinContainerRef}
         sectionCount={panels.length}
@@ -357,7 +409,19 @@ export default function Home() {
               {panel.ghost}
             </div>
 
-            <PanelVisuals index={index} />
+            <div
+              data-cinematic-visual
+              className="home-panel-visual absolute inset-0 z-0"
+              style={{
+                opacity: index === 0 ? 1 : 0,
+                visibility: index === 0 ? 'visible' : 'hidden',
+                transform: index === 0
+                  ? 'perspective(1200px) rotateY(0deg) scale(1)'
+                  : 'perspective(1200px) rotateY(18deg) scale(1.04)',
+              }}
+            >
+              <PanelVisuals index={index} />
+            </div>
 
             <div
               data-cinematic-copy
