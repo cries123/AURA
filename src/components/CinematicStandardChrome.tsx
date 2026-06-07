@@ -16,16 +16,8 @@ export default function CinematicStandardChrome() {
       <div className="cinematic-noise pointer-events-none fixed inset-0 z-[1]" />
       <div className="pointer-events-none fixed inset-0 z-[2] bg-[radial-gradient(circle_at_50%_35%,transparent_0%,transparent_36%,rgba(0,0,0,0.58)_82%)]" />
 
-      <div className="fixed left-6 top-6 z-40 flex items-start gap-6 md:left-10">
+      <div className="fixed left-6 top-6 z-40 md:left-10">
         <CinematicMenuButton onClick={() => setIsMenuOpen(true)} />
-        <div>
-          <p className="font-display text-xl font-bold uppercase leading-none tracking-[0.18em]">
-            Aura<span className="text-aura-gold">Tap</span>
-          </p>
-          <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.42em] text-zinc-500">
-            Command deck
-          </p>
-        </div>
       </div>
 
       <CinematicNavigationMenu
