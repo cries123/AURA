@@ -110,7 +110,7 @@ export default function Portal() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-aura-black flex items-center justify-center">
+      <div className="min-h-screen bg-transparent flex items-center justify-center">
         <div className="w-12 h-12 border-2 border-aura-gold border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -139,7 +139,7 @@ export default function Portal() {
     const currentTab = activeTab || (isAdmin ? 'admin' : isAffiliate ? 'affiliate' : 'selection');
 
     return (
-      <div className="min-h-screen bg-aura-black pt-24 px-6 pb-12">
+      <div id="portal-top" className="min-h-screen bg-transparent pt-28 px-6 pb-12">
         <div className="max-w-7xl mx-auto">
           {/* Dashboard Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
@@ -238,7 +238,7 @@ export default function Portal() {
   }
 
   return (
-    <div className="min-h-screen bg-aura-black pt-40 px-6 pb-24 relative overflow-y-auto">
+    <div id="portal-top" className="min-h-screen bg-transparent pt-40 px-6 pb-24 relative overflow-y-auto">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl aspect-square bg-aura-gold/5 rounded-full blur-[120px] -translate-y-1/2" />
       
       <div className="max-w-lg mx-auto relative z-10">

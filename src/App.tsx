@@ -3,8 +3,6 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
 import Home from './pages/Home';
 import Platform from './pages/Platform';
 import Pricing from './pages/Pricing';
@@ -14,6 +12,8 @@ import Affiliate from './pages/Affiliate';
 import Portal from './pages/Portal';
 import UserProfile from './pages/UserProfile';
 import LoadingScreen from './components/LoadingScreen';
+import CinematicStandardChrome from './components/CinematicStandardChrome';
+import FloatingCartControl from './components/FloatingCartControl';
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -136,15 +136,14 @@ function AppContent() {
   const systemPaths = ['/', '/platform', '/pricing', '/faq', '/warranty', '/affiliate', '/portal'];
   const isProfilePage = !systemPaths.includes(location.pathname);
   const isCinematicHome = location.pathname === '/';
-  const hideStandardNavbar = isCinematicHome || location.pathname === '/pricing';
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
-      {!isProfilePage && !hideStandardNavbar && <Navbar />}
-      <main>
+    <div className="min-h-screen bg-[#030303] text-white">
+      {!isProfilePage && !isCinematicHome && <CinematicStandardChrome />}
+      {!isProfilePage && <FloatingCartControl />}
+      <main className={!isProfilePage && !isCinematicHome ? 'relative z-10 [&_section]:bg-transparent' : undefined}>
         <AnimatedRoutes />
       </main>
-      {!isProfilePage && !isCinematicHome && <Footer />}
     </div>
   );
 }

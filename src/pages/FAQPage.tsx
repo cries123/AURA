@@ -36,8 +36,8 @@ export default function FAQPage() {
   ];
 
   return (
-    <div className="pt-20 min-h-screen">
-      <main className="py-24 bg-aura-black">
+    <div id="faq-top" className="min-h-screen pt-24">
+      <main className="py-24">
         <div className="max-w-4xl mx-auto px-6">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -64,7 +64,7 @@ export default function FAQPage() {
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div id="questions" className="space-y-4">
              {decisionMakerFaqs.map((faq, index) => (
                <motion.div 
                  key={index} 

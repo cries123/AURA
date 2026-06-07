@@ -1,7 +1,5 @@
 import { motion } from 'motion/react';
 import { DollarSign, BarChart3, Package, ArrowRight, ShieldCheck } from 'lucide-react';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 import { useState } from 'react';
 import LeadFormModal from '../components/LeadFormModal';
 import { useAuth } from '../context/AuthContext';
@@ -40,9 +38,7 @@ export default function Affiliate() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-aura-black text-white selection:bg-aura-gold selection:text-aura-black">
-      <Navbar />
-      
+    <div id="affiliate-top" className="min-h-screen bg-transparent text-white selection:bg-aura-gold selection:text-aura-black">
       {/* Hero Section */}
       <section className="pt-40 pb-24 px-6 relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl aspect-square bg-aura-gold/5 rounded-full blur-[120px] -translate-y-1/2" />
@@ -84,7 +80,7 @@ export default function Affiliate() {
       </section>
 
       {/* Tiers Section */}
-      <section className="py-24 px-6 border-t border-zinc-900">
+      <section id="tiers" className="py-24 px-6 border-t border-zinc-900">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
             <h2 className="text-3xl font-display font-bold italic mb-4">Volume <span className="text-aura-gold">Discount</span> Tiers</h2>
@@ -120,7 +116,7 @@ export default function Affiliate() {
       </section>
 
       {/* How it Works */}
-      <section className="py-24 px-6 bg-zinc-950">
+      <section id="workflow" className="py-24 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
             <div>
