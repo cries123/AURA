@@ -193,6 +193,7 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
         .filter((copy): copy is HTMLElement => Boolean(copy));
       const totalSections = Math.max(sectionCount, panels.length, 1);
       const totalTransitions = Math.max(totalSections - 1, 1);
+      const scrollDistancePerPanel = 0.58;
       const snapPoints = Array.from(
         { length: totalSections },
         (_, index) => index / totalTransitions,
@@ -258,9 +259,9 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
         scrollTrigger: {
           trigger: pinContainer,
           start: 'top top',
-          end: () => `+=${totalTransitions * window.innerHeight}`,
+          end: () => `+=${totalTransitions * window.innerHeight * scrollDistancePerPanel}`,
           pin: true,
-          scrub: 0.85,
+          scrub: 0.45,
           anticipatePin: 1,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
@@ -268,8 +269,8 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
           },
           snap: {
             snapTo: snapPoints,
-            duration: { min: 0.28, max: 0.65 },
-            delay: 0.04,
+            duration: { min: 0.2, max: 0.45 },
+            delay: 0.02,
             ease: 'power3.inOut',
           },
         },

@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home';
@@ -14,6 +14,11 @@ import UserProfile from './pages/UserProfile';
 import LoadingScreen from './components/LoadingScreen';
 import CinematicStandardChrome from './components/CinematicStandardChrome';
 import FloatingCartControl from './components/FloatingCartControl';
+
+const navigationEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+if (navigationEntry?.type === 'reload' && window.location.pathname !== '/') {
+  window.history.replaceState(null, '', '/');
+}
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -136,6 +141,10 @@ function AppContent() {
   const systemPaths = ['/', '/platform', '/pricing', '/faq', '/warranty', '/affiliate', '/portal'];
   const isProfilePage = !systemPaths.includes(location.pathname);
   const isCinematicHome = location.pathname === '/';
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen bg-[#030303] text-white">
