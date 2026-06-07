@@ -7,6 +7,7 @@ const panels = [
     chapter: '01',
     eyebrow: 'AURA TAP / REVOLUTIONIZED',
     ghost: 'TAP',
+    label: 'Genesis',
     title: 'Your card is no longer paper.',
     body: 'A cinematic NFC object built to turn a first meeting into an instant digital handoff.',
     align: 'items-start text-left',
@@ -17,6 +18,7 @@ const panels = [
     chapter: '02',
     eyebrow: 'THE SCIENCE OF THE TAP',
     ghost: 'SIGNAL',
+    label: 'Science',
     title: 'One gesture. A complete profile transfer.',
     body: 'NFC opens the right destination instantly: contact details, links, lead capture, and team-managed identity without an app download.',
     align: 'items-start text-left',
@@ -27,6 +29,7 @@ const panels = [
     chapter: '03',
     eyebrow: 'LIVE PROFILE SYSTEM',
     ghost: 'PULSE',
+    label: 'System',
     title: 'A physical card with a living backend.',
     body: 'Update offers, routing, team details, and analytics from Aura Platform while the card in your hand stays the same.',
     align: 'items-end text-right',
@@ -37,6 +40,7 @@ const panels = [
     chapter: '04',
     eyebrow: 'DEPLOY THE NETWORK',
     ghost: 'AURA',
+    label: 'Network',
     title: 'Make every introduction measurable.',
     body: 'Equip founders, sales teams, and creators with a reusable networking layer that feels premium before the link even opens.',
     align: 'items-end text-right',
@@ -44,14 +48,64 @@ const panels = [
   },
 ];
 
+function CinematicHud() {
+  return (
+    <>
+      <div className="pointer-events-none fixed left-6 right-6 top-6 z-30 flex items-start justify-between text-white md:left-10 md:right-10">
+        <div>
+          <p className="font-display text-xl font-bold uppercase leading-none tracking-[0.18em]">
+            Aura<span className="text-aura-gold">Tap</span>
+          </p>
+          <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.42em] text-zinc-500">
+            Networking. Revolutionized.
+          </p>
+        </div>
+        <div className="hidden text-right md:block">
+          <p className="font-mono text-[9px] uppercase tracking-[0.38em] text-zinc-500">
+            Current chapter
+          </p>
+          <p className="mt-2 font-mono text-xs uppercase tracking-[0.32em] text-aura-gold">
+            <span data-cinematic-index>01</span>
+            <span className="mx-2 text-zinc-600">/</span>
+            <span data-cinematic-title>Genesis</span>
+          </p>
+        </div>
+      </div>
+
+      <div className="pointer-events-none fixed right-5 top-1/2 z-30 hidden -translate-y-1/2 flex-col items-center gap-4 md:flex">
+        {panels.map((panel, index) => (
+          <span
+            key={panel.id}
+            data-cinematic-dot
+            className="h-2 w-2 rounded-full border border-aura-gold/40 bg-transparent transition-all duration-300 first:bg-aura-gold first:shadow-[0_0_18px_rgba(197,160,89,0.8)]"
+            aria-label={panel.label}
+            style={{ opacity: index === 0 ? 1 : 0.35 }}
+          />
+        ))}
+      </div>
+
+      <div className="pointer-events-none fixed bottom-6 left-1/2 z-30 hidden -translate-x-1/2 items-center gap-4 md:flex">
+        <span className="h-px w-14 bg-gradient-to-r from-transparent to-aura-gold/70" />
+        <span className="font-mono text-[9px] uppercase tracking-[0.45em] text-zinc-500">
+          Scroll to advance
+        </span>
+        <span className="h-px w-14 bg-gradient-to-l from-transparent to-aura-gold/70" />
+      </div>
+    </>
+  );
+}
+
 function PanelVisuals({ index }: { index: number }) {
   if (index === 0) {
     return (
       <div aria-hidden="true" className="absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_62%_44%,rgba(197,160,89,0.14),transparent_22%),radial-gradient(circle_at_18%_68%,rgba(255,255,255,0.055),transparent_18%)]" />
         <div className="absolute left-[45%] top-1/2 h-[58rem] w-[58rem] -translate-y-1/2 rounded-full border border-aura-gold/15 aura-spin-slow" />
         <div className="absolute left-[49%] top-1/2 h-[38rem] w-[38rem] -translate-y-1/2 rounded-full border border-dashed border-aura-gold/20 aura-spin-slow-reverse" />
         <div className="absolute right-[-8rem] top-[14%] h-[24rem] w-[24rem] rounded-full bg-aura-gold/10 blur-[90px]" />
         <div className="absolute bottom-[12%] left-[8%] h-40 w-40 rounded-full bg-aura-gold/10 blur-[70px]" />
+        <div className="absolute right-[18%] top-[36%] h-52 w-36 rounded-[1.8rem] border border-aura-gold/25 bg-black/30 shadow-[0_0_70px_rgba(197,160,89,0.12)] backdrop-blur aura-card-float" />
+        <div className="absolute right-[21%] top-[42%] h-20 w-24 rounded-2xl border border-aura-gold/30 bg-aura-gold/10 aura-card-float-delayed" />
         <div className="absolute right-[8%] top-[18%] grid grid-cols-4 gap-3 opacity-75">
           {Array.from({ length: 16 }, (_, tileIndex) => (
             <span
@@ -70,6 +124,9 @@ function PanelVisuals({ index }: { index: number }) {
             />
           ))}
         </div>
+        <div className="absolute left-[8%] bottom-[16%] rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 font-mono text-[9px] uppercase tracking-[0.34em] text-zinc-400">
+          Product launch sequence armed
+        </div>
       </div>
     );
   }
@@ -78,6 +135,7 @@ function PanelVisuals({ index }: { index: number }) {
     return (
       <div aria-hidden="true" className="absolute inset-0 z-0 overflow-hidden">
         <div className="absolute inset-y-0 right-0 w-[68%] bg-[linear-gradient(90deg,transparent,rgba(197,160,89,0.08)),linear-gradient(rgba(197,160,89,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(197,160,89,0.12)_1px,transparent_1px)] bg-[size:100%_100%,56px_56px,56px_56px] [transform:perspective(700px)_rotateX(58deg)_translateY(12%)] [transform-origin:center]" />
+        <div className="absolute right-[7%] top-[12%] h-[70vh] w-[46vw] min-w-[26rem] rounded-full border border-aura-gold/10 bg-[radial-gradient(circle,rgba(197,160,89,0.14),transparent_56%)] blur-[1px]" />
         <div className="absolute right-[12%] top-[17%] h-[34rem] w-[34rem] rounded-full border border-aura-gold/20 aura-spin-slow" />
         <div className="absolute right-[18%] top-[24%] h-[22rem] w-[22rem] rounded-full border border-aura-gold/30 aura-pulse-ring" />
         {[
@@ -96,6 +154,17 @@ function PanelVisuals({ index }: { index: number }) {
         <div className="absolute right-[9%] top-[24%] rounded-full border border-aura-gold/30 bg-black/30 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.32em] text-aura-gold/80 backdrop-blur">
           NFC FIELD ACTIVE
         </div>
+        <div className="absolute right-[12%] bottom-[26%] grid w-72 grid-cols-2 gap-3">
+          {['13.56 MHz', '0 Apps', 'Tap Range', 'Profile URL'].map((label, statIndex) => (
+            <span
+              key={label}
+              className="rounded-2xl border border-aura-gold/15 bg-black/35 px-4 py-3 font-mono text-[9px] uppercase tracking-[0.24em] text-zinc-300 backdrop-blur aura-float"
+              style={{ animationDelay: `${statIndex * 0.13}s` }}
+            >
+              {label}
+            </span>
+          ))}
+        </div>
         <div className="absolute bottom-[18%] right-[18%] h-px w-[34rem] max-w-[62vw] bg-gradient-to-r from-transparent via-aura-gold/70 to-transparent aura-scan-drift" />
       </div>
     );
@@ -104,6 +173,7 @@ function PanelVisuals({ index }: { index: number }) {
   if (index === 2) {
     return (
       <div aria-hidden="true" className="absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute inset-y-0 left-0 w-[60%] bg-[linear-gradient(90deg,rgba(197,160,89,0.08),transparent),repeating-linear-gradient(90deg,transparent_0_34px,rgba(255,255,255,0.045)_35px_36px)]" />
         <div className="absolute left-[8%] top-[18%] h-[34rem] w-[30rem] rounded-[2rem] border border-white/10 bg-white/[0.035] shadow-[0_0_80px_rgba(197,160,89,0.08)] backdrop-blur-sm aura-float" />
         <div className="absolute left-[12%] top-[24%] w-72 rounded-3xl border border-aura-gold/20 bg-black/45 p-5 backdrop-blur">
           <div className="mb-5 flex items-center justify-between">
@@ -132,6 +202,17 @@ function PanelVisuals({ index }: { index: number }) {
             </span>
           ))}
         </div>
+        <div className="absolute left-[38%] top-[18%] hidden w-56 rounded-3xl border border-white/10 bg-black/35 p-4 font-mono text-[9px] uppercase tracking-[0.26em] text-zinc-400 backdrop-blur lg:block">
+          <p className="text-aura-gold">Routing Matrix</p>
+          <div className="mt-4 space-y-2">
+            {['Lead Capture', 'Team Profile', 'Analytics'].map((item) => (
+              <div key={item} className="flex items-center justify-between">
+                <span>{item}</span>
+                <span className="text-aura-gold">ON</span>
+              </div>
+            ))}
+          </div>
+        </div>
         <div className="absolute left-[28%] top-[20%] h-[36rem] w-px rotate-12 bg-gradient-to-b from-transparent via-aura-gold/60 to-transparent" />
       </div>
     );
@@ -139,6 +220,7 @@ function PanelVisuals({ index }: { index: number }) {
 
   return (
     <div aria-hidden="true" className="absolute inset-0 z-0 overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_34%_54%,rgba(197,160,89,0.12),transparent_28%),radial-gradient(circle_at_78%_22%,rgba(255,255,255,0.05),transparent_20%)]" />
       <svg className="absolute left-[5%] top-[8%] h-[84vh] w-[60vw] opacity-70" viewBox="0 0 900 700">
         <defs>
           <linearGradient id="network-line" x1="0" x2="1" y1="0" y2="1">
@@ -193,6 +275,9 @@ function PanelVisuals({ index }: { index: number }) {
       <div className="absolute bottom-[16%] left-[22%] rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 font-mono text-[10px] uppercase tracking-[0.32em] text-zinc-200 aura-float">
         91% saved contact
       </div>
+      <div className="absolute left-[34%] top-[56%] hidden rounded-full border border-aura-gold/20 bg-black/30 px-5 py-3 font-mono text-[10px] uppercase tracking-[0.32em] text-aura-gold backdrop-blur md:block">
+        Network propagation live
+      </div>
       <div className="absolute right-[12%] top-[18%] h-[26rem] w-[26rem] rounded-full bg-aura-gold/10 blur-[100px]" />
     </div>
   );
@@ -210,6 +295,7 @@ export default function Home() {
 
       <div className="cinematic-noise pointer-events-none fixed inset-0 z-[1]" />
       <div className="pointer-events-none fixed inset-0 z-[2] bg-[radial-gradient(circle_at_50%_45%,transparent_0%,transparent_38%,rgba(0,0,0,0.62)_78%)]" />
+      <CinematicHud />
       <div className="pointer-events-none fixed left-6 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-4 md:flex">
         <span className="h-24 w-px bg-gradient-to-b from-transparent via-aura-gold to-transparent" />
         <span className="rotate-180 [writing-mode:vertical-rl] text-[10px] font-bold uppercase tracking-[0.38em] text-aura-gold/70">
@@ -227,6 +313,7 @@ export default function Home() {
             id={panel.id}
             key={panel.title}
             data-cinematic-panel
+            data-cinematic-label={panel.label}
             className={`absolute inset-0 isolate flex h-screen overflow-hidden px-6 pt-28 md:px-12 ${panel.align}`}
           >
             <div

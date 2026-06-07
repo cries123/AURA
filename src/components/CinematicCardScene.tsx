@@ -197,6 +197,28 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
         { length: totalSections },
         (_, index) => index / totalTransitions,
       );
+      const dots = gsap.utils.toArray<HTMLElement>('[data-cinematic-dot]');
+      const currentIndex = document.querySelector<HTMLElement>('[data-cinematic-index]');
+      const currentTitle = document.querySelector<HTMLElement>('[data-cinematic-title]');
+      const setActiveChapter = (activeIndex: number) => {
+        const safeIndex = gsap.utils.clamp(0, totalSections - 1, activeIndex);
+
+        dots.forEach((dot, dotIndex) => {
+          const isActive = dotIndex === safeIndex;
+          dot.style.opacity = isActive ? '1' : '0.35';
+          dot.style.backgroundColor = isActive ? '#c5a059' : 'transparent';
+          dot.style.transform = isActive ? 'scale(1.65)' : 'scale(1)';
+          dot.style.boxShadow = isActive ? '0 0 18px rgba(197,160,89,0.8)' : 'none';
+        });
+
+        if (currentIndex) {
+          currentIndex.textContent = String(safeIndex + 1).padStart(2, '0');
+        }
+
+        if (currentTitle) {
+          currentTitle.textContent = panels[safeIndex]?.dataset.cinematicLabel ?? '';
+        }
+      };
       const responsiveX = (desktopValue: number, mobileValue: number) =>
         window.innerWidth < 768 ? mobileValue : desktopValue;
       const cardStates = [
@@ -229,6 +251,7 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
       gsap.set(card.position, cardStates[0].position);
       gsap.set(card.rotation, cardStates[0].rotation);
       gsap.set(card.scale, { x: cardStates[0].scale, y: cardStates[0].scale, z: cardStates[0].scale });
+      setActiveChapter(0);
 
       const timeline = gsap.timeline({
         defaults: { ease: 'none' },
@@ -240,6 +263,9 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
           scrub: 0.85,
           anticipatePin: 1,
           invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            setActiveChapter(Math.round(self.progress * totalTransitions));
+          },
           snap: {
             snapTo: snapPoints,
             duration: { min: 0.28, max: 0.65 },
