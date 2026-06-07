@@ -54,8 +54,30 @@ const panels = [
 function CinematicHud({ onOpenMenu }: { onOpenMenu: () => void }) {
   return (
     <>
-      <div className="fixed left-6 top-6 z-30 md:left-10">
-        <CinematicMenuButton onClick={onOpenMenu} />
+      <div className="pointer-events-none fixed left-6 right-6 top-6 z-30 flex items-start justify-between text-white md:left-10 md:right-10">
+        <div className="flex items-start gap-6">
+          <div className="mt-1">
+            <CinematicMenuButton onClick={onOpenMenu} />
+          </div>
+          <div>
+            <p className="font-display text-xl font-bold uppercase leading-none tracking-[0.18em]">
+              Aura<span className="text-aura-gold">Tap</span>
+            </p>
+            <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.42em] text-zinc-500">
+              Networking. Revolutionized.
+            </p>
+          </div>
+        </div>
+        <div className="hidden text-right md:block">
+          <p className="font-mono text-[9px] uppercase tracking-[0.38em] text-zinc-500">
+            Current chapter
+          </p>
+          <p className="mt-2 font-mono text-xs uppercase tracking-[0.32em] text-aura-gold">
+            <span data-cinematic-index>01</span>
+            <span className="mx-2 text-zinc-600">/</span>
+            <span data-cinematic-title>Genesis</span>
+          </p>
+        </div>
       </div>
 
       <div className="pointer-events-none fixed right-5 top-1/2 z-30 hidden -translate-y-1/2 flex-col items-center gap-4 md:flex">
