@@ -4,8 +4,10 @@ import PricingDetails from '../components/PricingDetails';
 
 export default function Pricing() {
   return (
-    <div className="pt-20">
-      <PricingHeader />
+    <div className="relative min-h-screen text-white">
+      <div id="pricing-hero">
+        <PricingHeader />
+      </div>
       <Products />
       <PricingDetails />
     </div>

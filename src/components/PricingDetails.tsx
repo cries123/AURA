@@ -11,7 +11,8 @@ export default function PricingDetails() {
       price: "$225",
       units: "/ 10 cards",
       description: "Includes onboarding and dashboard setup for your full team rollout.",
-      badge: "STARTER ROLLOUT"
+      badge: "STARTER ROLLOUT",
+      savings: "Save $74"
     },
     {
       name: "Growth Team",
@@ -20,6 +21,7 @@ export default function PricingDetails() {
       units: "/ 25 mixed units",
       description: "Mix cards and wristbands for office staff and field reps.",
       badge: "MOST POPULAR",
+      savings: "Save $250",
       highlight: true
     },
     {
@@ -28,7 +30,8 @@ export default function PricingDetails() {
       price: "$499",
       units: "/ 50 mixed units",
       description: "Includes onboarding call, activation support, and priority platform service.",
-      badge: "SCALE PACKAGE"
+      badge: "SCALE PACKAGE",
+      savings: "Save $600"
     }
   ];
 
@@ -68,22 +71,28 @@ export default function PricingDetails() {
                viewport={{ once: true }}
                transition={{ delay: i * 0.1, duration: 0.6 }}
                whileHover={{ y: -5 }}
-               className={`p-8 rounded-3xl border transition-all ${bundle.highlight ? 'bg-aura-gold/5 border-aura-gold/30' : 'bg-zinc-900/20 border-zinc-800/50'}`}
+               className={`p-8 rounded-3xl border transition-all ${bundle.highlight ? 'bg-aura-lime/5 border-aura-lime/40 shadow-xl shadow-aura-lime/5' : 'bg-zinc-900/20 border-zinc-800/50'}`}
              >
-                <div className="text-[9px] font-bold text-zinc-500 mb-6 uppercase tracking-[0.2em]">{bundle.badge}</div>
+                <div className={`text-[9px] font-bold mb-6 uppercase tracking-[0.2em] ${bundle.highlight ? 'text-aura-lime' : 'text-zinc-500'}`}>{bundle.badge}</div>
                 <h4 className="text-xl font-display font-bold mb-2">{bundle.name}</h4>
                 <div className="flex items-baseline gap-2 mb-6">
                    <span className="text-zinc-600 line-through text-sm">{bundle.originalPrice}</span>
                    <span className="text-3xl text-white font-bold">{bundle.price}</span>
                    <span className="text-zinc-500 text-sm">{bundle.units}</span>
                 </div>
+                <div className="mb-5 inline-flex rounded-full border border-aura-lime/30 bg-aura-lime/5 px-3 py-1 text-[9px] font-black uppercase tracking-[0.22em] text-aura-lime">
+                  {bundle.savings} today
+                </div>
                 <p className="text-zinc-500 text-xs leading-relaxed mb-8">{bundle.description}</p>
                 <button 
                   onClick={() => setSelectedBundle(bundle.name)}
-                  className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${bundle.highlight ? 'bg-aura-gold text-aura-black hover:bg-white' : 'border border-zinc-800 hover:border-white'}`}
+                  className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${bundle.highlight ? 'bg-aura-lime text-aura-black hover:bg-white shadow-lg shadow-aura-lime/20' : 'border border-zinc-800 hover:border-aura-lime hover:text-aura-lime'}`}
                 >
                    Get Started
                 </button>
+                <p className="mt-4 text-center text-[9px] font-bold uppercase tracking-[0.18em] text-zinc-600">
+                  Setup included · Ships in 3-5 days · No monthly fees
+                </p>
              </motion.div>
            ))}
         </div>
@@ -145,7 +154,7 @@ export default function PricingDetails() {
              </div>
              <button 
                onClick={() => setSelectedBundle("Custom Enterprise Rollout")}
-               className="px-8 py-4 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl text-sm transition-all"
+               className="px-8 py-4 bg-aura-lime hover:bg-white text-aura-black font-bold rounded-xl text-sm transition-all shadow-lg shadow-aura-lime/20"
              >
                 Tailor an Enterprise Quote
              </button>
@@ -156,7 +165,7 @@ export default function PricingDetails() {
                 <h3 className="text-2xl font-display font-medium text-white mb-4">Want to resell Aura products?</h3>
                 <p className="text-zinc-500 text-sm leading-relaxed">Join our Affiliate Program to access exclusive reseller discounts up to 40% based on your purchase volume.</p>
              </div>
-             <a href="/affiliate" className="px-8 py-4 bg-white text-aura-black font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-aura-gold transition-all whitespace-nowrap">
+             <a href="/affiliate" className="px-8 py-4 bg-aura-lime text-aura-black font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-white transition-all whitespace-nowrap shadow-lg shadow-aura-lime/20">
                 Join Affiliate Program
              </a>
           </div>

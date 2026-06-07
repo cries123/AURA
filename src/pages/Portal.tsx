@@ -110,7 +110,7 @@ export default function Portal() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-aura-black flex items-center justify-center">
+      <div className="min-h-screen bg-transparent flex items-center justify-center">
         <div className="w-12 h-12 border-2 border-aura-gold border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -139,7 +139,7 @@ export default function Portal() {
     const currentTab = activeTab || (isAdmin ? 'admin' : isAffiliate ? 'affiliate' : 'selection');
 
     return (
-      <div className="min-h-screen bg-aura-black pt-24 px-6 pb-12">
+      <div id="portal-top" className="min-h-screen bg-transparent pt-28 px-6 pb-12">
         <div className="max-w-7xl mx-auto">
           {/* Dashboard Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
@@ -209,7 +209,7 @@ export default function Portal() {
                   <p className="text-zinc-500 mb-8 max-w-sm">Setup your digital business card and claim your public aurataps.net handle.</p>
                   <button 
                     onClick={() => setActiveTab('profile')}
-                    className="inline-flex items-center gap-2 px-8 py-4 bg-white text-aura-black font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-aura-gold transition-all"
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-aura-lime text-aura-black font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-white transition-all shadow-lg shadow-aura-lime/20"
                   >
                     Configure Profile <ArrowRight className="w-4 h-4" />
                   </button>
@@ -238,7 +238,7 @@ export default function Portal() {
   }
 
   return (
-    <div className="min-h-screen bg-aura-black pt-40 px-6 pb-24 relative overflow-y-auto">
+    <div id="portal-top" className="min-h-screen bg-transparent pt-40 px-6 pb-24 relative overflow-y-auto">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl aspect-square bg-aura-gold/5 rounded-full blur-[120px] -translate-y-1/2" />
       
       <div className="max-w-lg mx-auto relative z-10">
@@ -367,7 +367,7 @@ export default function Portal() {
                 <button 
                   disabled={isSubmitting}
                   type="submit"
-                  className="w-full py-5 bg-aura-gold text-aura-black rounded-xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-white transition-all mt-4 disabled:opacity-50 shadow-lg shadow-aura-gold/10"
+                  className="w-full py-5 bg-aura-lime text-aura-black rounded-xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-white transition-all mt-4 disabled:opacity-50 shadow-lg shadow-aura-lime/20"
                 >
                   {isSubmitting ? 'Processing...' : (
                     <>

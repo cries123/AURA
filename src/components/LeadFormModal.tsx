@@ -48,37 +48,41 @@ export default function LeadFormModal({ isOpen, onClose, bundleName }: LeadFormM
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
+            className="fixed inset-0 z-[100] bg-[#030303]/90 backdrop-blur-md"
           />
+          <div className="pointer-events-none fixed inset-0 z-[101] bg-[radial-gradient(circle_at_50%_35%,rgba(232,215,162,0.16),transparent_26%),radial-gradient(circle_at_74%_72%,rgba(184,255,44,0.08),transparent_26%)]" />
+          <div className="cinematic-noise pointer-events-none fixed inset-0 z-[102] opacity-25" />
           <motion.div 
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-zinc-950 border border-zinc-800 rounded-[2.5rem] p-8 md:p-12 z-[110] shadow-2xl"
+            className="fixed top-1/2 left-1/2 z-[110] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[2.25rem] border border-aura-gold/15 bg-[#070706]/80 p-8 shadow-[0_40px_140px_rgba(0,0,0,0.75)] backdrop-blur-2xl md:p-12"
           >
-            <button onClick={onClose} className="absolute top-6 right-6 text-zinc-500 hover:text-white transition-colors">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_0%,rgba(232,215,162,0.12),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.045),transparent_38%)]" />
+            <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-aura-gold/50 to-transparent" />
+            <button onClick={onClose} className="absolute right-6 top-6 z-10 text-zinc-500 transition-colors hover:text-aura-gold">
               <X className="w-6 h-6" />
             </button>
 
             {status === 'success' ? (
-              <div className="text-center py-8">
-                <div className="w-20 h-20 bg-aura-gold/10 rounded-full flex items-center justify-center mx-auto mb-6 text-aura-gold">
+              <div className="relative z-10 py-8 text-center">
+                <div className="w-20 h-20 bg-aura-gold/10 rounded-full flex items-center justify-center mx-auto mb-6 text-aura-gold border border-aura-gold/20">
                   <CheckCircle2 className="w-10 h-10" />
                 </div>
                 <h2 className="text-3xl font-display font-bold text-white mb-4">Request Sent</h2>
                 <p className="text-zinc-500 mb-8">An Aura Tap specialist will contact you within 24 hours to finalize your {bundleName}.</p>
                 <button 
                   onClick={onClose}
-                  className="w-full py-4 bg-white text-aura-black rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-aura-gold transition-all"
+                  className="w-full py-4 bg-aura-lime text-aura-black rounded-xl font-black uppercase tracking-widest text-xs hover:bg-white transition-all shadow-lg shadow-aura-lime/20"
                 >
                   Return to Pricing
                 </button>
               </div>
             ) : (
-              <div>
+              <div className="relative z-10">
                 <div className="mb-8">
-                  <div className="text-aura-gold text-[10px] font-bold uppercase tracking-[0.3em] mb-4">Enterprise Inquiry</div>
-                  <h2 className="text-3xl font-display font-medium text-white italic">Customize your <span className="text-aura-gold">{bundleName}.</span></h2>
+                  <div className="mb-4 text-[10px] font-black uppercase tracking-[0.42em] text-aura-gold">Enterprise Inquiry</div>
+                  <h2 className="font-display text-3xl font-semibold italic leading-tight text-white">Customize your <span className="text-aura-gold">{bundleName}.</span></h2>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -90,7 +94,7 @@ export default function LeadFormModal({ isOpen, onClose, bundleName }: LeadFormM
                         type="text" 
                         value={formData.name}
                         onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                        className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-aura-gold transition-colors" 
+                        className="w-full rounded-xl border border-white/10 bg-white/[0.035] px-4 py-3 text-white placeholder:text-zinc-600 transition-colors focus:border-aura-lime focus:outline-none" 
                         placeholder="John Doe" 
                       />
                     </div>
@@ -101,7 +105,7 @@ export default function LeadFormModal({ isOpen, onClose, bundleName }: LeadFormM
                         type="text" 
                         value={formData.company}
                         onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
-                        className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-aura-gold transition-colors" 
+                        className="w-full rounded-xl border border-white/10 bg-white/[0.035] px-4 py-3 text-white placeholder:text-zinc-600 transition-colors focus:border-aura-lime focus:outline-none" 
                         placeholder="Acme Inc." 
                       />
                     </div>
@@ -113,14 +117,14 @@ export default function LeadFormModal({ isOpen, onClose, bundleName }: LeadFormM
                       type="email" 
                       value={formData.email}
                       onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                      className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-aura-gold transition-colors" 
+                      className="w-full rounded-xl border border-white/10 bg-white/[0.035] px-4 py-3 text-white placeholder:text-zinc-600 transition-colors focus:border-aura-lime focus:outline-none" 
                       placeholder="john@acme.com" 
                     />
                   </div>
                   <button 
                     disabled={status === 'submitting'}
                     type="submit"
-                    className="w-full py-5 bg-aura-gold text-aura-black rounded-xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-white transition-all mt-4 disabled:opacity-50"
+                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-aura-lime py-5 text-xs font-black uppercase tracking-widest text-aura-black shadow-[0_0_28px_rgba(184,255,44,0.25)] transition-all hover:bg-white disabled:opacity-50"
                   >
                     {status === 'submitting' ? 'Sending...' : (
                       <>

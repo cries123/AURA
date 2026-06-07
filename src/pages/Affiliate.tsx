@@ -1,7 +1,5 @@
 import { motion } from 'motion/react';
 import { DollarSign, BarChart3, Package, ArrowRight, ShieldCheck } from 'lucide-react';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 import { useState } from 'react';
 import LeadFormModal from '../components/LeadFormModal';
 import { useAuth } from '../context/AuthContext';
@@ -40,9 +38,7 @@ export default function Affiliate() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-aura-black text-white selection:bg-aura-gold selection:text-aura-black">
-      <Navbar />
-      
+    <div id="affiliate-top" className="min-h-screen bg-transparent text-white selection:bg-aura-gold selection:text-aura-black">
       {/* Hero Section */}
       <section className="pt-40 pb-24 px-6 relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl aspect-square bg-aura-gold/5 rounded-full blur-[120px] -translate-y-1/2" />
@@ -58,7 +54,7 @@ export default function Affiliate() {
           
           <h1 className="text-5xl md:text-8xl font-display font-medium tracking-tight mb-8 leading-[0.9]">
             Scale your <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-aura-gold to-[#e8d2a5] italic">revenue</span> with Aura.
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-aura-gold to-[#f2e6b8] italic">revenue</span> with Aura.
           </h1>
           
           <p className="text-zinc-500 text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed">
@@ -68,14 +64,14 @@ export default function Affiliate() {
           {isAffiliate ? (
             <Link 
               to="/portal"
-              className="px-10 py-5 bg-aura-gold text-aura-black font-bold rounded-2xl hover:bg-white hover:scale-105 transition-all shadow-xl shadow-aura-gold/10 inline-flex items-center gap-3"
+              className="px-10 py-5 bg-aura-lime text-aura-black font-bold rounded-2xl hover:bg-white hover:scale-105 transition-all shadow-xl shadow-aura-lime/20 inline-flex items-center gap-3"
             >
               Access Affiliate Dashboard <ArrowRight className="w-5 h-5" />
             </Link>
           ) : (
             <button 
               onClick={() => setIsModalOpen(true)}
-              className="px-10 py-5 bg-white text-aura-black font-bold rounded-2xl hover:bg-aura-gold hover:scale-105 transition-all shadow-xl shadow-aura-gold/10"
+              className="px-10 py-5 bg-aura-lime text-aura-black font-bold rounded-2xl hover:bg-white hover:scale-105 transition-all shadow-xl shadow-aura-lime/20"
             >
               Apply for Reseller Access
             </button>
@@ -84,7 +80,7 @@ export default function Affiliate() {
       </section>
 
       {/* Tiers Section */}
-      <section className="py-24 px-6 border-t border-zinc-900">
+      <section id="tiers" className="py-24 px-6 border-t border-zinc-900">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
             <h2 className="text-3xl font-display font-bold italic mb-4">Volume <span className="text-aura-gold">Discount</span> Tiers</h2>
@@ -102,7 +98,7 @@ export default function Affiliate() {
                 className={`p-10 rounded-[2.5rem] bg-zinc-900/20 border ${tier.border} relative group hover:bg-zinc-900/40 transition-all`}
               >
                 {tier.highlight && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-aura-gold text-aura-black text-[10px] font-bold uppercase tracking-widest rounded-full">
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-aura-lime text-aura-black text-[10px] font-bold uppercase tracking-widest rounded-full shadow-[0_0_18px_rgba(184,255,44,0.45)]">
                     Most Popular
                   </div>
                 )}
@@ -120,7 +116,7 @@ export default function Affiliate() {
       </section>
 
       {/* How it Works */}
-      <section className="py-24 px-6 bg-zinc-950">
+      <section id="workflow" className="py-24 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
             <div>

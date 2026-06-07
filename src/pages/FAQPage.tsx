@@ -36,8 +36,8 @@ export default function FAQPage() {
   ];
 
   return (
-    <div className="pt-20 min-h-screen">
-      <main className="py-24 bg-aura-black">
+    <div id="faq-top" className="min-h-screen pt-24">
+      <main className="py-24">
         <div className="max-w-4xl mx-auto px-6">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -64,7 +64,7 @@ export default function FAQPage() {
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div id="questions" className="space-y-4">
              {decisionMakerFaqs.map((faq, index) => (
                <motion.div 
                  key={index} 
@@ -98,7 +98,7 @@ export default function FAQPage() {
             <MessageCircle className="w-12 h-12 text-aura-gold mx-auto mb-6 opacity-50" />
             <h2 className="text-3xl font-display font-bold mb-4">Still have questions?</h2>
             <p className="text-zinc-500 mb-8 max-w-sm mx-auto">Our specialist team is available 9am-5pm EST to help with team onboarding and custom orders.</p>
-            <button className="px-8 py-4 bg-white text-aura-black font-bold rounded-xl hover:bg-aura-gold transition-all">
+            <button className="px-8 py-4 bg-aura-lime text-aura-black font-bold rounded-xl hover:bg-white transition-all shadow-lg shadow-aura-lime/20">
               Contact Sales Support
             </button>
           </div>

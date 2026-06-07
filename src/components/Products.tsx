@@ -3,7 +3,7 @@ import { ShoppingBag, Minus, Plus, Check, Share2 } from 'lucide-react';
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 
-const products = [
+export const products = [
   {
     name: "Aura Card",
     price: "$25",
@@ -12,7 +12,9 @@ const products = [
     bestFor: "INDIVIDUAL UNIT",
     features: ["Premium matte-black finish", "Instant contact sharing", "Durable PVC construction"],
     priceValue: 25,
-    inStock: 500
+    inStock: 500,
+    urgency: "Only 24 ready-to-ship today",
+    savings: "Ships in 3-5 days"
   },
   {
     name: "Aura Wristband",
@@ -22,7 +24,9 @@ const products = [
     bestFor: "INDIVIDUAL UNIT",
     features: ["Adjustable silicone strap", "Water-resistant chip", "Perfect for events"],
     priceValue: 25,
-    inStock: 300
+    inStock: 300,
+    urgency: "Only 18 event bands ready today",
+    savings: "Ships in 3-5 days"
   },
   {
     name: "Duo Bundle",
@@ -33,7 +37,9 @@ const products = [
     features: ["1x Aura Card", "1x Aura Wristband", "Unified profile management"],
     highlight: true,
     priceValue: 40,
-    inStock: 300
+    inStock: 300,
+    urgency: "Most buyers choose this",
+    savings: "Save $10"
   }
 ];
 
@@ -81,12 +87,12 @@ function ProductCard({ product, index }: { product: any, index: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.1 }}
-      className={`bg-aura-black rounded-3xl border ${product.highlight ? 'border-aura-gold/50 shadow-xl shadow-aura-gold/5' : 'border-zinc-800'} p-8 hover:border-aura-gold/50 transition-all group flex flex-col relative`}
+      className={`bg-aura-black rounded-3xl border ${product.highlight ? 'border-aura-lime/60 shadow-xl shadow-aura-lime/10' : 'border-zinc-800'} p-8 hover:border-aura-lime/60 transition-all group flex flex-col relative`}
     >
       <div className="absolute top-12 right-12 z-10">
-        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-950/80 backdrop-blur-md border border-zinc-800 rounded-full">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">{product.inStock} in stock</span>
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-950/80 backdrop-blur-md border border-aura-lime/30 rounded-full shadow-[0_0_22px_rgba(184,255,44,0.08)]">
+          <div className="w-1.5 h-1.5 rounded-full bg-aura-lime animate-pulse" />
+          <span className="text-[9px] font-bold text-aura-lime uppercase tracking-widest">{product.urgency}</span>
         </div>
       </div>
 
@@ -99,12 +105,15 @@ function ProductCard({ product, index }: { product: any, index: number }) {
       </div>
       
       <div className="mb-2">
-        <span className={`text-[10px] font-bold uppercase tracking-widest ${product.highlight ? 'text-aura-gold' : 'text-zinc-500'}`}>{product.bestFor}</span>
+        <span className={`text-[10px] font-bold uppercase tracking-widest ${product.highlight ? 'text-aura-lime' : 'text-zinc-500'}`}>{product.bestFor}</span>
       </div>
       
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-display font-bold">{product.name}</h3>
-        <span className="text-white font-bold text-2xl">{product.price}</span>
+        <div className="text-right">
+          <span className="text-white font-bold text-2xl">{product.price}</span>
+          <div className="mt-1 text-[9px] font-black uppercase tracking-widest text-aura-lime">{product.savings}</div>
+        </div>
       </div>
       
       <p className="text-zinc-500 text-xs mb-8 leading-relaxed h-12 line-clamp-2">{product.description}</p>
@@ -137,7 +146,7 @@ function ProductCard({ product, index }: { product: any, index: number }) {
         
         <button 
           onClick={handleAddToCart}
-          className="flex-grow py-4 rounded-xl transition-all text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 bg-aura-gold text-aura-black hover:bg-white hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-aura-gold/10"
+          className="flex-grow py-4 rounded-xl transition-all text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 bg-aura-lime text-aura-black hover:bg-white hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-aura-lime/20"
         >
            {isAdded ? (
              <>
@@ -154,23 +163,36 @@ function ProductCard({ product, index }: { product: any, index: number }) {
 
         <button 
           onClick={handleShare}
-          className="w-[56px] h-[56px] shrink-0 border border-zinc-800 rounded-xl flex items-center justify-center text-zinc-500 hover:border-aura-gold hover:text-aura-gold transition-all"
+          className="w-[56px] h-[56px] shrink-0 border border-zinc-800 rounded-xl flex items-center justify-center text-zinc-500 hover:border-aura-lime hover:text-aura-lime transition-all"
           title="Share Product"
         >
           {isShared ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
         </button>
+      </div>
+      <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[8px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+        <span className="rounded-lg border border-zinc-800 py-2">Warranty</span>
+        <span className="rounded-lg border border-zinc-800 py-2">Setup inc.</span>
+        <span className="rounded-lg border border-zinc-800 py-2">No fees</span>
       </div>
     </motion.div>
   );
 }
 
 export default function Products() {
+  const { addToCart } = useCart();
+  const duoBundle = products.find((product) => product.name === 'Duo Bundle')!;
+
   return (
     <section id="products" className="py-24 bg-zinc-950 border-t border-zinc-900">
       <div className="max-w-7xl mx-auto px-6">
         <div className="mb-16 text-center">
           <div className="text-aura-gold text-[10px] font-bold uppercase tracking-[0.3em] mb-4">Solo Hardware</div>
           <h2 className="text-3xl md:text-5xl font-display font-bold">Standard <span className="text-aura-gold italic">Units.</span></h2>
+          <div className="mt-8 mx-auto grid max-w-3xl grid-cols-1 gap-3 text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-400 sm:grid-cols-3">
+            <div className="rounded-full border border-aura-lime/25 bg-aura-lime/5 px-4 py-3 text-aura-lime">1,200+ pros upgraded</div>
+            <div className="rounded-full border border-zinc-800 px-4 py-3">Ships in 3-5 days</div>
+            <div className="rounded-full border border-zinc-800 px-4 py-3">12-month warranty</div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -178,6 +200,20 @@ export default function Products() {
             // @ts-ignore - key prop is handled by React
             <ProductCard key={product.name} product={product} index={index} />
           ))}
+        </div>
+      </div>
+      <div className="fixed inset-x-4 bottom-4 z-40 rounded-2xl border border-aura-lime/30 bg-black/85 p-3 shadow-2xl shadow-aura-lime/10 backdrop-blur-xl md:hidden">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="text-[9px] font-black uppercase tracking-[0.22em] text-aura-lime">Most buyers choose Duo</div>
+            <div className="text-sm font-bold text-white">$40 bundle <span className="text-zinc-500">/ save $10</span></div>
+          </div>
+          <button
+            onClick={() => addToCart(duoBundle, 1)}
+            className="rounded-xl bg-aura-lime px-4 py-3 text-[10px] font-black uppercase tracking-widest text-aura-black"
+          >
+            Add now
+          </button>
         </div>
       </div>
     </section>

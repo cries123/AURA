@@ -55,7 +55,7 @@ export default function Hero() {
               className="block"
               style={{ willChange: 'transform, opacity' }}
             >
-              first <span className="text-transparent bg-clip-text bg-gradient-to-r from-aura-gold to-[#e8d2a5] italic">impression.</span>
+              first <span className="text-transparent bg-clip-text bg-gradient-to-r from-aura-gold to-[#f2e6b8] italic">impression.</span>
             </motion.span>
           </h1>
 
