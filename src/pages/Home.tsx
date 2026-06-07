@@ -81,6 +81,18 @@ function CinematicHud({ onOpenMenu }: { onOpenMenu: () => void }) {
   );
 }
 
+function HomeAtmosphere() {
+  return (
+    <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_0%,rgba(232,215,162,0.16),transparent_28%),radial-gradient(circle_at_92%_14%,rgba(184,255,44,0.07),transparent_20%),linear-gradient(180deg,rgba(3,3,3,0.72),transparent_44%,rgba(3,3,3,0.42))]" />
+      <div className="absolute -right-32 -top-40 h-[42rem] w-[42rem] rounded-full border border-aura-gold/15 aura-spin-slow" />
+      <div className="absolute right-12 top-10 h-[22rem] w-[22rem] rounded-full border border-dashed border-aura-gold/20 aura-spin-slow-reverse" />
+      <div className="absolute inset-x-0 top-0 h-48 bg-[linear-gradient(rgba(232,215,162,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(232,215,162,0.06)_1px,transparent_1px)] bg-[size:54px_54px] opacity-35" />
+      <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-aura-gold/35 to-transparent" />
+    </div>
+  );
+}
+
 function PanelVisuals({ index }: { index: number }) {
   if (index === 0) {
     return (
@@ -280,8 +292,9 @@ export default function Home() {
         sectionCount={panels.length}
       />
 
-      <div className="cinematic-noise pointer-events-none fixed inset-0 z-[1]" />
-      <div className="pointer-events-none fixed inset-0 z-[2] bg-[radial-gradient(circle_at_50%_45%,transparent_0%,transparent_38%,rgba(0,0,0,0.62)_78%)]" />
+      <HomeAtmosphere />
+      <div className="cinematic-noise pointer-events-none fixed inset-0 z-[2]" />
+      <div className="pointer-events-none fixed inset-0 z-[3] bg-[radial-gradient(circle_at_50%_45%,transparent_0%,transparent_38%,rgba(0,0,0,0.62)_78%)]" />
       <CinematicHud onOpenMenu={() => setIsMenuOpen(true)} />
       <CinematicNavigationMenu
         isOpen={isMenuOpen}
