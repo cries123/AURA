@@ -305,25 +305,26 @@ function PanelVisuals({ index }: { index: number }) {
 }
 
 function renderInteractiveTitle(title: string) {
-  return title.split('').map((character, index) => {
-    if (character === ' ') {
-      return (
-        <span key={`space-${index}`} className="cinematic-title-space">
-          {' '}
-        </span>
-      );
-    }
+  let letterIndex = 0;
 
-    return (
-      <span
-        key={`${character}-${index}`}
-        className="cinematic-title-letter"
-        style={{ transitionDelay: `${(index % 9) * 12}ms` }}
-      >
-        {character}
-      </span>
-    );
-  });
+  return title.split(' ').map((word, wordIndex) => (
+    <span key={`${word}-${wordIndex}`} className="cinematic-title-word">
+      {word.split('').map((character) => {
+        const currentIndex = letterIndex;
+        letterIndex += 1;
+
+        return (
+          <span
+            key={`${character}-${currentIndex}`}
+            className="cinematic-title-letter"
+            style={{ transitionDelay: `${(currentIndex % 9) * 12}ms` }}
+          >
+            {character}
+          </span>
+        );
+      })}
+    </span>
+  ));
 }
 
 export default function Home() {
@@ -455,7 +456,7 @@ export default function Home() {
                 filter: index === 0 ? 'blur(0px)' : 'blur(12px)',
               }}
             >
-              <div className={`relative max-w-2xl ${panel.copyAlign}`}>
+              <div className={`relative w-full max-w-5xl ${panel.copyAlign}`}>
                 <div className={`mb-8 flex items-center gap-4 ${index > 1 ? 'justify-end' : ''}`}>
                   <span className="font-mono text-xs text-aura-gold/80">{panel.chapter}</span>
                   <span className="h-px w-16 bg-aura-gold/50" />
@@ -463,7 +464,7 @@ export default function Home() {
                     {panel.eyebrow}
                   </p>
                 </div>
-                <h1 className="cinematic-title font-display text-6xl font-bold uppercase leading-[0.82] tracking-[-0.075em] text-white md:text-8xl lg:text-9xl">
+                <h1 className="cinematic-title font-display text-5xl font-bold uppercase leading-[0.9] tracking-[-0.065em] text-white sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl">
                   {renderInteractiveTitle(panel.title)}
                 </h1>
                 <p className="mt-8 max-w-xl text-base font-medium leading-8 text-zinc-300/80 md:text-xl">

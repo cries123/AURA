@@ -135,11 +135,19 @@ body {
 
 .cinematic-title {
   cursor: default;
+  overflow-wrap: normal;
+  word-break: keep-all;
 }
 
+.cinematic-title-word,
 .cinematic-title-letter,
 .cinematic-title-space {
   display: inline-block;
+}
+
+.cinematic-title-word {
+  margin-right: 0.18em;
+  white-space: nowrap;
 }
 
 .cinematic-title-letter {
@@ -154,10 +162,6 @@ body {
     text-shadow 180ms ease,
     transform 180ms ease,
     opacity 180ms ease;
-}
-
-.cinematic-title-space {
-  width: 0.26em;
 }
 
 .cinematic-title:hover .cinematic-title-letter:nth-child(3n),
