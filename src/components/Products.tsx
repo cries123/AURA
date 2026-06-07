@@ -81,12 +81,12 @@ function ProductCard({ product, index }: { product: any, index: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.1 }}
-      className={`bg-aura-black rounded-3xl border ${product.highlight ? 'border-aura-gold/50 shadow-xl shadow-aura-gold/5' : 'border-zinc-800'} p-8 hover:border-aura-gold/50 transition-all group flex flex-col relative`}
+      className={`bg-aura-black rounded-3xl border ${product.highlight ? 'border-aura-lime/60 shadow-xl shadow-aura-lime/10' : 'border-zinc-800'} p-8 hover:border-aura-lime/60 transition-all group flex flex-col relative`}
     >
       <div className="absolute top-12 right-12 z-10">
-        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-950/80 backdrop-blur-md border border-zinc-800 rounded-full">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">{product.inStock} in stock</span>
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-950/80 backdrop-blur-md border border-aura-lime/30 rounded-full shadow-[0_0_22px_rgba(184,255,44,0.08)]">
+          <div className="w-1.5 h-1.5 rounded-full bg-aura-lime animate-pulse" />
+          <span className="text-[9px] font-bold text-aura-lime uppercase tracking-widest">{product.inStock} in stock</span>
         </div>
       </div>
 
@@ -99,7 +99,7 @@ function ProductCard({ product, index }: { product: any, index: number }) {
       </div>
       
       <div className="mb-2">
-        <span className={`text-[10px] font-bold uppercase tracking-widest ${product.highlight ? 'text-aura-gold' : 'text-zinc-500'}`}>{product.bestFor}</span>
+        <span className={`text-[10px] font-bold uppercase tracking-widest ${product.highlight ? 'text-aura-lime' : 'text-zinc-500'}`}>{product.bestFor}</span>
       </div>
       
       <div className="flex items-center justify-between mb-4">
@@ -137,7 +137,7 @@ function ProductCard({ product, index }: { product: any, index: number }) {
         
         <button 
           onClick={handleAddToCart}
-          className="flex-grow py-4 rounded-xl transition-all text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 bg-aura-gold text-aura-black hover:bg-white hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-aura-gold/10"
+          className="flex-grow py-4 rounded-xl transition-all text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 bg-aura-lime text-aura-black hover:bg-white hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-aura-lime/20"
         >
            {isAdded ? (
              <>
@@ -154,7 +154,7 @@ function ProductCard({ product, index }: { product: any, index: number }) {
 
         <button 
           onClick={handleShare}
-          className="w-[56px] h-[56px] shrink-0 border border-zinc-800 rounded-xl flex items-center justify-center text-zinc-500 hover:border-aura-gold hover:text-aura-gold transition-all"
+          className="w-[56px] h-[56px] shrink-0 border border-zinc-800 rounded-xl flex items-center justify-center text-zinc-500 hover:border-aura-lime hover:text-aura-lime transition-all"
           title="Share Product"
         >
           {isShared ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}

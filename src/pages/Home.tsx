@@ -363,7 +363,7 @@ export default function Home() {
                 {index === panels.length - 1 && (
                   <a
                     href="mailto:sales@auratap.net"
-                    className="pointer-events-auto mt-10 inline-flex rounded-full border border-aura-gold/50 bg-aura-gold px-7 py-3 text-[11px] font-black uppercase tracking-[0.28em] text-black shadow-[0_0_42px_rgba(197,160,89,0.22)] transition hover:bg-white"
+                    className="pointer-events-auto mt-10 inline-flex rounded-full border border-aura-lime/60 bg-aura-lime px-7 py-3 text-[11px] font-black uppercase tracking-[0.28em] text-black shadow-[0_0_42px_rgba(184,255,44,0.22)] transition hover:bg-white"
                   >
                     Start the rollout
                   </a>

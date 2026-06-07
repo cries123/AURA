@@ -14,12 +14,12 @@ export default function FloatingCartControl() {
     <>
       <button
         onClick={() => setCartOpen(true)}
-        className="fixed right-6 top-20 z-40 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/25 text-white backdrop-blur transition hover:border-aura-gold/60 hover:text-aura-gold md:right-10"
+        className="fixed right-6 top-20 z-40 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/25 text-white backdrop-blur transition hover:border-aura-lime/70 hover:text-aura-lime md:right-10"
         aria-label="Open cart"
       >
         <ShoppingBag className="h-5 w-5" />
         {totalItems > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-aura-gold text-[10px] font-black text-aura-black">
+          <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-aura-lime text-[10px] font-black text-aura-black shadow-[0_0_18px_rgba(184,255,44,0.75)]">
             {totalItems}
           </span>
         )}
@@ -44,7 +44,7 @@ export default function FloatingCartControl() {
             >
               <div className="flex items-center justify-between border-b border-zinc-800 p-8">
                 <div className="flex items-center gap-3">
-                  <ShoppingBag className="h-6 w-6 text-aura-gold" />
+                  <ShoppingBag className="h-6 w-6 text-aura-lime" />
                   <h2 className="font-display text-xl font-bold">Your Cart</h2>
                   <span className="rounded-md bg-zinc-900 px-2 py-1 font-mono text-xs text-zinc-500">
                     {totalItems}
@@ -65,7 +65,7 @@ export default function FloatingCartControl() {
                     <Link
                       to="/pricing#products"
                       onClick={() => setCartOpen(false)}
-                      className="mt-6 text-[10px] font-bold uppercase tracking-widest text-aura-gold hover:underline"
+                      className="mt-6 text-[10px] font-bold uppercase tracking-widest text-aura-lime hover:underline"
                     >
                       Browse Units
                     </Link>
@@ -112,7 +112,7 @@ export default function FloatingCartControl() {
                         if (emailError) setEmailError(false);
                       }}
                       placeholder="Enter your email for setup instructions"
-                      className={`w-full rounded-xl border ${emailError ? 'border-red-500/50' : 'border-zinc-800'} bg-zinc-900/50 px-4 py-3 text-sm text-white transition-colors focus:border-aura-gold focus:outline-none`}
+                      className={`w-full rounded-xl border ${emailError ? 'border-red-500/50' : 'border-zinc-800'} bg-zinc-900/50 px-4 py-3 text-sm text-white transition-colors focus:border-aura-lime focus:outline-none`}
                     />
                     <p className="mt-2 text-[9px] italic text-zinc-600">
                       Instructions will be sent here immediately after payment.
@@ -129,7 +129,7 @@ export default function FloatingCartControl() {
                         setEmailError(true);
                       }
                     }}
-                    className="w-full rounded-xl bg-white py-4 text-[11px] font-bold uppercase tracking-widest text-aura-black transition-all hover:bg-aura-gold"
+                    className="w-full rounded-xl bg-aura-lime py-4 text-[11px] font-black uppercase tracking-widest text-aura-black transition-all hover:bg-white shadow-lg shadow-aura-lime/20"
                   >
                     Checkout Now
                   </button>

@@ -69,7 +69,7 @@ export default function LeadFormModal({ isOpen, onClose, bundleName }: LeadFormM
                 <p className="text-zinc-500 mb-8">An Aura Tap specialist will contact you within 24 hours to finalize your {bundleName}.</p>
                 <button 
                   onClick={onClose}
-                  className="w-full py-4 bg-white text-aura-black rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-aura-gold transition-all"
+                  className="w-full py-4 bg-aura-lime text-aura-black rounded-xl font-black uppercase tracking-widest text-xs hover:bg-white transition-all shadow-lg shadow-aura-lime/20"
                 >
                   Return to Pricing
                 </button>
@@ -120,7 +120,7 @@ export default function LeadFormModal({ isOpen, onClose, bundleName }: LeadFormM
                   <button 
                     disabled={status === 'submitting'}
                     type="submit"
-                    className="w-full py-5 bg-aura-gold text-aura-black rounded-xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-white transition-all mt-4 disabled:opacity-50"
+                    className="w-full py-5 bg-aura-lime text-aura-black rounded-xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-white transition-all mt-4 disabled:opacity-50 shadow-lg shadow-aura-lime/20"
                   >
                     {status === 'submitting' ? 'Sending...' : (
                       <>

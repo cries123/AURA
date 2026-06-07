@@ -209,7 +209,7 @@ export default function Portal() {
                   <p className="text-zinc-500 mb-8 max-w-sm">Setup your digital business card and claim your public aurataps.net handle.</p>
                   <button 
                     onClick={() => setActiveTab('profile')}
-                    className="inline-flex items-center gap-2 px-8 py-4 bg-white text-aura-black font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-aura-gold transition-all"
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-aura-lime text-aura-black font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-white transition-all shadow-lg shadow-aura-lime/20"
                   >
                     Configure Profile <ArrowRight className="w-4 h-4" />
                   </button>
@@ -367,7 +367,7 @@ export default function Portal() {
                 <button 
                   disabled={isSubmitting}
                   type="submit"
-                  className="w-full py-5 bg-aura-gold text-aura-black rounded-xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-white transition-all mt-4 disabled:opacity-50 shadow-lg shadow-aura-gold/10"
+                  className="w-full py-5 bg-aura-lime text-aura-black rounded-xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-white transition-all mt-4 disabled:opacity-50 shadow-lg shadow-aura-lime/20"
                 >
                   {isSubmitting ? 'Processing...' : (
                     <>

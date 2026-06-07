@@ -64,14 +64,14 @@ export default function Affiliate() {
           {isAffiliate ? (
             <Link 
               to="/portal"
-              className="px-10 py-5 bg-aura-gold text-aura-black font-bold rounded-2xl hover:bg-white hover:scale-105 transition-all shadow-xl shadow-aura-gold/10 inline-flex items-center gap-3"
+              className="px-10 py-5 bg-aura-lime text-aura-black font-bold rounded-2xl hover:bg-white hover:scale-105 transition-all shadow-xl shadow-aura-lime/20 inline-flex items-center gap-3"
             >
               Access Affiliate Dashboard <ArrowRight className="w-5 h-5" />
             </Link>
           ) : (
             <button 
               onClick={() => setIsModalOpen(true)}
-              className="px-10 py-5 bg-white text-aura-black font-bold rounded-2xl hover:bg-aura-gold hover:scale-105 transition-all shadow-xl shadow-aura-gold/10"
+              className="px-10 py-5 bg-aura-lime text-aura-black font-bold rounded-2xl hover:bg-white hover:scale-105 transition-all shadow-xl shadow-aura-lime/20"
             >
               Apply for Reseller Access
             </button>
@@ -98,7 +98,7 @@ export default function Affiliate() {
                 className={`p-10 rounded-[2.5rem] bg-zinc-900/20 border ${tier.border} relative group hover:bg-zinc-900/40 transition-all`}
               >
                 {tier.highlight && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-aura-gold text-aura-black text-[10px] font-bold uppercase tracking-widest rounded-full">
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-aura-lime text-aura-black text-[10px] font-bold uppercase tracking-widest rounded-full shadow-[0_0_18px_rgba(184,255,44,0.45)]">
                     Most Popular
                   </div>
                 )}
