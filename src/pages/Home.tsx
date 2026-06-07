@@ -304,6 +304,28 @@ function PanelVisuals({ index }: { index: number }) {
   );
 }
 
+function renderInteractiveTitle(title: string) {
+  return title.split('').map((character, index) => {
+    if (character === ' ') {
+      return (
+        <span key={`space-${index}`} className="cinematic-title-space">
+          {' '}
+        </span>
+      );
+    }
+
+    return (
+      <span
+        key={`${character}-${index}`}
+        className="cinematic-title-letter"
+        style={{ transitionDelay: `${(index % 9) * 12}ms` }}
+      >
+        {character}
+      </span>
+    );
+  });
+}
+
 export default function Home() {
   const pinContainerRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -326,8 +348,8 @@ export default function Home() {
     const rect = root.getBoundingClientRect();
     const normalizedX = (event.clientX - rect.left) / rect.width - 0.5;
     const normalizedY = (event.clientY - rect.top) / rect.height - 0.5;
-    const x = normalizedX * 72;
-    const y = normalizedY * 56;
+    const x = normalizedX * 128;
+    const y = normalizedY * 96;
 
     root.style.setProperty('--mouse-x', `${x}px`);
     root.style.setProperty('--mouse-y', `${y}px`);
@@ -441,8 +463,8 @@ export default function Home() {
                     {panel.eyebrow}
                   </p>
                 </div>
-                <h1 className="font-display text-6xl font-bold uppercase leading-[0.82] tracking-[-0.075em] text-white md:text-8xl lg:text-9xl">
-                  {panel.title}
+                <h1 className="cinematic-title font-display text-6xl font-bold uppercase leading-[0.82] tracking-[-0.075em] text-white md:text-8xl lg:text-9xl">
+                  {renderInteractiveTitle(panel.title)}
                 </h1>
                 <p className="mt-8 max-w-xl text-base font-medium leading-8 text-zinc-300/80 md:text-xl">
                   {panel.body}
