@@ -343,6 +343,10 @@ export default function Home() {
             data-cinematic-panel
             data-cinematic-label={panel.label}
             className={`absolute inset-0 isolate flex h-screen overflow-hidden px-6 pt-28 md:px-12 ${panel.align}`}
+            style={{
+              opacity: index === 0 ? 1 : 0,
+              visibility: index === 0 ? 'visible' : 'hidden',
+            }}
           >
             <div
               aria-hidden="true"
@@ -358,6 +362,12 @@ export default function Home() {
             <div
               data-cinematic-copy
               className="relative z-10 flex h-screen w-full max-w-7xl mx-auto flex-col justify-center"
+              style={{
+                opacity: index === 0 ? 1 : 0,
+                visibility: index === 0 ? 'visible' : 'hidden',
+                transform: index === 0 ? 'translateY(0)' : 'translateY(54px)',
+                filter: index === 0 ? 'blur(0px)' : 'blur(12px)',
+              }}
             >
               <div className={`relative max-w-2xl ${panel.copyAlign}`}>
                 <div className={`mb-8 flex items-center gap-4 ${index > 1 ? 'justify-end' : ''}`}>
