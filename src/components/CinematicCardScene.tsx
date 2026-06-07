@@ -1,4 +1,4 @@
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { RefObject } from 'react';
@@ -45,6 +45,14 @@ function createRoundedCardGeometry() {
 
 function SmartCardModel() {
   const cardGeometry = useMemo(createRoundedCardGeometry, []);
+  const contactNodes = useMemo(
+    () =>
+      Array.from({ length: 12 }, (_, index) => ({
+        x: -1.05 + (index % 6) * 0.14,
+        y: 0.1 - Math.floor(index / 6) * 0.14,
+      })),
+    [],
+  );
 
   return (
     <group>
@@ -63,6 +71,13 @@ function SmartCardModel() {
         <meshStandardMaterial color="#c5a059" metalness={0.82} roughness={0.2} />
       </mesh>
 
+      {contactNodes.map((node) => (
+        <mesh key={`${node.x}-${node.y}`} position={[node.x, node.y, 0.068]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.026, 0.026, 0.012, 24]} />
+          <meshStandardMaterial color="#f5c765" emissive="#4a2b04" metalness={0.7} roughness={0.2} />
+        </mesh>
+      ))}
+
       <mesh position={[0, -0.56, 0.061]}>
         <boxGeometry args={[1.82, 0.018, 0.01]} />
         <meshStandardMaterial color="#c5a059" emissive="#3d2b12" roughness={0.35} />
@@ -73,6 +88,89 @@ function SmartCardModel() {
         <meshStandardMaterial color="#f5f5f5" emissive="#1f1f1f" roughness={0.3} />
       </mesh>
     </group>
+  );
+}
+
+function SignalRings() {
+  const ringsRef = useRef<THREE.Group>(null);
+
+  useFrame(({ clock }) => {
+    if (!ringsRef.current) {
+      return;
+    }
+
+    const elapsed = clock.getElapsedTime();
+    ringsRef.current.rotation.z = elapsed * 0.08;
+    ringsRef.current.children.forEach((ring, index) => {
+      const pulse = 1 + Math.sin(elapsed * 1.4 + index) * 0.035;
+      ring.scale.setScalar(pulse);
+    });
+  });
+
+  return (
+    <group ref={ringsRef} position={[0, 0, -0.04]}>
+      {[1.85, 2.35, 2.85].map((radius, index) => (
+        <mesh key={radius}>
+          <torusGeometry args={[radius, 0.006, 12, 160]} />
+          <meshBasicMaterial
+            color={index === 1 ? '#f5c765' : '#c5a059'}
+            transparent
+            opacity={0.22 - index * 0.045}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function Atmosphere() {
+  const particlesRef = useRef<THREE.Points>(null);
+  const geometry = useMemo(() => {
+    const positions = new Float32Array(420 * 3);
+    let seed = 18;
+
+    const random = () => {
+      seed = (seed * 16807) % 2147483647;
+      return (seed - 1) / 2147483646;
+    };
+
+    for (let i = 0; i < 420; i += 1) {
+      const radius = 1.1 + random() * 4.8;
+      const angle = random() * Math.PI * 2;
+      const drift = (random() - 0.5) * 3.4;
+
+      positions[i * 3] = Math.cos(angle) * radius;
+      positions[i * 3 + 1] = drift;
+      positions[i * 3 + 2] = Math.sin(angle) * radius - 1.8;
+    }
+
+    const bufferGeometry = new THREE.BufferGeometry();
+    bufferGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    return bufferGeometry;
+  }, []);
+
+  useFrame(({ clock }) => {
+    if (!particlesRef.current) {
+      return;
+    }
+
+    particlesRef.current.rotation.y = clock.getElapsedTime() * 0.025;
+    particlesRef.current.rotation.x = Math.sin(clock.getElapsedTime() * 0.18) * 0.025;
+  });
+
+  return (
+    <points ref={particlesRef} geometry={geometry}>
+      <pointsMaterial
+        color="#d7a93e"
+        size={0.018}
+        transparent
+        opacity={0.42}
+        blending={THREE.AdditiveBlending}
+        depthWrite={false}
+      />
+    </points>
   );
 }
 
@@ -150,6 +248,7 @@ function CardRig({ scrollRootRef }: CinematicCardSceneProps) {
 
   return (
     <group ref={cardRef}>
+      <SignalRings />
       <SmartCardModel />
     </group>
   );
@@ -164,11 +263,13 @@ export default function CinematicCardScene({ scrollRootRef }: CinematicCardScene
       shadows
     >
       <color attach="background" args={['#050505']} />
-      <fog attach="fog" args={['#050505', 5.2, 8.6]} />
-      <ambientLight intensity={0.42} />
-      <hemisphereLight args={['#ffffff', '#0f0f12', 1.1]} />
-      <directionalLight position={[3.5, 4, 5]} intensity={2.2} castShadow />
-      <pointLight position={[-2.6, -1.8, 2.5]} color="#c5a059" intensity={6.2} distance={7} />
+      <fog attach="fog" args={['#050505', 4.8, 8.2]} />
+      <ambientLight intensity={0.28} />
+      <hemisphereLight args={['#f7d37a', '#050505', 0.82]} />
+      <directionalLight position={[3.5, 4, 5]} intensity={2.5} castShadow />
+      <pointLight position={[-2.6, -1.8, 2.5]} color="#c5a059" intensity={7.8} distance={7} />
+      <pointLight position={[2.8, 1.2, 2]} color="#f5c765" intensity={3.4} distance={5.5} />
+      <Atmosphere />
       <CardRig scrollRootRef={scrollRootRef} />
     </Canvas>
   );
