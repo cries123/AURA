@@ -3,12 +3,17 @@ import { ShoppingBag, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { products } from './Products';
 
 export default function FloatingCartControl() {
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutEmail, setCheckoutEmail] = useState('');
   const [emailError, setEmailError] = useState(false);
-  const { items, totalItems, totalPrice, removeFromCart } = useCart();
+  const { items, totalItems, totalPrice, removeFromCart, addToCart } = useCart();
+  const cartItemNames = items.map((item) => item.name);
+  const upsellProduct =
+    products.find((product) => product.name === 'Duo Bundle' && !cartItemNames.includes(product.name)) ??
+    products.find((product) => !cartItemNames.includes(product.name));
 
   return (
     <>
@@ -94,6 +99,32 @@ export default function FloatingCartControl() {
                         </div>
                       </div>
                     ))}
+                    {upsellProduct && (
+                      <div className="rounded-2xl border border-aura-lime/30 bg-aura-lime/5 p-5">
+                        <div className="mb-2 text-[9px] font-black uppercase tracking-[0.28em] text-aura-lime">
+                          Quick add upgrade
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
+                            <img src={upsellProduct.image} alt={upsellProduct.name} className="h-full w-full object-cover opacity-70" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h4 className="text-sm font-bold text-white">{upsellProduct.name}</h4>
+                            <p className="text-[10px] text-zinc-500">
+                              {upsellProduct.name === 'Duo Bundle'
+                                ? 'Upgrade to the bundle and save $10.'
+                                : 'Complete the kit before checkout.'}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => addToCart(upsellProduct, 1)}
+                            className="rounded-xl bg-aura-lime px-4 py-3 text-[10px] font-black uppercase tracking-widest text-aura-black transition hover:bg-white"
+                          >
+                            Add
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -115,7 +146,7 @@ export default function FloatingCartControl() {
                       className={`w-full rounded-xl border ${emailError ? 'border-red-500/50' : 'border-zinc-800'} bg-zinc-900/50 px-4 py-3 text-sm text-white transition-colors focus:border-aura-lime focus:outline-none`}
                     />
                     <p className="mt-2 text-[9px] italic text-zinc-600">
-                      Instructions will be sent here immediately after payment.
+                      Setup link is sent instantly. Hardware ships in 3-5 days.
                     </p>
                   </div>
 
@@ -133,7 +164,9 @@ export default function FloatingCartControl() {
                   >
                     Checkout Now
                   </button>
-                  <p className="mt-4 text-center text-[10px] italic text-zinc-600">Always secure checkout. Setup included.</p>
+                  <p className="mt-4 text-center text-[10px] italic text-zinc-600">
+                    Secure checkout. 12-month warranty. No monthly fees.
+                  </p>
                 </div>
               )}
             </motion.div>

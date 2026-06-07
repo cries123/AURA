@@ -11,7 +11,8 @@ export default function PricingDetails() {
       price: "$225",
       units: "/ 10 cards",
       description: "Includes onboarding and dashboard setup for your full team rollout.",
-      badge: "STARTER ROLLOUT"
+      badge: "STARTER ROLLOUT",
+      savings: "Save $74"
     },
     {
       name: "Growth Team",
@@ -20,6 +21,7 @@ export default function PricingDetails() {
       units: "/ 25 mixed units",
       description: "Mix cards and wristbands for office staff and field reps.",
       badge: "MOST POPULAR",
+      savings: "Save $250",
       highlight: true
     },
     {
@@ -28,7 +30,8 @@ export default function PricingDetails() {
       price: "$499",
       units: "/ 50 mixed units",
       description: "Includes onboarding call, activation support, and priority platform service.",
-      badge: "SCALE PACKAGE"
+      badge: "SCALE PACKAGE",
+      savings: "Save $600"
     }
   ];
 
@@ -77,6 +80,9 @@ export default function PricingDetails() {
                    <span className="text-3xl text-white font-bold">{bundle.price}</span>
                    <span className="text-zinc-500 text-sm">{bundle.units}</span>
                 </div>
+                <div className="mb-5 inline-flex rounded-full border border-aura-lime/30 bg-aura-lime/5 px-3 py-1 text-[9px] font-black uppercase tracking-[0.22em] text-aura-lime">
+                  {bundle.savings} today
+                </div>
                 <p className="text-zinc-500 text-xs leading-relaxed mb-8">{bundle.description}</p>
                 <button 
                   onClick={() => setSelectedBundle(bundle.name)}
@@ -84,6 +90,9 @@ export default function PricingDetails() {
                 >
                    Get Started
                 </button>
+                <p className="mt-4 text-center text-[9px] font-bold uppercase tracking-[0.18em] text-zinc-600">
+                  Setup included · Ships in 3-5 days · No monthly fees
+                </p>
              </motion.div>
            ))}
         </div>
