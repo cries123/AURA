@@ -45,14 +45,14 @@ const panels = [
 ];
 
 export default function Home() {
-  const scrollRootRef = useRef<HTMLDivElement>(null);
+  const pinContainerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div
-      ref={scrollRootRef}
-      className="relative min-h-[400vh] overflow-hidden bg-[#030303] text-white"
-    >
-      <CinematicCardScene scrollRootRef={scrollRootRef} />
+    <div className="relative min-h-screen overflow-hidden bg-[#030303] text-white">
+      <CinematicCardScene
+        pinContainerRef={pinContainerRef}
+        sectionCount={panels.length}
+      />
 
       <div className="cinematic-noise pointer-events-none fixed inset-0 z-[1]" />
       <div className="pointer-events-none fixed inset-0 z-[2] bg-[radial-gradient(circle_at_50%_45%,transparent_0%,transparent_38%,rgba(0,0,0,0.62)_78%)]" />
@@ -64,13 +64,16 @@ export default function Home() {
         <span className="h-24 w-px bg-gradient-to-b from-transparent via-aura-gold to-transparent" />
       </div>
 
-      <div className="pointer-events-none relative z-10">
+      <div
+        ref={pinContainerRef}
+        className="pointer-events-none relative z-10 h-screen overflow-hidden"
+      >
         {panels.map((panel, index) => (
           <section
             id={panel.id}
             key={panel.title}
             data-cinematic-panel
-            className={`relative flex min-h-screen px-6 pt-28 md:px-12 ${panel.align}`}
+            className={`absolute inset-0 flex h-screen overflow-hidden px-6 pt-28 md:px-12 ${panel.align}`}
           >
             <div
               aria-hidden="true"
@@ -83,7 +86,7 @@ export default function Home() {
 
             <div
               data-cinematic-copy
-              className="flex min-h-screen w-full max-w-7xl mx-auto flex-col justify-center"
+              className="flex h-screen w-full max-w-7xl mx-auto flex-col justify-center"
             >
               <div className={`relative max-w-2xl ${panel.copyAlign}`}>
                 <div className={`mb-8 flex items-center gap-4 ${index > 1 ? 'justify-end' : ''}`}>

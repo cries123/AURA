@@ -6,7 +6,8 @@ import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 
 type CinematicCardSceneProps = {
-  scrollRootRef: RefObject<HTMLElement | null>;
+  pinContainerRef: RefObject<HTMLElement | null>;
+  sectionCount: number;
 };
 
 gsap.registerPlugin(ScrollTrigger);
@@ -174,77 +175,132 @@ function Atmosphere() {
   );
 }
 
-function CardRig({ scrollRootRef }: CinematicCardSceneProps) {
+function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
   const cardRef = useRef<THREE.Group>(null);
 
   useEffect(() => {
     const card = cardRef.current;
-    const scrollRoot = scrollRootRef.current;
+    const pinContainer = pinContainerRef.current;
 
-    if (!card || !scrollRoot) {
+    if (!card || !pinContainer) {
       return undefined;
     }
 
     const ctx = gsap.context(() => {
-      gsap.set(card.rotation, { x: -0.18, y: -0.35, z: 0.05 });
-      gsap.set(card.scale, { x: 0.92, y: 0.92, z: 0.92 });
-      gsap.set(card.position, { x: 0, y: 0, z: 0 });
+      const panels = gsap.utils.toArray<HTMLElement>('[data-cinematic-panel]', pinContainer);
+      const copies = panels
+        .map((section) => section.querySelector<HTMLElement>('[data-cinematic-copy]'))
+        .filter((copy): copy is HTMLElement => Boolean(copy));
+      const totalSections = Math.max(sectionCount, panels.length, 1);
+      const totalTransitions = Math.max(totalSections - 1, 1);
+      const snapPoints = Array.from(
+        { length: totalSections },
+        (_, index) => index / totalTransitions,
+      );
+      const responsiveX = (desktopValue: number, mobileValue: number) =>
+        window.innerWidth < 768 ? mobileValue : desktopValue;
+      const cardStates = [
+        {
+          position: { x: 0, y: 0, z: 0 },
+          rotation: { x: -0.18, y: -0.35, z: 0.05 },
+          scale: 0.92,
+        },
+        {
+          position: { x: () => responsiveX(-0.68, -0.1), y: () => responsiveX(0.06, -0.16), z: 0.16 },
+          rotation: { x: 0.26, y: Math.PI * 0.72, z: -0.08 },
+          scale: 1.08,
+        },
+        {
+          position: { x: () => responsiveX(1.24, 0.34), y: () => responsiveX(0.02, -0.24), z: 0.28 },
+          rotation: { x: -0.08, y: Math.PI * 1.42, z: 0.09 },
+          scale: 1.28,
+        },
+        {
+          position: { x: () => responsiveX(1.48, 0.5), y: () => responsiveX(0.1, -0.28), z: 0.34 },
+          rotation: { x: 0.2, y: Math.PI * 2 - 0.35, z: -0.08 },
+          scale: 1.42,
+        },
+      ];
 
-      gsap
-        .timeline({
-          scrollTrigger: {
-            trigger: scrollRoot,
-            start: 'top top',
-            end: 'bottom bottom',
-            scrub: 1.15,
-            invalidateOnRefresh: true,
+      gsap.set(panels, { autoAlpha: 0 });
+      gsap.set(copies, { autoAlpha: 0, y: 54, filter: 'blur(12px)' });
+      gsap.set(panels[0], { autoAlpha: 1 });
+      gsap.set(copies[0], { autoAlpha: 1, y: 0, filter: 'blur(0px)' });
+      gsap.set(card.position, cardStates[0].position);
+      gsap.set(card.rotation, cardStates[0].rotation);
+      gsap.set(card.scale, { x: cardStates[0].scale, y: cardStates[0].scale, z: cardStates[0].scale });
+
+      const timeline = gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: {
+          trigger: pinContainer,
+          start: 'top top',
+          end: () => `+=${totalTransitions * window.innerHeight}`,
+          pin: true,
+          scrub: 0.85,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          snap: {
+            snapTo: snapPoints,
+            duration: { min: 0.28, max: 0.65 },
+            delay: 0.04,
+            ease: 'power3.inOut',
           },
-        })
-        .to(card.rotation, { x: 0.18, y: Math.PI * 2 - 0.35, z: -0.08, ease: 'none' }, 0)
-        .to(card.scale, { x: 1.42, y: 1.42, z: 1.42, ease: 'none' }, 0)
-        .to(
-          card.position,
-          {
-            x: () => (window.innerWidth < 768 ? 0.52 : 1.38),
-            y: () => (window.innerWidth < 768 ? -0.24 : 0.08),
-            z: 0.28,
-            ease: 'none',
-          },
-          0,
-        );
+        },
+      });
 
-      gsap.utils
-        .toArray<HTMLElement>('[data-cinematic-panel]', scrollRoot)
-        .forEach((section) => {
-          const copy = section.querySelector<HTMLElement>('[data-cinematic-copy]');
+      for (let index = 1; index < totalSections; index += 1) {
+        const previousPanel = panels[index - 1];
+        const currentPanel = panels[index];
+        const previousCopy = copies[index - 1];
+        const currentCopy = copies[index];
+        const cardState = cardStates[index] ?? cardStates[cardStates.length - 1];
+        const transitionStart = index - 1;
 
-          if (!copy) {
-            return;
-          }
+        timeline
+          .to(card.rotation, cardState.rotation, transitionStart)
+          .to(
+            card.position,
+            {
+              x: cardState.position.x,
+              y: cardState.position.y,
+              z: cardState.position.z,
+            },
+            transitionStart,
+          )
+          .to(
+            card.scale,
+            { x: cardState.scale, y: cardState.scale, z: cardState.scale },
+            transitionStart,
+          );
 
-          gsap
-            .timeline({
-              scrollTrigger: {
-                trigger: section,
-                start: 'top bottom',
-                end: 'bottom top',
-                scrub: true,
-              },
-            })
-            .fromTo(
-              copy,
-              { autoAlpha: 0, y: 54, filter: 'blur(12px)' },
-              { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.28, ease: 'power2.out' },
+        if (previousPanel && currentPanel) {
+          timeline
+            .to(previousPanel, { autoAlpha: 0, duration: 0.18 }, transitionStart + 0.42)
+            .to(currentPanel, { autoAlpha: 1, duration: 0.18 }, transitionStart + 0.42);
+        }
+
+        if (previousCopy && currentCopy) {
+          timeline
+            .to(
+              previousCopy,
+              { autoAlpha: 0, y: -46, filter: 'blur(12px)', duration: 0.28, ease: 'power2.in' },
+              transitionStart + 0.22,
             )
-            .to(copy, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.42 })
-            .to(copy, { autoAlpha: 0, y: -42, filter: 'blur(10px)', duration: 0.3, ease: 'power2.in' });
-        });
-    }, scrollRoot);
+            .fromTo(
+              currentCopy,
+              { autoAlpha: 0, y: 56, filter: 'blur(12px)' },
+              { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.34, ease: 'power2.out' },
+              transitionStart + 0.52,
+            );
+        }
+      }
+    }, pinContainer);
 
     ScrollTrigger.refresh();
 
     return () => ctx.revert();
-  }, [scrollRootRef]);
+  }, [pinContainerRef, sectionCount]);
 
   return (
     <group ref={cardRef}>
@@ -254,7 +310,10 @@ function CardRig({ scrollRootRef }: CinematicCardSceneProps) {
   );
 }
 
-export default function CinematicCardScene({ scrollRootRef }: CinematicCardSceneProps) {
+export default function CinematicCardScene({
+  pinContainerRef,
+  sectionCount,
+}: CinematicCardSceneProps) {
   return (
     <Canvas
       className="pointer-events-none fixed inset-0 z-0 h-screen w-screen"
@@ -270,7 +329,7 @@ export default function CinematicCardScene({ scrollRootRef }: CinematicCardScene
       <pointLight position={[-2.6, -1.8, 2.5]} color="#c5a059" intensity={7.8} distance={7} />
       <pointLight position={[2.8, 1.2, 2]} color="#f5c765" intensity={3.4} distance={5.5} />
       <Atmosphere />
-      <CardRig scrollRootRef={scrollRootRef} />
+      <CardRig pinContainerRef={pinContainerRef} sectionCount={sectionCount} />
     </Canvas>
   );
 }
