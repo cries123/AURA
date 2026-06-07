@@ -136,10 +136,11 @@ function AppContent() {
   const systemPaths = ['/', '/platform', '/pricing', '/faq', '/warranty', '/affiliate', '/portal'];
   const isProfilePage = !systemPaths.includes(location.pathname);
   const isCinematicHome = location.pathname === '/';
+  const hideStandardNavbar = isCinematicHome || location.pathname === '/pricing';
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
-      {!isProfilePage && !isCinematicHome && <Navbar />}
+      {!isProfilePage && !hideStandardNavbar && <Navbar />}
       <main>
         <AnimatedRoutes />
       </main>
