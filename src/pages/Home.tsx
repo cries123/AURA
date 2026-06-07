@@ -1,4 +1,5 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import CinematicCardScene from '../components/CinematicCardScene';
 
 const panels = [
@@ -48,17 +49,38 @@ const panels = [
   },
 ];
 
-function CinematicHud() {
+const siteNavLinks = [
+  { label: 'Platform', to: '/platform' },
+  { label: 'Pricing', to: '/pricing' },
+  { label: 'FAQ', to: '/faq' },
+  { label: 'Warranty', to: '/warranty' },
+  { label: 'Affiliate', to: '/affiliate' },
+  { label: 'Portal', to: '/portal' },
+];
+
+function CinematicHud({ onOpenMenu }: { onOpenMenu: () => void }) {
   return (
     <>
       <div className="pointer-events-none fixed left-6 right-6 top-6 z-30 flex items-start justify-between text-white md:left-10 md:right-10">
-        <div>
-          <p className="font-display text-xl font-bold uppercase leading-none tracking-[0.18em]">
-            Aura<span className="text-aura-gold">Tap</span>
-          </p>
-          <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.42em] text-zinc-500">
-            Networking. Revolutionized.
-          </p>
+        <div className="flex items-start gap-6">
+          <button
+            type="button"
+            onClick={onOpenMenu}
+            className="pointer-events-auto mt-1 flex h-10 w-10 flex-col items-center justify-center gap-1.5 rounded-full border border-white/10 bg-black/25 text-white backdrop-blur transition hover:border-aura-gold/60 hover:text-aura-gold"
+            aria-label="Open navigation menu"
+          >
+            <span className="h-px w-5 bg-current" />
+            <span className="h-px w-5 bg-current" />
+            <span className="h-px w-5 bg-current" />
+          </button>
+          <div>
+            <p className="font-display text-xl font-bold uppercase leading-none tracking-[0.18em]">
+              Aura<span className="text-aura-gold">Tap</span>
+            </p>
+            <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.42em] text-zinc-500">
+              Networking. Revolutionized.
+            </p>
+          </div>
         </div>
         <div className="hidden text-right md:block">
           <p className="font-mono text-[9px] uppercase tracking-[0.38em] text-zinc-500">
@@ -92,6 +114,104 @@ function CinematicHud() {
         <span className="h-px w-14 bg-gradient-to-l from-transparent to-aura-gold/70" />
       </div>
     </>
+  );
+}
+
+function CinematicMenu({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  if (!isOpen) {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#080704]/95 text-white backdrop-blur-2xl">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_24%_34%,rgba(197,160,89,0.22),transparent_28%),radial-gradient(circle_at_78%_72%,rgba(71,109,58,0.16),transparent_30%)]" />
+      <div className="cinematic-noise pointer-events-none absolute inset-0 opacity-30" />
+
+      <div className="relative z-10 flex min-h-screen flex-col px-6 py-8 md:px-14">
+        <div className="flex items-center justify-between">
+          <Link
+            to="/"
+            onClick={onClose}
+            className="font-display text-xl font-bold uppercase tracking-[0.18em]"
+          >
+            Aura<span className="text-aura-gold">Tap</span>
+          </Link>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-white/25 text-2xl font-light text-white transition hover:border-aura-gold hover:text-aura-gold"
+            aria-label="Close navigation menu"
+          >
+            x
+          </button>
+        </div>
+
+        <div className="grid flex-1 gap-12 py-16 md:grid-cols-[1.1fr_0.9fr] md:items-center md:py-8">
+          <div>
+            <p className="mb-9 font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-aura-gold">
+              Explore the story
+            </p>
+            <div className="space-y-8">
+              {panels.map((panel) => (
+                <a
+                  key={panel.id}
+                  href={`#${panel.id}`}
+                  onClick={onClose}
+                  className="group block max-w-2xl"
+                >
+                  <span className="font-mono text-xs uppercase tracking-[0.22em] text-zinc-600">
+                    Chapter {Number(panel.chapter)}
+                  </span>
+                  <span className="mt-2 block font-display text-5xl font-black uppercase leading-[0.85] tracking-[-0.06em] text-white transition group-hover:text-aura-gold md:text-7xl">
+                    {panel.label}
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-5 md:pl-10">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-zinc-500">
+              Site navigation
+            </p>
+            {siteNavLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                onClick={onClose}
+                className="flex min-h-14 items-center justify-center rounded border border-white/15 bg-white/[0.015] px-6 text-center text-xs font-black uppercase tracking-[0.18em] text-white transition hover:border-aura-gold hover:bg-aura-gold hover:text-black"
+              >
+                {link.label}
+              </Link>
+            ))}
+            <a
+              href="mailto:sales@auratap.net"
+              onClick={onClose}
+              className="mt-8 flex min-h-14 items-center justify-center border-b border-aura-gold/35 px-6 text-center text-xs font-black uppercase tracking-[0.18em] text-aura-gold transition hover:text-white"
+            >
+              Contact sales
+            </a>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-white/10 pt-5 font-mono text-[9px] uppercase tracking-[0.28em] text-zinc-500">
+          <span>Premium NFC launch experience</span>
+          <Link to="/pricing" onClick={onClose} className="hover:text-aura-gold">
+            View pricing
+          </Link>
+          <Link to="/portal" onClick={onClose} className="hover:text-aura-gold">
+            Client portal
+          </Link>
+          <span className="md:ml-auto">Aura Tap</span>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -285,6 +405,7 @@ function PanelVisuals({ index }: { index: number }) {
 
 export default function Home() {
   const pinContainerRef = useRef<HTMLDivElement>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#030303] text-white">
@@ -295,7 +416,8 @@ export default function Home() {
 
       <div className="cinematic-noise pointer-events-none fixed inset-0 z-[1]" />
       <div className="pointer-events-none fixed inset-0 z-[2] bg-[radial-gradient(circle_at_50%_45%,transparent_0%,transparent_38%,rgba(0,0,0,0.62)_78%)]" />
-      <CinematicHud />
+      <CinematicHud onOpenMenu={() => setIsMenuOpen(true)} />
+      <CinematicMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
       <div className="pointer-events-none fixed left-6 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-4 md:flex">
         <span className="h-24 w-px bg-gradient-to-b from-transparent via-aura-gold to-transparent" />
         <span className="rotate-180 [writing-mode:vertical-rl] text-[10px] font-bold uppercase tracking-[0.38em] text-aura-gold/70">
