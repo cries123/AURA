@@ -22,9 +22,29 @@ function hasRequiredConfig(config: FirebaseRuntimeConfig | null): config is Fire
   return Boolean(config?.apiKey && config.authDomain && config.projectId && config.appId);
 }
 
+function loadFirebaseConfigFromEnv(): FirebaseRuntimeConfig | null {
+  const config: FirebaseRuntimeConfig = {
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '',
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || '',
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '',
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+    appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || '',
+    databaseId: import.meta.env.VITE_FIREBASE_DATABASE_ID || '',
+  };
+
+  return hasRequiredConfig(config) ? config : null;
+}
+
 async function loadFirebaseConfig(): Promise<FirebaseRuntimeConfig | null> {
   if (typeof window === 'undefined') {
     return null;
+  }
+
+  const envConfig = loadFirebaseConfigFromEnv();
+  if (envConfig) {
+    return envConfig;
   }
 
   try {
@@ -36,7 +56,13 @@ async function loadFirebaseConfig(): Promise<FirebaseRuntimeConfig | null> {
       return null;
     }
 
-    return await response.json();
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      return null;
+    }
+
+    const remoteConfig = await response.json();
+    return hasRequiredConfig(remoteConfig) ? remoteConfig : null;
   } catch (err) {
     console.warn('Firebase runtime config unavailable. Database features may be disabled.', err);
     return null;
