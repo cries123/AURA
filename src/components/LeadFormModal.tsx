@@ -17,6 +17,18 @@ export default function LeadFormModal({ isOpen, onClose, bundleName }: LeadFormM
     company: '',
     email: '',
   });
+  const isResellerApplication = bundleName.toLowerCase().includes('reseller') || bundleName.toLowerCase().includes('partnership');
+  const eyebrow = isResellerApplication ? 'Reseller Application' : 'Enterprise Inquiry';
+  const title = isResellerApplication ? 'Apply for reseller access.' : `Customize your ${bundleName}.`;
+  const submitLabel = isResellerApplication ? 'Apply for Reseller Access' : 'Get Customized Quote';
+  const helperText = isResellerApplication
+    ? 'We review reseller applications and respond with next steps via email.'
+    : 'No obligation. Detailed quote provided via email.';
+  const successTitle = isResellerApplication ? 'Application Sent' : 'Request Sent';
+  const successBody = isResellerApplication
+    ? 'An Aura Tap specialist will review your reseller application and contact you with next steps.'
+    : `An Aura Tap specialist will contact you within 24 hours to finalize your ${bundleName}.`;
+  const returnLabel = isResellerApplication ? 'Return to Affiliate Page' : 'Return to Pricing';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,20 +81,30 @@ export default function LeadFormModal({ isOpen, onClose, bundleName }: LeadFormM
                 <div className="w-20 h-20 bg-aura-gold/10 rounded-full flex items-center justify-center mx-auto mb-6 text-aura-gold border border-aura-gold/20">
                   <CheckCircle2 className="w-10 h-10" />
                 </div>
-                <h2 className="text-3xl font-display font-bold text-white mb-4">Request Sent</h2>
-                <p className="text-zinc-500 mb-8">An Aura Tap specialist will contact you within 24 hours to finalize your {bundleName}.</p>
+                <h2 className="text-3xl font-display font-bold text-white mb-4">{successTitle}</h2>
+                <p className="text-zinc-500 mb-8">{successBody}</p>
                 <button 
                   onClick={onClose}
                   className="w-full py-4 bg-aura-lime text-aura-black rounded-xl font-black uppercase tracking-widest text-xs hover:bg-white transition-all shadow-lg shadow-aura-lime/20"
                 >
-                  Return to Pricing
+                  {returnLabel}
                 </button>
               </div>
             ) : (
               <div className="relative z-10">
                 <div className="mb-8">
-                  <div className="mb-4 text-[10px] font-black uppercase tracking-[0.42em] text-aura-gold">Enterprise Inquiry</div>
-                  <h2 className="font-display text-3xl font-semibold italic leading-tight text-white">Customize your <span className="text-aura-gold">{bundleName}.</span></h2>
+                  <div className="mb-4 text-[10px] font-black uppercase tracking-[0.42em] text-aura-gold">{eyebrow}</div>
+                  <h2 className="font-display text-3xl font-semibold italic leading-tight text-white">
+                    {isResellerApplication ? (
+                      <>
+                        Apply for <span className="text-aura-gold">Reseller Access.</span>
+                      </>
+                    ) : (
+                      <>
+                        Customize your <span className="text-aura-gold">{bundleName}.</span>
+                      </>
+                    )}
+                  </h2>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -129,11 +151,11 @@ export default function LeadFormModal({ isOpen, onClose, bundleName }: LeadFormM
                     {status === 'submitting' ? 'Sending...' : (
                       <>
                         <Send className="w-4 h-4" />
-                        Get Customized Quote
+                        {submitLabel}
                       </>
                     )}
                   </button>
-                  <p className="text-center text-[10px] text-zinc-600 mt-4 italic">No obligation. Detailed quote provided via email.</p>
+                  <p className="text-center text-[10px] text-zinc-600 mt-4 italic">{helperText}</p>
                 </form>
               </div>
             )}
