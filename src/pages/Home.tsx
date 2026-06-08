@@ -470,6 +470,14 @@ export default function Home() {
                 <p className="mt-8 max-w-xl text-base font-medium leading-8 text-zinc-300/80 md:text-xl">
                   {panel.body}
                 </p>
+                {index === 2 && (
+                  <a
+                    href="/pricing#products"
+                    className="chapter-buy-orbit pointer-events-auto mt-12 inline-flex h-36 w-36 items-center justify-center rounded-full text-center text-[12px] font-black uppercase tracking-[0.18em] text-white transition hover:text-aura-lime md:h-44 md:w-44"
+                  >
+                    <span className="relative z-10">Buy Now</span>
+                  </a>
+                )}
                 {index === panels.length - 1 && (
                   <a
                     href="mailto:sales@auratap.net"

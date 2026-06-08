@@ -186,9 +186,52 @@ body {
   transform: translate3d(0.035em, 0, 0);
 }
 
+.chapter-buy-orbit {
+  position: relative;
+}
+
+.chapter-buy-orbit::before,
+.chapter-buy-orbit::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.chapter-buy-orbit::before {
+  border-left-color: transparent;
+  border-bottom-color: rgba(232, 215, 162, 0.18);
+  animation: buy-orbit-spin 7s linear infinite;
+}
+
+.chapter-buy-orbit::after {
+  inset: -16px;
+  border-color: rgba(232, 215, 162, 0.26);
+  border-right-color: transparent;
+  border-top-color: rgba(184, 255, 44, 0.42);
+  animation: buy-orbit-spin 11s linear infinite reverse;
+}
+
+.chapter-buy-orbit:hover::before,
+.chapter-buy-orbit:hover::after {
+  border-color: rgba(184, 255, 44, 0.8);
+  box-shadow: 0 0 34px rgba(184, 255, 44, 0.16);
+}
+
 @keyframes aura-spin {
   to {
     transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+@keyframes buy-orbit-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
