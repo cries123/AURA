@@ -22,22 +22,11 @@ function hasRequiredConfig(config: FirebaseRuntimeConfig | null): config is Fire
   return Boolean(config?.apiKey && config.authDomain && config.projectId && config.appId);
 }
 
-declare global {
-  interface Window {
-    __AURA_FIREBASE_CONFIG__?: FirebaseRuntimeConfig;
-  }
-}
-
-function loadFirebaseConfigFromWindow(): FirebaseRuntimeConfig | null {
-  if (typeof window === 'undefined') {
+function loadFirebaseConfigFromEnv(): FirebaseRuntimeConfig | null {
+  if (!import.meta.env.DEV) {
     return null;
   }
 
-  const config = window.__AURA_FIREBASE_CONFIG__;
-  return hasRequiredConfig(config) ? config : null;
-}
-
-function loadFirebaseConfigFromEnv(): FirebaseRuntimeConfig | null {
   const config: FirebaseRuntimeConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '',
@@ -55,11 +44,6 @@ function loadFirebaseConfigFromEnv(): FirebaseRuntimeConfig | null {
 async function loadFirebaseConfig(): Promise<FirebaseRuntimeConfig | null> {
   if (typeof window === 'undefined') {
     return null;
-  }
-
-  const windowConfig = loadFirebaseConfigFromWindow();
-  if (windowConfig) {
-    return windowConfig;
   }
 
   const envConfig = loadFirebaseConfigFromEnv();
