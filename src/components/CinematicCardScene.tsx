@@ -186,14 +186,19 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
       return undefined;
     }
 
+    let cleanupSnapControls = () => {};
+
     const ctx = gsap.context(() => {
       const panels = gsap.utils.toArray<HTMLElement>('[data-cinematic-panel]', pinContainer);
       const copies = panels
         .map((section) => section.querySelector<HTMLElement>('[data-cinematic-copy]'))
         .filter((copy): copy is HTMLElement => Boolean(copy));
+      const visuals = panels
+        .map((section) => section.querySelector<HTMLElement>('[data-cinematic-visual]'))
+        .filter((visual): visual is HTMLElement => Boolean(visual));
       const totalSections = Math.max(sectionCount, panels.length, 1);
       const totalTransitions = Math.max(totalSections - 1, 1);
-      const scrollDistancePerPanel = 0.58;
+      const scrollDistancePerPanel = window.innerWidth < 768 ? 0.42 : 0.34;
       const snapPoints = Array.from(
         { length: totalSections },
         (_, index) => index / totalTransitions,
@@ -247,8 +252,24 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
 
       gsap.set(panels, { autoAlpha: 0 });
       gsap.set(copies, { autoAlpha: 0, y: 54, filter: 'blur(12px)' });
+      gsap.set(visuals, {
+        autoAlpha: 0,
+        rotateY: 18,
+        rotateX: -4,
+        scale: 1.04,
+        filter: 'blur(8px)',
+        transformPerspective: 1200,
+        transformOrigin: '50% 50%',
+      });
       gsap.set(panels[0], { autoAlpha: 1 });
       gsap.set(copies[0], { autoAlpha: 1, y: 0, filter: 'blur(0px)' });
+      gsap.set(visuals[0], {
+        autoAlpha: 1,
+        rotateY: 0,
+        rotateX: 0,
+        scale: 1,
+        filter: 'blur(0px)',
+      });
       gsap.set(card.position, cardStates[0].position);
       gsap.set(card.rotation, cardStates[0].rotation);
       gsap.set(card.scale, { x: cardStates[0].scale, y: cardStates[0].scale, z: cardStates[0].scale });
@@ -275,12 +296,69 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
           },
         },
       });
+      let isProgrammaticSnap = false;
+      let touchStartY = 0;
+
+      const getScrollTrigger = () => timeline.scrollTrigger as ScrollTrigger | undefined;
+      const isWithinPinnedRange = () => {
+        const scrollTrigger = getScrollTrigger();
+        if (!scrollTrigger) return false;
+
+        return window.scrollY >= scrollTrigger.start - 2 && window.scrollY <= scrollTrigger.end + 2;
+      };
+      const jumpToPanel = (direction: 1 | -1) => {
+        const scrollTrigger = getScrollTrigger();
+        if (!scrollTrigger || isProgrammaticSnap) return;
+
+        const currentPanel = Math.round(scrollTrigger.progress * totalTransitions);
+        const targetPanel = gsap.utils.clamp(0, totalSections - 1, currentPanel + direction);
+        if (targetPanel === currentPanel) return;
+
+        isProgrammaticSnap = true;
+        const targetProgress = targetPanel / totalTransitions;
+        const targetScroll = scrollTrigger.start + (scrollTrigger.end - scrollTrigger.start) * targetProgress;
+        window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+        window.setTimeout(() => {
+          isProgrammaticSnap = false;
+        }, 520);
+      };
+      const handleWheel = (event: WheelEvent) => {
+        if (!isWithinPinnedRange() || Math.abs(event.deltaY) < 4) return;
+
+        event.preventDefault();
+        jumpToPanel(event.deltaY > 0 ? 1 : -1);
+      };
+      const handleTouchStart = (event: TouchEvent) => {
+        touchStartY = event.touches[0]?.clientY ?? 0;
+      };
+      const handleTouchMove = (event: TouchEvent) => {
+        if (!isWithinPinnedRange()) return;
+
+        const currentY = event.touches[0]?.clientY ?? touchStartY;
+        const deltaY = touchStartY - currentY;
+        if (Math.abs(deltaY) < 36) return;
+
+        event.preventDefault();
+        jumpToPanel(deltaY > 0 ? 1 : -1);
+        touchStartY = currentY;
+      };
+
+      window.addEventListener('wheel', handleWheel, { passive: false });
+      window.addEventListener('touchstart', handleTouchStart, { passive: true });
+      window.addEventListener('touchmove', handleTouchMove, { passive: false });
+      cleanupSnapControls = () => {
+        window.removeEventListener('wheel', handleWheel);
+        window.removeEventListener('touchstart', handleTouchStart);
+        window.removeEventListener('touchmove', handleTouchMove);
+      };
 
       for (let index = 1; index < totalSections; index += 1) {
         const previousPanel = panels[index - 1];
         const currentPanel = panels[index];
         const previousCopy = copies[index - 1];
         const currentCopy = copies[index];
+        const previousVisual = visuals[index - 1];
+        const currentVisual = visuals[index];
         const cardState = cardStates[index] ?? cardStates[cardStates.length - 1];
         const transitionStart = index - 1;
 
@@ -321,12 +399,52 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
               transitionStart + 0.52,
             );
         }
+
+        if (previousVisual && currentVisual) {
+          timeline
+            .to(
+              previousVisual,
+              {
+                autoAlpha: 0,
+                rotateY: -22,
+                rotateX: 5,
+                scale: 0.96,
+                filter: 'blur(10px)',
+                duration: 0.36,
+                ease: 'power2.in',
+              },
+              transitionStart + 0.18,
+            )
+            .fromTo(
+              currentVisual,
+              {
+                autoAlpha: 0,
+                rotateY: 24,
+                rotateX: -6,
+                scale: 1.08,
+                filter: 'blur(12px)',
+              },
+              {
+                autoAlpha: 1,
+                rotateY: 0,
+                rotateX: 0,
+                scale: 1,
+                filter: 'blur(0px)',
+                duration: 0.46,
+                ease: 'power3.out',
+              },
+              transitionStart + 0.42,
+            );
+        }
       }
     }, pinContainer);
 
     ScrollTrigger.refresh();
 
-    return () => ctx.revert();
+    return () => {
+      cleanupSnapControls();
+      ctx.revert();
+    };
   }, [pinContainerRef, sectionCount]);
 
   return (

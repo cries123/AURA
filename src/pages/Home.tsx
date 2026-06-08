@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { type CSSProperties, type PointerEvent, useRef, useState } from 'react';
 import CinematicCardScene from '../components/CinematicCardScene';
 import CinematicNavigationMenu, {
   CinematicMenuButton,
@@ -106,10 +106,11 @@ function CinematicHud({ onOpenMenu }: { onOpenMenu: () => void }) {
 function HomeAtmosphere() {
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_0%,rgba(232,215,162,0.16),transparent_28%),radial-gradient(circle_at_92%_14%,rgba(184,255,44,0.07),transparent_20%),linear-gradient(180deg,rgba(3,3,3,0.72),transparent_44%,rgba(3,3,3,0.42))]" />
+      <div className="home-reactive-glow absolute inset-0" />
       <div className="absolute -right-32 -top-40 h-[42rem] w-[42rem] rounded-full border border-aura-gold/15 aura-spin-slow" />
       <div className="absolute right-12 top-10 h-[22rem] w-[22rem] rounded-full border border-dashed border-aura-gold/20 aura-spin-slow-reverse" />
-      <div className="absolute inset-x-0 top-0 h-48 bg-[linear-gradient(rgba(232,215,162,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(232,215,162,0.06)_1px,transparent_1px)] bg-[size:54px_54px] opacity-35" />
+      <div className="home-reactive-drift absolute right-[12%] top-[12%] h-52 w-52 rounded-full bg-aura-lime/10 blur-[80px]" />
+      <div className="home-reactive-drift-slow absolute inset-x-0 top-0 h-48 bg-[linear-gradient(rgba(232,215,162,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(232,215,162,0.06)_1px,transparent_1px)] bg-[size:54px_54px] opacity-35" />
       <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-aura-gold/35 to-transparent" />
     </div>
   );
@@ -303,12 +304,86 @@ function PanelVisuals({ index }: { index: number }) {
   );
 }
 
+function renderInteractiveTitle(title: string) {
+  let letterIndex = 0;
+
+  return title.split(' ').map((word, wordIndex) => (
+    <span key={`${word}-${wordIndex}`} className="cinematic-title-word">
+      {word.split('').map((character) => {
+        const currentIndex = letterIndex;
+        letterIndex += 1;
+
+        return (
+          <span
+            key={`${character}-${currentIndex}`}
+            className="cinematic-title-letter"
+            style={{ transitionDelay: `${(currentIndex % 9) * 12}ms` }}
+          >
+            {character}
+          </span>
+        );
+      })}
+    </span>
+  ));
+}
+
 export default function Home() {
   const pinContainerRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const mouseReactiveStyle = {
+    '--mouse-x': '0px',
+    '--mouse-y': '0px',
+    '--mouse-x-reverse': '0px',
+    '--mouse-y-reverse': '0px',
+    '--mouse-x-slow': '0px',
+    '--mouse-y-slow': '0px',
+    '--mouse-tilt-x': '0deg',
+    '--mouse-tilt-y': '0deg',
+  } as CSSProperties;
+
+  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const rect = root.getBoundingClientRect();
+    const normalizedX = (event.clientX - rect.left) / rect.width - 0.5;
+    const normalizedY = (event.clientY - rect.top) / rect.height - 0.5;
+    const x = normalizedX * 128;
+    const y = normalizedY * 96;
+
+    root.style.setProperty('--mouse-x', `${x}px`);
+    root.style.setProperty('--mouse-y', `${y}px`);
+    root.style.setProperty('--mouse-x-reverse', `${x * -0.55}px`);
+    root.style.setProperty('--mouse-y-reverse', `${y * -0.45}px`);
+    root.style.setProperty('--mouse-x-slow', `${x * -0.18}px`);
+    root.style.setProperty('--mouse-y-slow', `${y * -0.14}px`);
+    root.style.setProperty('--mouse-tilt-x', `${normalizedY * -7}deg`);
+    root.style.setProperty('--mouse-tilt-y', `${normalizedX * 9}deg`);
+  };
+
+  const handlePointerLeave = () => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    root.style.setProperty('--mouse-x', '0px');
+    root.style.setProperty('--mouse-y', '0px');
+    root.style.setProperty('--mouse-x-reverse', '0px');
+    root.style.setProperty('--mouse-y-reverse', '0px');
+    root.style.setProperty('--mouse-x-slow', '0px');
+    root.style.setProperty('--mouse-y-slow', '0px');
+    root.style.setProperty('--mouse-tilt-x', '0deg');
+    root.style.setProperty('--mouse-tilt-y', '0deg');
+  };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#030303] text-white">
+    <div
+      ref={rootRef}
+      className="relative min-h-screen overflow-hidden bg-[#030303] text-white"
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+      style={mouseReactiveStyle}
+    >
       <CinematicCardScene
         pinContainerRef={pinContainerRef}
         sectionCount={panels.length}
@@ -343,6 +418,10 @@ export default function Home() {
             data-cinematic-panel
             data-cinematic-label={panel.label}
             className={`absolute inset-0 isolate flex h-screen overflow-hidden px-6 pt-28 md:px-12 ${panel.align}`}
+            style={{
+              opacity: index === 0 ? 1 : 0,
+              visibility: index === 0 ? 'visible' : 'hidden',
+            }}
           >
             <div
               aria-hidden="true"
@@ -353,13 +432,31 @@ export default function Home() {
               {panel.ghost}
             </div>
 
-            <PanelVisuals index={index} />
+            <div
+              data-cinematic-visual
+              className="home-panel-visual absolute inset-0 z-0"
+              style={{
+                opacity: index === 0 ? 1 : 0,
+                visibility: index === 0 ? 'visible' : 'hidden',
+                transform: index === 0
+                  ? 'perspective(1200px) rotateY(0deg) scale(1)'
+                  : 'perspective(1200px) rotateY(18deg) scale(1.04)',
+              }}
+            >
+              <PanelVisuals index={index} />
+            </div>
 
             <div
               data-cinematic-copy
               className="relative z-10 flex h-screen w-full max-w-7xl mx-auto flex-col justify-center"
+              style={{
+                opacity: index === 0 ? 1 : 0,
+                visibility: index === 0 ? 'visible' : 'hidden',
+                transform: index === 0 ? 'translateY(0)' : 'translateY(54px)',
+                filter: index === 0 ? 'blur(0px)' : 'blur(12px)',
+              }}
             >
-              <div className={`relative max-w-2xl ${panel.copyAlign}`}>
+              <div className={`relative w-full max-w-5xl ${panel.copyAlign}`}>
                 <div className={`mb-8 flex items-center gap-4 ${index > 1 ? 'justify-end' : ''}`}>
                   <span className="font-mono text-xs text-aura-gold/80">{panel.chapter}</span>
                   <span className="h-px w-16 bg-aura-gold/50" />
@@ -367,8 +464,8 @@ export default function Home() {
                     {panel.eyebrow}
                   </p>
                 </div>
-                <h1 className="font-display text-6xl font-bold uppercase leading-[0.82] tracking-[-0.075em] text-white md:text-8xl lg:text-9xl">
-                  {panel.title}
+                <h1 className="cinematic-title font-display text-5xl font-bold uppercase leading-[0.9] tracking-[-0.065em] text-white sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl">
+                  {renderInteractiveTitle(panel.title)}
                 </h1>
                 <p className="mt-8 max-w-xl text-base font-medium leading-8 text-zinc-300/80 md:text-xl">
                   {panel.body}

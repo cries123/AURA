@@ -1,61 +1,64 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-function getSecureApiKey(): string {
-  const envVal = import.meta.env?.VITE_FIREBASE_API_KEY || '';
-  const prefix = ['A', 'I', 'z', 'a'].join('');
-  if (envVal) {
-    if (envVal.startsWith(prefix)) {
-      return envVal;
-    }
-    try {
-      if (envVal.length > 20 && /^[a-zA-Z0-9+/=]+$/.test(envVal)) {
-        const decoded = atob(envVal);
-        if (decoded.startsWith(prefix)) {
-          return decoded;
-        }
-      }
-    } catch (e) {}
-    return prefix + envVal;
-  }
-  
-  // Obfuscated literal assembly to prevent compile-time signature alignment
-  const p1 = 'AI';
-  const p2 = 'za';
-  const p3 = 'SyDUFTWdcFwMzu3';
-  const p4 = '6uPKUVONWBXesKajGr8';
-  return p1 + p2 + p3 + p4;
-}
+import type { FirebaseApp } from 'firebase/app';
+import { getAuth, type Auth } from 'firebase/auth';
+import { getFirestore, type Firestore } from 'firebase/firestore';
 
-const firebaseConfig = {
-  apiKey: getSecureApiKey(),
-  authDomain: import.meta.env?.VITE_FIREBASE_AUTH_DOMAIN || 'gen-lang-client-0812120945.firebaseapp.com',
-  projectId: import.meta.env?.VITE_FIREBASE_PROJECT_ID || 'gen-lang-client-0812120945',
-  storageBucket: import.meta.env?.VITE_FIREBASE_STORAGE_BUCKET || 'gen-lang-client-0812120945.firebasestorage.app',
-  messagingSenderId: import.meta.env?.VITE_FIREBASE_MESSAGING_SENDER_ID || '636277215078',
-  appId: import.meta.env?.VITE_FIREBASE_APP_ID || '1:636277215078:web:00cefbf0cedd4967adc2a7',
-  measurementId: import.meta.env?.VITE_FIREBASE_MEASUREMENT_ID || ''
+type FirebaseRuntimeConfig = {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  storageBucket?: string;
+  messagingSenderId?: string;
+  appId: string;
+  measurementId?: string;
+  databaseId?: string;
 };
 
-let appInstance: any = null;
-let dbInstance: any = null;
-let authInstance: any = null;
+let appInstance: FirebaseApp | null = null;
+export let db: Firestore | null = null;
+export let auth: Auth | null = null;
 
-if (firebaseConfig.apiKey && firebaseConfig.apiKey.length > 5 && firebaseConfig.projectId) {
+function hasRequiredConfig(config: FirebaseRuntimeConfig | null): config is FirebaseRuntimeConfig {
+  return Boolean(config?.apiKey && config.authDomain && config.projectId && config.appId);
+}
+
+async function loadFirebaseConfig(): Promise<FirebaseRuntimeConfig | null> {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    const response = await fetch('/.netlify/functions/firebase-config', {
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return await response.json();
+  } catch (err) {
+    console.warn('Firebase runtime config unavailable. Database features may be disabled.', err);
+    return null;
+  }
+}
+
+export const firebaseReady = loadFirebaseConfig().then((firebaseConfig) => {
+  if (!hasRequiredConfig(firebaseConfig)) {
+    console.warn('Firebase runtime config is missing or incomplete. Database features may be disabled.');
+    return;
+  }
+
   try {
     appInstance = initializeApp(firebaseConfig);
-    const customDbId = import.meta.env?.VITE_FIREBASE_DATABASE_ID || 'ai-studio-b9573200-9f4c-45e4-a4d3-adaecd66eb8a';
-    dbInstance = getFirestore(appInstance, customDbId);
-    authInstance = getAuth(appInstance);
+    db = firebaseConfig.databaseId
+      ? getFirestore(appInstance, firebaseConfig.databaseId)
+      : getFirestore(appInstance);
+    auth = getAuth(appInstance);
   } catch (err) {
     console.error('Failed to initialize Firebase services:', err);
   }
-} else {
-  console.warn('Firebase core config is missing or incomplete. Run-time database operations may remain unavailable or require backend setup.');
-}
-
-export const db = dbInstance;
-export const auth = authInstance;
+});
 
 export enum OperationType {
   CREATE = 'create',

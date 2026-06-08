@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase';
+import { auth, db, firebaseReady } from '../lib/firebase';
 
 interface AuthContextType {
   user: User | null;
@@ -29,60 +29,70 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!auth || !db) {
-      setLoading(false);
-      return;
-    }
-
     let unsubscribeProfile: (() => void) | null = null;
-    const unsubscribeAuth = onAuthStateChanged(auth, async (authUser) => {
-      setUser(authUser);
-      
-      if (unsubscribeProfile) {
-        unsubscribeProfile();
-        unsubscribeProfile = null;
+    let unsubscribeAuth: (() => void) | null = null;
+    let cancelled = false;
+
+    firebaseReady.then(() => {
+      if (cancelled) {
+        return;
       }
 
-      if (authUser) {
-        try {
-          unsubscribeProfile = onSnapshot(doc(db, 'users', authUser.uid), async (snapshot) => {
-            if (snapshot.exists()) {
-              setUserProfile(snapshot.data());
-              setLoading(false);
-            } else {
-              // check if user email matches the owner email provided in metadata/chat
-              const isAdminBootstrap = authUser.email?.toLowerCase() === 'jaryn.b.healey@gmail.com';
-              const newProfile = {
-                uid: authUser.uid,
-                email: authUser.email,
-                role: isAdminBootstrap ? 'admin' : 'user',
-                createdAt: new Date().toISOString(),
-              };
-              try {
-                await setDoc(doc(db, 'users', authUser.uid), newProfile);
-                // snapshot will trigger again with new data
-              } catch (e) {
-                console.error('Failed to create user profile:', e);
-                setUserProfile({ ...newProfile, error: 'Profile creation pending rules deployment' });
+      if (!auth || !db) {
+        setLoading(false);
+        return;
+      }
+
+      unsubscribeAuth = onAuthStateChanged(auth, async (authUser) => {
+        setUser(authUser);
+        
+        if (unsubscribeProfile) {
+          unsubscribeProfile();
+          unsubscribeProfile = null;
+        }
+
+        if (authUser) {
+          try {
+            unsubscribeProfile = onSnapshot(doc(db, 'users', authUser.uid), async (snapshot) => {
+              if (snapshot.exists()) {
+                setUserProfile(snapshot.data());
                 setLoading(false);
+              } else {
+                // check if user email matches the owner email provided in metadata/chat
+                const isAdminBootstrap = authUser.email?.toLowerCase() === 'jaryn.b.healey@gmail.com';
+                const newProfile = {
+                  uid: authUser.uid,
+                  email: authUser.email,
+                  role: isAdminBootstrap ? 'admin' : 'user',
+                  createdAt: new Date().toISOString(),
+                };
+                try {
+                  await setDoc(doc(db, 'users', authUser.uid), newProfile);
+                  // snapshot will trigger again with new data
+                } catch (e) {
+                  console.error('Failed to create user profile:', e);
+                  setUserProfile({ ...newProfile, error: 'Profile creation pending rules deployment' });
+                  setLoading(false);
+                }
               }
-            }
-          }, (err) => {
-            console.error('Profile listener error:', err);
+            }, (err) => {
+              console.error('Profile listener error:', err);
+              setLoading(false);
+            });
+          } catch (subErr) {
+            console.error('Failed to subscribe to user profile updates:', subErr);
             setLoading(false);
-          });
-        } catch (subErr) {
-          console.error('Failed to subscribe to user profile updates:', subErr);
+          }
+        } else {
+          setUserProfile(null);
           setLoading(false);
         }
-      } else {
-        setUserProfile(null);
-        setLoading(false);
-      }
+      });
     });
 
     return () => {
-      unsubscribeAuth();
+      cancelled = true;
+      if (unsubscribeAuth) unsubscribeAuth();
       if (unsubscribeProfile) unsubscribeProfile();
     };
   }, []);
