@@ -39,6 +39,27 @@ export default function ProfileDashboard() {
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   useEffect(() => {
+    async function ensureUsernameMapping() {
+      if (!user || !db || !userProfile?.username) return;
+
+      const lowerUsername = userProfile.username.toLowerCase();
+      try {
+        const usernameDoc = await getDoc(doc(db, 'usernames', lowerUsername));
+        if (!usernameDoc.exists()) {
+          await setDoc(doc(db, 'usernames', lowerUsername), {
+            uid: user.uid,
+            claimedAt: new Date().toISOString(),
+          });
+        }
+      } catch (err) {
+        console.warn('Could not backfill username mapping:', err);
+      }
+    }
+
+    ensureUsernameMapping();
+  }, [user, userProfile?.username]);
+
+  useEffect(() => {
     if (userProfile) {
       if (userProfile.username !== undefined) setUsername(userProfile.username || '');
       if (userProfile.bio !== undefined) setBio(userProfile.bio || '');
@@ -180,52 +201,46 @@ export default function ProfileDashboard() {
     try {
       const lowerUsername = username.toLowerCase();
       
-      // If username changed, handle uniqueness and release old handle
-      if (lowerUsername !== (userProfile?.username || '')) {
-        // If they had an old username, release it first
-        if (userProfile?.username) {
-          try {
-            await deleteDoc(doc(db, 'usernames', userProfile.username.toLowerCase()));
-          } catch (err) {
-            console.warn('Could not release old handle:', err);
-          }
-        }
+      const previousUsername = (userProfile?.username || '').toLowerCase();
 
-        // If setting a NEW username, verify uniqueness and claim it
-        if (lowerUsername) {
-          const usernameDoc = await getDoc(doc(db, 'usernames', lowerUsername));
-          if (usernameDoc.exists()) {
-            const existingUid = usernameDoc.data().uid;
-            if (existingUid !== user.uid) {
-              if (isAdminEmail(user.email)) {
-                // Admin override! Delete the conflicting handle mapping first, releasing the handle
-                try {
-                  await deleteDoc(doc(db, 'usernames', lowerUsername));
-                  console.log('Admin override: freed handle', lowerUsername);
-                } catch (err) {
-                  console.warn('Could not force release handle:', err);
-                }
-              } else {
-                // Check if that user still exists (handle stale handles)
-                const existingUserDoc = await getDoc(doc(db, 'users', existingUid));
-                if (existingUserDoc.exists()) {
-                  throw new Error('This handle is already taken');
-                }
-                // If user record doesn't exist, delete the stale mapping to allow setDoc to succeed
-                try {
-                  await deleteDoc(doc(db, 'usernames', lowerUsername));
-                } catch (err) {
-                  console.warn('Could not clear stale username doc to allow setDoc:', err);
-                }
+      if (lowerUsername !== previousUsername && previousUsername) {
+        try {
+          await deleteDoc(doc(db, 'usernames', previousUsername));
+        } catch (err) {
+          console.warn('Could not release old handle:', err);
+        }
+      }
+
+      if (lowerUsername) {
+        const usernameDoc = await getDoc(doc(db, 'usernames', lowerUsername));
+        if (usernameDoc.exists()) {
+          const existingUid = usernameDoc.data().uid;
+          if (existingUid !== user.uid) {
+            if (isAdminEmail(user.email)) {
+              try {
+                await deleteDoc(doc(db, 'usernames', lowerUsername));
+                console.log('Admin override: freed handle', lowerUsername);
+              } catch (err) {
+                console.warn('Could not force release handle:', err);
+              }
+            } else {
+              const existingUserDoc = await getDoc(doc(db, 'users', existingUid));
+              if (existingUserDoc.exists()) {
+                throw new Error('This handle is already taken');
+              }
+              try {
+                await deleteDoc(doc(db, 'usernames', lowerUsername));
+              } catch (err) {
+                console.warn('Could not clear stale username doc to allow setDoc:', err);
               }
             }
           }
-          
-          await setDoc(doc(db, 'usernames', lowerUsername), { 
-            uid: user.uid,
-            claimedAt: new Date().toISOString()
-          });
         }
+
+        await setDoc(doc(db, 'usernames', lowerUsername), {
+          uid: user.uid,
+          claimedAt: new Date().toISOString(),
+        });
       }
 
       await updateDoc(doc(db, 'users', user.uid), {

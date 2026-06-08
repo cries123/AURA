@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Share2, ExternalLink, AlertCircle } from 'lucide-react';
-import { db } from '../lib/firebase';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { db, firebaseReady } from '../lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import ProfileCard from '../components/ProfileCard';
 
 export default function UserProfile() {
@@ -50,35 +50,24 @@ export default function UserProfile() {
       setError(null);
 
       try {
-        // Promise timeout wrapper (4 seconds max before fallback or error)
         const fetchPromise = (async () => {
-          try {
-            // Attempt 1: Direct fast query on 'users' collection (1 network roundtrip instead of 2)
-            const usersRef = collection(db, 'users');
-            const q = query(usersRef, where('username', '==', lowerUsername));
-            const querySnapshot = await getDocs(q);
-            
-            if (!querySnapshot.empty) {
-              return { data: querySnapshot.docs[0].data() };
-            }
-          } catch (queryErr) {
-            console.warn('Direct users query failed, trying sequential path:', queryErr);
+          await firebaseReady;
+          if (!db) {
+            return { error: 'Profile service unavailable' };
           }
 
-          // Attempt 2: Fallback to sequential path check
           const usernameDoc = await getDoc(doc(db, 'usernames', lowerUsername));
-          
           if (!usernameDoc.exists()) {
             return { error: 'Aura Profile not found' };
-          } else {
-            const { uid } = usernameDoc.data();
-            const userDoc = await getDoc(doc(db, 'users', uid));
-            if (userDoc.exists()) {
-              return { data: userDoc.data() };
-            } else {
-              return { error: 'Aura Profile disconnected' };
-            }
           }
+
+          const { uid } = usernameDoc.data();
+          const userDoc = await getDoc(doc(db, 'users', uid));
+          if (userDoc.exists()) {
+            return { data: userDoc.data() };
+          }
+
+          return { error: 'Aura Profile disconnected' };
         })();
 
         const timeoutPromise = new Promise<{ error?: string; data?: any }>((_, reject) =>
