@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { auth, db, firebaseReady } from '../lib/firebase';
+import { isAdminEmail } from '../lib/adminAccess';
 
 interface AuthContextType {
   user: User | null;
@@ -55,15 +56,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           try {
             unsubscribeProfile = onSnapshot(doc(db, 'users', authUser.uid), async (snapshot) => {
               if (snapshot.exists()) {
-                setUserProfile(snapshot.data());
+                const profileData = snapshot.data();
+                if (isAdminEmail(authUser.email)) {
+                  setUserProfile({ ...profileData, role: 'admin' });
+                  if (profileData.role !== 'admin') {
+                    updateDoc(doc(db, 'users', authUser.uid), { role: 'admin' }).catch((err) => {
+                      console.warn('Could not persist admin role bootstrap:', err);
+                    });
+                  }
+                } else {
+                  setUserProfile(profileData);
+                }
                 setLoading(false);
               } else {
                 // check if user email matches the owner email provided in metadata/chat
-                const isAdminBootstrap = authUser.email?.toLowerCase() === 'jaryn.b.healey@gmail.com';
                 const newProfile = {
                   uid: authUser.uid,
                   email: authUser.email,
-                  role: isAdminBootstrap ? 'admin' : 'user',
+                  role: isAdminEmail(authUser.email) ? 'admin' : 'user',
                   createdAt: new Date().toISOString(),
                 };
                 try {

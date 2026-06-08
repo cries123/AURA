@@ -17,13 +17,13 @@ export default function Comparison() {
   ];
 
   return (
-    <section className="py-24 bg-aura-black">
+    <section className="py-24">
       <div className="max-w-7xl mx-auto px-6">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4"
+          className="text-aura-gold text-[10px] font-black uppercase tracking-[0.42em] mb-4"
         >
           Before and After
         </motion.div>
@@ -32,7 +32,7 @@ export default function Comparison() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
-          className="text-3xl md:text-5xl font-display font-bold mb-12"
+          className="text-4xl md:text-6xl font-display font-black uppercase tracking-[-0.055em] mb-12"
         >
           A Clear Advantage Over <br /> Paper Cards and Static Profiles
         </motion.h2>
@@ -44,7 +44,7 @@ export default function Comparison() {
             viewport={{ once: true }}
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.4 }}
-            className="p-8 rounded-3xl bg-zinc-900/20 border border-zinc-800/50 grayscale hover:grayscale-0 transition-all cursor-default"
+            className="p-8 rounded-[2rem] bg-black/35 border border-white/10 grayscale hover:grayscale-0 transition-all cursor-default backdrop-blur"
           >
             <div className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-6">Paper Card</div>
             <ul className="space-y-6">
@@ -63,13 +63,13 @@ export default function Comparison() {
             viewport={{ once: true }}
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.4 }}
-            className="p-8 rounded-3xl bg-aura-gold/5 border border-aura-gold/20 hover:bg-aura-gold/10 transition-all cursor-default"
+            className="p-8 rounded-[2rem] bg-aura-lime/5 border border-aura-lime/30 hover:bg-aura-lime/10 transition-all cursor-default backdrop-blur shadow-xl shadow-aura-lime/5"
           >
-            <div className="text-[10px] font-bold text-aura-gold uppercase tracking-widest mb-6">Aura Tap</div>
+            <div className="text-[10px] font-bold text-aura-lime uppercase tracking-widest mb-6">Aura Tap</div>
             <ul className="space-y-6">
               {auraTap.map((item, i) => (
                 <li key={i} className="flex gap-4 text-white text-sm">
-                  <Check className="w-5 h-5 text-aura-gold flex-shrink-0" />
+                  <Check className="w-5 h-5 text-aura-lime flex-shrink-0" />
                   {item}
                 </li>
               ))}
@@ -92,7 +92,7 @@ export default function Comparison() {
                       whileInView={{ opacity: 1, scale: 1 }}
                       viewport={{ once: true }}
                       transition={{ delay: i * 0.1 }}
-                      className="px-4 py-2 border border-zinc-800 rounded-full text-xs text-zinc-400 font-medium"
+                      className="px-4 py-2 border border-white/10 bg-white/[0.025] rounded-full text-xs text-zinc-400 font-medium backdrop-blur"
                     >
                        {org}
                     </motion.span>

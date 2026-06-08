@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, Briefcase, LogIn, UserPlus, ArrowRight, LayoutDashboard, LogOut } from 'lucide-react';
+import { Shield, Users, Briefcase, LogIn, UserPlus, ArrowRight, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { auth, db } from '../lib/firebase';
 import { signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
@@ -8,6 +8,7 @@ import { doc, setDoc, getDoc, collection, query, where, getDocs, addDoc } from '
 import AffiliateDashboard from '../components/dashboard/AffiliateDashboard';
 import AdminDashboard from '../components/dashboard/AdminDashboard';
 import ProfileDashboard from '../components/dashboard/ProfileDashboard';
+import { isAdminEmail } from '../lib/adminAccess';
 
 type PortalView = 'selection' | 'login' | 'enroll' | 'dashboard';
 type UserRole = 'user' | 'affiliate' | 'admin';
@@ -85,13 +86,12 @@ export default function Portal() {
     try {
       if (view === 'enroll') {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const isAdminBootstrap = email.toLowerCase() === 'jaryn.b.healey@gmail.com';
         const profilePath = `users/${userCredential.user.uid}`;
         try {
           await setDoc(doc(db, 'users', userCredential.user.uid), {
             uid: userCredential.user.uid,
             email: email,
-            role: isAdminBootstrap ? 'admin' : selectedRole,
+            role: isAdminEmail(email) ? 'admin' : selectedRole,
             createdAt: new Date().toISOString()
           });
         } catch (err) {
@@ -142,7 +142,9 @@ export default function Portal() {
       <div id="portal-top" className="min-h-screen bg-transparent pt-28 px-6 pb-12">
         <div className="max-w-7xl mx-auto">
           {/* Dashboard Header */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
+          <div className="relative mb-8 overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/35 p-8 backdrop-blur md:p-10">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_10%,rgba(232,215,162,0.12),transparent_24%),radial-gradient(circle_at_18%_76%,rgba(184,255,44,0.06),transparent_22%)]" />
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
               <div className="text-aura-gold text-[10px] font-bold uppercase tracking-[0.3em] mb-2">Workspace</div>
               <h1 className="text-4xl font-display font-bold italic">
@@ -152,6 +154,9 @@ export default function Portal() {
                    'Member Portal.'}
                 </span>
               </h1>
+              <p className="mt-3 max-w-xl text-xs leading-6 text-zinc-500">
+                Manage profiles, reseller activity, users, and Aura account tools from a single cinematic command center.
+              </p>
             </div>
             
             <div className="flex items-center gap-4">
@@ -162,14 +167,15 @@ export default function Portal() {
                 <LogOut className="w-4 h-4" /> Sign Out
               </button>
             </div>
+            </div>
           </div>
 
           {/* Dashboard Navigation */}
-          <div className="flex items-center gap-2 p-1 bg-zinc-950 border border-zinc-800 rounded-2xl mb-12 w-fit">
+          <div className="flex flex-wrap items-center gap-2 p-1.5 bg-black/50 border border-white/10 rounded-2xl mb-12 w-fit backdrop-blur">
             {isAdmin && (
               <button 
                 onClick={() => setActiveTab('admin')}
-                className={`px-6 py-3 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${currentTab === 'admin' ? 'bg-zinc-800 text-white' : 'text-zinc-600 hover:text-zinc-400'}`}
+                className={`px-6 py-3 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${currentTab === 'admin' ? 'bg-aura-lime text-aura-black' : 'text-zinc-600 hover:text-zinc-300'}`}
               >
                 Terminal
               </button>
@@ -177,20 +183,20 @@ export default function Portal() {
             {(isAdmin || isAffiliate) && (
               <button 
                 onClick={() => setActiveTab('affiliate')}
-                className={`px-6 py-3 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${currentTab === 'affiliate' ? 'bg-zinc-800 text-white' : 'text-zinc-600 hover:text-zinc-400'}`}
+                className={`px-6 py-3 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${currentTab === 'affiliate' ? 'bg-aura-lime text-aura-black' : 'text-zinc-600 hover:text-zinc-300'}`}
               >
                 Reseller
               </button>
             )}
             <button 
               onClick={() => setActiveTab('profile')}
-              className={`px-6 py-3 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${currentTab === 'profile' ? 'bg-zinc-800 text-white' : 'text-zinc-600 hover:text-zinc-400'}`}
+              className={`px-6 py-3 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${currentTab === 'profile' ? 'bg-aura-lime text-aura-black' : 'text-zinc-600 hover:text-zinc-300'}`}
             >
               Aura Card
             </button>
             <button 
               onClick={() => setActiveTab('selection')}
-              className={`px-6 py-3 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${currentTab === 'selection' ? 'bg-zinc-800 text-white' : 'text-zinc-600 hover:text-zinc-400'}`}
+              className={`px-6 py-3 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${currentTab === 'selection' ? 'bg-aura-lime text-aura-black' : 'text-zinc-600 hover:text-zinc-300'}`}
             >
               Overview
             </button>
@@ -203,7 +209,7 @@ export default function Portal() {
             {currentTab === 'profile' && <ProfileDashboard />}
             {currentTab === 'selection' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="p-12 rounded-[2.5rem] bg-zinc-900/20 border border-zinc-800 text-left">
+                <div className="p-12 rounded-[2.5rem] bg-black/35 border border-white/10 text-left backdrop-blur">
                   <Users className="w-12 h-12 text-aura-gold mb-6" />
                   <h2 className="text-2xl font-bold mb-4">Aura Profile</h2>
                   <p className="text-zinc-500 mb-8 max-w-sm">Setup your digital business card and claim your public aurataps.net handle.</p>
@@ -215,7 +221,7 @@ export default function Portal() {
                   </button>
                 </div>
 
-                <div className="p-12 rounded-[2.5rem] bg-zinc-900/20 border border-zinc-800 text-left">
+                <div className="p-12 rounded-[2.5rem] bg-black/35 border border-white/10 text-left backdrop-blur">
                   <Briefcase className="w-12 h-12 text-aura-gold mb-6" />
                   <h2 className="text-2xl font-bold mb-4">Affiliate Program</h2>
                   <p className="text-zinc-500 mb-8 max-w-sm">
@@ -224,7 +230,7 @@ export default function Portal() {
                   <button 
                     disabled={pendingApp || isSubmitting}
                     onClick={() => isAffiliate ? setActiveTab('affiliate') : handleJoinProgram()}
-                    className={`inline-flex items-center gap-2 px-8 py-4 font-bold rounded-xl text-xs uppercase tracking-widest transition-all ${pendingApp || isSubmitting ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed' : 'bg-zinc-900 border border-zinc-800 text-white hover:border-aura-gold'}`}
+                    className={`inline-flex items-center gap-2 px-8 py-4 font-bold rounded-xl text-xs uppercase tracking-widest transition-all ${pendingApp || isSubmitting ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed' : 'bg-white/[0.035] border border-white/10 text-white hover:border-aura-lime hover:text-aura-lime'}`}
                   >
                     {isAffiliate ? "View Sales" : isSubmitting ? "Processing..." : pendingApp ? "Enrolled Request" : "Request Enrollment"} <ArrowRight className="w-4 h-4" />
                   </button>
@@ -238,10 +244,10 @@ export default function Portal() {
   }
 
   return (
-    <div id="portal-top" className="min-h-screen bg-transparent pt-40 px-6 pb-24 relative overflow-y-auto">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl aspect-square bg-aura-gold/5 rounded-full blur-[120px] -translate-y-1/2" />
+    <div id="portal-top" className="min-h-screen bg-transparent pt-36 px-6 pb-24 relative overflow-y-auto">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(232,215,162,0.12),transparent_28%),radial-gradient(circle_at_76%_72%,rgba(184,255,44,0.06),transparent_24%)]" />
       
-      <div className="max-w-lg mx-auto relative z-10">
+      <div className="max-w-5xl mx-auto relative z-10">
         <AnimatePresence mode="wait">
           {view === 'selection' ? (
             <motion.div 
@@ -249,37 +255,41 @@ export default function Portal() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="space-y-6"
+              className="space-y-8"
             >
               <div className="text-center mb-12">
-                <div className="text-aura-gold text-[10px] font-bold uppercase tracking-[0.3em] mb-4">Aura Gateway</div>
-                <h1 className="text-5xl font-display font-medium italic mb-4">Portal Access.</h1>
-                <p className="text-zinc-500 text-sm">Select your journey to continue.</p>
+                <div className="text-aura-gold text-[10px] font-black uppercase tracking-[0.42em] mb-5">Aura Gateway</div>
+                <h1 className="font-display text-5xl md:text-7xl font-black uppercase tracking-[-0.065em] leading-[0.9] mb-6">Portal Access.</h1>
+                <p className="text-zinc-500 text-sm md:text-base max-w-xl mx-auto leading-7">Choose your workspace. Manage your profile, reseller dashboard, or admin terminal.</p>
               </div>
 
-              {[
-                { id: 'user', icon: <Users />, title: 'Customer Portal', desc: 'Manage your profile and orders.' },
-                { id: 'affiliate', icon: <Briefcase />, title: 'Affiliate Portal', desc: 'Access your reseller dashboard.' },
-                { id: 'admin', icon: <Shield />, title: 'Admin Terminal', desc: 'Secure management for Aura Team.' }
-              ].map((role) => (
-                <button 
-                  key={role.id}
-                  onClick={() => {
-                    setSelectedRole(role.id as UserRole);
-                    setView('login');
-                  }}
-                  className="w-full p-6 rounded-3xl bg-zinc-900/50 border border-zinc-800 flex items-center gap-6 group hover:border-aura-gold/50 hover:bg-zinc-900 transition-all text-left"
-                >
-                  <div className="w-14 h-14 rounded-2xl bg-zinc-950 border border-zinc-800 flex items-center justify-center text-zinc-500 group-hover:text-aura-gold transition-colors">
-                    {role.icon}
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-white group-hover:text-aura-gold transition-colors">{role.title}</h3>
-                    <p className="text-xs text-zinc-500">{role.desc}</p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 ml-auto text-zinc-700 group-hover:text-aura-gold transition-all group-hover:translate-x-1" />
-                </button>
-              ))}
+              <div className="grid gap-5 md:grid-cols-3">
+                {[
+                  { id: 'user', icon: <Users />, title: 'Customer Portal', desc: 'Manage your profile and orders.' },
+                  { id: 'affiliate', icon: <Briefcase />, title: 'Affiliate Portal', desc: 'Access your reseller dashboard.' },
+                  { id: 'admin', icon: <Shield />, title: 'Admin Terminal', desc: 'Secure management for Aura Team.' }
+                ].map((role, index) => (
+                  <button 
+                    key={role.id}
+                    onClick={() => {
+                      setSelectedRole(role.id as UserRole);
+                      setView('login');
+                    }}
+                    className={`group relative overflow-hidden rounded-[2rem] border p-7 text-left backdrop-blur transition-all hover:-translate-y-1 ${index === 2 ? 'border-aura-lime/30 bg-aura-lime/5' : 'border-white/10 bg-black/35 hover:border-aura-gold/40'}`}
+                  >
+                    <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-aura-gold/10 blur-3xl opacity-0 transition-opacity group-hover:opacity-100" />
+                    <div className={`mb-8 flex h-14 w-14 items-center justify-center rounded-2xl border ${index === 2 ? 'border-aura-lime/30 bg-aura-lime/10 text-aura-lime' : 'border-white/10 bg-black/35 text-aura-gold'}`}>
+                      {role.icon}
+                    </div>
+                    <h3 className="font-display text-xl font-black text-white transition-colors group-hover:text-aura-gold">{role.title}</h3>
+                    <p className="mt-3 min-h-12 text-xs leading-6 text-zinc-500">{role.desc}</p>
+                    <div className="mt-8 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-zinc-600">
+                      Enter
+                      <ArrowRight className="h-4 w-4 text-aura-lime transition-transform group-hover:translate-x-1" />
+                    </div>
+                  </button>
+                ))}
+              </div>
 
               <div className="pt-8 text-center">
                 <button 
@@ -299,7 +309,7 @@ export default function Portal() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="bg-zinc-900/40 border border-zinc-800 rounded-[2.5rem] p-10 md:p-12 shadow-2xl backdrop-blur-xl"
+              className="mx-auto max-w-lg bg-black/45 border border-white/10 rounded-[2.5rem] p-10 md:p-12 shadow-2xl backdrop-blur-xl"
             >
               <button 
                 onClick={() => setView('selection')}
@@ -348,7 +358,7 @@ export default function Portal() {
                     type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-aura-gold transition-colors" 
+                    className="w-full bg-white/[0.035] border border-white/10 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-aura-lime transition-colors" 
                     placeholder="name@aura.tap" 
                   />
                 </div>
@@ -359,7 +369,7 @@ export default function Portal() {
                     type="password" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-aura-gold transition-colors" 
+                    className="w-full bg-white/[0.035] border border-white/10 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-aura-lime transition-colors" 
                     placeholder="••••••••" 
                   />
                 </div>
@@ -381,7 +391,7 @@ export default function Portal() {
               <div className="mt-8 pt-8 border-t border-zinc-800">
                 <button 
                   onClick={handleGoogleLogin}
-                  className="w-full py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-3 hover:border-aura-gold transition-all"
+                  className="w-full py-4 bg-white/[0.035] border border-white/10 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-3 hover:border-aura-gold transition-all"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24">
                     <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />

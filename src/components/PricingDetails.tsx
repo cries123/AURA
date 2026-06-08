@@ -36,7 +36,7 @@ export default function PricingDetails() {
   ];
 
   return (
-    <section id="pricing" className="py-24 bg-aura-black relative">
+    <section id="pricing" className="py-24 relative">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
            {['Platform Access Included', 'No Monthly Fees', 'Built to Scale'].map((title, i) => (
@@ -46,7 +46,7 @@ export default function PricingDetails() {
                whileInView={{ opacity: 1, y: 0 }}
                viewport={{ once: true }}
                transition={{ delay: i * 0.1, duration: 0.5 }}
-               className="p-8 rounded-2xl bg-zinc-900/40 border border-zinc-800/50"
+               className="p-8 rounded-[2rem] bg-white/[0.035] border border-white/10 backdrop-blur"
              >
                <h4 className="text-white font-display font-bold mb-2">{title}</h4>
                <p className="text-zinc-500 text-xs">
@@ -59,8 +59,8 @@ export default function PricingDetails() {
         </div>
 
         <div className="mb-16 text-center">
-          <div className="text-aura-gold text-[10px] font-bold uppercase tracking-[0.3em] mb-4">Bundle Packages</div>
-          <h2 className="text-3xl md:text-5xl font-display font-bold">Enterprise <span className="text-aura-gold italic">Units.</span></h2>
+          <div className="text-aura-gold text-[10px] font-black uppercase tracking-[0.42em] mb-4">Bundle Packages</div>
+          <h2 className="text-4xl md:text-6xl font-display font-black uppercase tracking-[-0.055em]">Enterprise <span className="text-aura-gold">Units.</span></h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
            {bundles.map((bundle, i) => (
@@ -71,8 +71,9 @@ export default function PricingDetails() {
                viewport={{ once: true }}
                transition={{ delay: i * 0.1, duration: 0.6 }}
                whileHover={{ y: -5 }}
-               className={`p-8 rounded-3xl border transition-all ${bundle.highlight ? 'bg-aura-lime/5 border-aura-lime/40 shadow-xl shadow-aura-lime/5' : 'bg-zinc-900/20 border-zinc-800/50'}`}
+               className={`p-8 rounded-[2rem] border backdrop-blur transition-all relative overflow-hidden ${bundle.highlight ? 'bg-aura-lime/5 border-aura-lime/40 shadow-xl shadow-aura-lime/5' : 'bg-black/35 border-white/10'}`}
              >
+                {bundle.highlight && <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-aura-lime/70 to-transparent" />}
                 <div className={`text-[9px] font-bold mb-6 uppercase tracking-[0.2em] ${bundle.highlight ? 'text-aura-lime' : 'text-zinc-500'}`}>{bundle.badge}</div>
                 <h4 className="text-xl font-display font-bold mb-2">{bundle.name}</h4>
                 <div className="flex items-baseline gap-2 mb-6">
@@ -106,7 +107,7 @@ export default function PricingDetails() {
             className="text-center mb-16"
           >
             <div className="text-zinc-500 text-[10px] font-bold uppercase tracking-[0.3em] mb-4">The Implementation Process</div>
-            <h2 className="text-3xl md:text-5xl font-display font-medium text-white italic">How we get your team <span className="text-aura-gold italic">live.</span></h2>
+            <h2 className="text-4xl md:text-6xl font-display font-black uppercase tracking-[-0.055em] text-white">How we get your team <span className="text-aura-gold">live.</span></h2>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -133,7 +134,7 @@ export default function PricingDetails() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="p-10 rounded-[2rem] bg-zinc-900/10 border border-zinc-800/50 hover:border-aura-gold/30 transition-all group"
+                className="p-10 rounded-[2rem] bg-white/[0.025] border border-white/10 hover:border-aura-gold/30 transition-all group backdrop-blur"
               >
                 <div className="text-4xl font-display font-bold text-zinc-800 group-hover:text-aura-gold/20 mb-6 transition-colors">{item.step}</div>
                 <h4 className="text-xl font-display font-bold text-white mb-4">{item.title}</h4>
@@ -142,25 +143,7 @@ export default function PricingDetails() {
             ))}
           </div>
 
-          <div className="mt-12 p-10 rounded-3xl bg-zinc-900/30 border border-aura-gold/10 flex flex-col md:flex-row justify-between items-center gap-8">
-             <div className="flex items-center gap-6">
-                <div className="w-14 h-14 rounded-full bg-aura-gold/10 flex items-center justify-center text-aura-gold font-bold font-mono">
-                  $99
-                </div>
-                <div>
-                  <h5 className="text-white font-bold mb-1 font-display">One-Time Setup Fee</h5>
-                  <p className="text-zinc-500 text-xs">Included in all bundle prices. Covers platform config & team onboarding.</p>
-                </div>
-             </div>
-             <button 
-               onClick={() => setSelectedBundle("Custom Enterprise Rollout")}
-               className="px-8 py-4 bg-aura-lime hover:bg-white text-aura-black font-bold rounded-xl text-sm transition-all shadow-lg shadow-aura-lime/20"
-             >
-                Tailor an Enterprise Quote
-             </button>
-          </div>
-
-          <div className="mt-20 p-12 rounded-[2.5rem] bg-aura-gold/5 border border-aura-gold/20 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="mt-20 p-12 rounded-[2.5rem] bg-aura-gold/5 border border-aura-gold/20 flex flex-col md:flex-row items-center justify-between gap-8 backdrop-blur">
              <div className="max-w-xl">
                 <h3 className="text-2xl font-display font-medium text-white mb-4">Want to resell Aura products?</h3>
                 <p className="text-zinc-500 text-sm leading-relaxed">Join our Affiliate Program to access exclusive reseller discounts up to 40% based on your purchase volume.</p>

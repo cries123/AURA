@@ -12,6 +12,7 @@ interface ProfileData {
   displayName: string;
   bio: string;
   avatarUrl?: string;
+  bannerUrl?: string;
   username?: string;
   links: AuraLink[];
   themeColor?: string;
@@ -171,26 +172,36 @@ function ProfileContent({
         {/* Brand Header */}
         <div className="text-center w-full py-1.5 shrink-0 relative z-30">
           <span className="text-[10px] font-mono tracking-[0.3em] text-zinc-500 uppercase font-semibold select-none">
-            aura<span className="text-[#c49215]">.</span>
+            aura<span className="text-aura-gold">.</span>
           </span>
         </div>
 
         {/* Curved Header Banner Section */}
-        <div className="relative w-full h-[120px] overflow-hidden rounded-2xl bg-zinc-950 mt-1 shadow-inner shrink-0">
-          {/* Wave/Mesh luxury gradient */}
-          <div className="absolute inset-x-0 bottom-0 h-full bg-gradient-radial from-[#c49215]/20 via-[#13131a] to-[#040406]" />
-          <div className="absolute -top-10 -right-10 w-28 h-28 bg-[#c49215]/10 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-48 h-2 bg-[#c49215]/5 rounded-full blur-2xl rotate-12" />
-          {/* Subtle design matrix/mesh lines */}
-          <div className="absolute inset-0 bg-[#c49215]/[0.015] bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:12px_12px]" />
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-zinc-900 via-[#c49215]/20 to-zinc-900" />
+        <div className="relative w-full h-[132px] overflow-hidden rounded-[1.35rem] bg-zinc-950 mt-1 shadow-inner shrink-0 border border-white/5">
+          {data.bannerUrl ? (
+            <img
+              src={data.bannerUrl}
+              alt={`${data.displayName || 'Aura'} banner`}
+              className="absolute inset-0 h-full w-full object-cover opacity-85"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <>
+              <div className="absolute inset-x-0 bottom-0 h-full bg-[radial-gradient(circle_at_24%_18%,rgba(232,215,162,0.22),transparent_34%),radial-gradient(circle_at_82%_60%,rgba(184,255,44,0.12),transparent_30%),linear-gradient(135deg,#161613,#040406)]" />
+              <div className="absolute -top-10 -right-10 w-28 h-28 bg-aura-gold/10 rounded-full blur-3xl" />
+              <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-48 h-2 bg-aura-gold/5 rounded-full blur-2xl rotate-12" />
+            </>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050506] via-[#050506]/20 to-black/15" />
+          <div className="absolute inset-0 bg-aura-gold/[0.012] bg-[linear-gradient(rgba(255,255,255,0.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.018)_1px,transparent_1px)] bg-[size:12px_12px]" />
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-zinc-900 via-aura-gold/35 to-zinc-900" />
         </div>
 
         {/* Left-aligned Profile Picture Overlap */}
         <div className="relative px-5 -mt-10 flex justify-start w-full z-10 shrink-0">
           <div className="relative group/avatar">
-            <div className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-[#c49215]/40 via-transparent to-white/10 opacity-70 blur-md group-hover/avatar:opacity-90 duration-500" />
-            <div className="relative w-20 h-20 rounded-full p-[2.5px] bg-gradient-to-tr from-[#c49215] via-zinc-800 to-white/30 flex items-center justify-center shadow-lg">
+            <div className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-aura-gold/45 via-aura-lime/10 to-white/10 opacity-70 blur-md group-hover/avatar:opacity-90 duration-500" />
+            <div className="relative w-20 h-20 rounded-full p-[2.5px] bg-gradient-to-tr from-aura-gold via-zinc-800 to-white/30 flex items-center justify-center shadow-lg">
               <div className="w-full h-full rounded-full bg-[#050506] overflow-hidden flex items-center justify-center">
                 {data.avatarUrl ? (
                   <img 
@@ -200,8 +211,8 @@ function ProfileContent({
                     referrerPolicy="no-referrer" 
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-[#c49215]/15 to-zinc-950 flex items-center justify-center">
-                    <span className="text-2xl font-display font-medium italic text-[#dfba49]">
+                  <div className="w-full h-full bg-gradient-to-br from-aura-gold/15 to-zinc-950 flex items-center justify-center">
+                    <span className="text-2xl font-display font-medium italic text-aura-gold">
                       {(data.displayName || 'A').charAt(0)}
                     </span>
                   </div>
@@ -224,7 +235,7 @@ function ProfileContent({
           </p>
 
           {/* Left vertical border section containing Job Role & Location */}
-          <div className="border-l-2 border-[#c49215] pl-3.5 space-y-0.5 py-0.5 my-3 text-left">
+          <div className="border-l-2 border-aura-gold pl-3.5 space-y-0.5 py-0.5 my-3 text-left">
             <p className="text-zinc-200 font-sans font-semibold text-[12px] tracking-wide">
               {jobTitle}
             </p>
@@ -258,7 +269,7 @@ function ProfileContent({
           <div className="flex items-center gap-2 mt-4 w-full">
             <button 
               onClick={handleSaveContact}
-              className="flex-grow py-3 px-4 bg-gradient-to-r from-white via-zinc-100 to-zinc-200 text-black hover:from-[#dfba49] hover:to-[#c49215] font-sans font-bold text-[10.5px] uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 transition-all duration-300 shadow-lg cursor-pointer hover:scale-[1.01] active:scale-[0.98]"
+              className="flex-grow py-3 px-4 bg-gradient-to-r from-white via-zinc-100 to-zinc-200 text-black hover:from-aura-lime hover:to-aura-lime font-sans font-bold text-[10.5px] uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 transition-all duration-300 shadow-lg cursor-pointer hover:scale-[1.01] active:scale-[0.98]"
             >
               <UserPlus className="w-3.5 h-3.5 text-black" />
               Save Contact
@@ -320,7 +331,7 @@ function ProfileContent({
 
       {/* Verified Footer Badge */}
       <div className="pt-2 pb-1 text-center text-zinc-600 font-mono tracking-[0.16em] text-[7.5px] uppercase font-bold flex items-center justify-center gap-1.5 opacity-60 shrink-0 select-none">
-        <span className="w-1 h-1 bg-[#c49215] rounded-full shadow-[0_0_6px_#c49215] animate-pulse" />
+        <span className="w-1 h-1 bg-aura-gold rounded-full shadow-[0_0_6px_rgba(232,215,162,0.85)] animate-pulse" />
         <span>Verified Aura NFC Member</span>
       </div>
     </div>

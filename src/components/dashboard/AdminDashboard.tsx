@@ -7,8 +7,9 @@ import { db } from '../../lib/firebase';
 export default function AdminDashboard() {
   const [leads, setLeads] = useState<any[]>([]);
   const [applications, setApplications] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeView, setActiveView] = useState<'leads' | 'requests'>('leads');
+  const [activeView, setActiveView] = useState<'leads' | 'requests' | 'users'>('users');
 
   function handleFirestoreError(error: unknown, operationType: string, path: string | null) {
     const errInfo = {
@@ -34,10 +35,16 @@ export default function AdminDashboard() {
       setApplications(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     }, (err) => handleFirestoreError(err, 'list', 'affiliate_applications'));
 
+    const qUsers = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
+    const unsubscribeUsers = onSnapshot(qUsers, (snapshot) => {
+      setUsers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }, (err) => handleFirestoreError(err, 'list', 'users'));
+
     setLoading(false);
     return () => {
       unsubscribeLeads();
       unsubscribeApps();
+      unsubscribeUsers();
     };
   }, []);
 
@@ -93,10 +100,11 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8 pb-12">
       {/* Admin Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
           { label: 'Total Leads', value: leads.length, icon: <Mail />, color: 'text-aura-gold' },
           { label: 'Pending Partners', value: applications.filter(a => a.status === 'pending').length, icon: <Clock />, color: 'text-amber-500' },
+          { label: 'Total Users', value: users.length, icon: <Users />, color: 'text-aura-lime' },
           { label: 'System Status', value: 'Live', icon: <ShieldCheck />, color: 'text-emerald-500' }
         ].map((stat, i) => (
           <div key={i} className="p-8 rounded-3xl bg-zinc-900/40 border border-zinc-800">
@@ -112,7 +120,13 @@ export default function AdminDashboard() {
       </div>
 
       {/* Admin Nav */}
-      <div className="flex items-center gap-4 bg-zinc-950 border border-zinc-800 p-1.5 rounded-2xl w-fit">
+      <div className="flex flex-wrap items-center gap-2 bg-zinc-950 border border-zinc-800 p-1.5 rounded-2xl w-fit max-w-full">
+        <button 
+          onClick={() => setActiveView('users')}
+          className={`px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${activeView === 'users' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+        >
+          Users & Handles ({users.length})
+        </button>
         <button 
           onClick={() => setActiveView('leads')}
           className={`px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${activeView === 'leads' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
@@ -207,7 +221,7 @@ export default function AdminDashboard() {
               </div>
             )}
           </>
-        ) : (
+        ) : activeView === 'requests' ? (
           <>
             <div className="mb-10">
               <h3 className="text-2xl font-display font-bold italic mb-2">Enrollment <span className="text-aura-gold">Requests.</span></h3>
@@ -264,6 +278,70 @@ export default function AdminDashboard() {
                     )}
                   </motion.div>
                 ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
+              <div>
+                <h3 className="text-2xl font-display font-bold italic mb-2">User <span className="text-aura-lime">Handles.</span></h3>
+                <p className="text-xs text-zinc-500">All registered users and their public Aura handles.</p>
+              </div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-600">
+                {users.length} total accounts
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="py-20 text-center">
+                <div className="w-8 h-8 border-2 border-aura-lime border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">Loading users...</p>
+              </div>
+            ) : users.length === 0 ? (
+              <div className="py-24 text-center border border-dashed border-zinc-800 rounded-[2rem]">
+                <Users className="w-12 h-12 text-zinc-700 mx-auto mb-6" />
+                <h4 className="text-xl font-bold text-zinc-500">No users found.</h4>
+                <p className="text-xs text-zinc-600 mt-2">New portal accounts will appear here.</p>
+              </div>
+            ) : (
+              <div className="overflow-hidden rounded-[2rem] border border-zinc-800">
+                <div className="hidden md:grid grid-cols-[1.2fr_1fr_0.7fr_1.2fr] gap-4 bg-zinc-950/70 px-6 py-4 text-[10px] font-bold uppercase tracking-[0.24em] text-zinc-600">
+                  <span>User</span>
+                  <span>Handle</span>
+                  <span>Role</span>
+                  <span>UID</span>
+                </div>
+                <div className="divide-y divide-zinc-900">
+                  {users.map((user) => {
+                    const handle = user.username ? `@${user.username}` : 'No handle set';
+
+                    return (
+                      <motion.div
+                        key={user.id}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="grid grid-cols-1 gap-4 bg-zinc-950/35 px-6 py-5 text-sm transition-colors hover:bg-zinc-900/45 md:grid-cols-[1.2fr_1fr_0.7fr_1.2fr] md:items-center"
+                      >
+                        <div>
+                          <div className="font-bold text-white">{user.displayName || user.email || 'Unnamed user'}</div>
+                          <div className="mt-1 text-[11px] text-zinc-500">{user.email || 'No email'}</div>
+                        </div>
+                        <div className={`font-mono text-xs font-bold ${user.username ? 'text-aura-lime' : 'text-zinc-600'}`}>
+                          {handle}
+                        </div>
+                        <div>
+                          <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                            {user.role || 'user'}
+                          </span>
+                        </div>
+                        <div className="truncate font-mono text-[10px] text-zinc-600" title={user.uid || user.id}>
+                          {user.uid || user.id}
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </>

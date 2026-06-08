@@ -5,6 +5,7 @@ import { db } from '../../lib/firebase';
 import { doc, updateDoc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 import ProfileCard from '../ProfileCard';
+import { isAdminEmail } from '../../lib/adminAccess';
 
 interface AuraLink {
   type: string;
@@ -29,6 +30,7 @@ export default function ProfileDashboard() {
   const [displayName, setDisplayName] = useState(userProfile?.displayName || '');
   const [links, setLinks] = useState<AuraLink[]>(userProfile?.links || []);
   const [avatarUrl, setAvatarUrl] = useState(userProfile?.avatarUrl || '');
+  const [bannerUrl, setBannerUrl] = useState(userProfile?.bannerUrl || '');
   const [jobTitle, setJobTitle] = useState(userProfile?.jobTitle || '');
   const [location, setLocation] = useState(userProfile?.location || '');
   const [tagsText, setTagsText] = useState(userProfile?.tags ? userProfile.tags.join(', ') : '');
@@ -43,6 +45,7 @@ export default function ProfileDashboard() {
       if (userProfile.displayName !== undefined) setDisplayName(userProfile.displayName || '');
       if (userProfile.links !== undefined) setLinks(userProfile.links || []);
       if (userProfile.avatarUrl !== undefined) setAvatarUrl(userProfile.avatarUrl || '');
+      if (userProfile.bannerUrl !== undefined) setBannerUrl(userProfile.bannerUrl || '');
       if (userProfile.jobTitle !== undefined) setJobTitle(userProfile.jobTitle || '');
       if (userProfile.location !== undefined) setLocation(userProfile.location || '');
       if (userProfile.tags !== undefined) setTagsText(userProfile.tags.join(', ') || '');
@@ -54,6 +57,7 @@ export default function ProfileDashboard() {
     bio,
     links,
     avatarUrl: avatarUrl,
+    bannerUrl,
     username: username || 'handle',
     jobTitle,
     location,
@@ -105,6 +109,53 @@ export default function ProfileDashboard() {
     reader.readAsDataURL(file);
   };
 
+  const handleBannerUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 8 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'Banner image must be under 8MB.' });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const targetWidth = 900;
+        const targetHeight = 360;
+        const sourceRatio = img.width / img.height;
+        const targetRatio = targetWidth / targetHeight;
+        let sourceWidth = img.width;
+        let sourceHeight = img.height;
+        let sourceX = 0;
+        let sourceY = 0;
+
+        if (sourceRatio > targetRatio) {
+          sourceWidth = img.height * targetRatio;
+          sourceX = (img.width - sourceWidth) / 2;
+        } else {
+          sourceHeight = img.width / targetRatio;
+          sourceY = (img.height - sourceHeight) / 2;
+        }
+
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, targetWidth, targetHeight);
+          setBannerUrl(canvas.toDataURL('image/jpeg', 0.78));
+          setMessage({ type: 'success', text: 'Banner applied! Tap Save Profile to publish.' });
+          setTimeout(() => setMessage(null), 3500);
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
   function handleFirestoreError(error: unknown, operationType: string, path: string | null) {
     const errInfo = {
       error: error instanceof Error ? error.message : String(error),
@@ -146,8 +197,7 @@ export default function ProfileDashboard() {
           if (usernameDoc.exists()) {
             const existingUid = usernameDoc.data().uid;
             if (existingUid !== user.uid) {
-              const isUserAdmin = user.email?.toLowerCase() === 'jaryn.b.healey@gmail.com';
-              if (isUserAdmin) {
+              if (isAdminEmail(user.email)) {
                 // Admin override! Delete the conflicting handle mapping first, releasing the handle
                 try {
                   await deleteDoc(doc(db, 'usernames', lowerUsername));
@@ -184,6 +234,7 @@ export default function ProfileDashboard() {
         bio,
         links,
         avatarUrl,
+        bannerUrl,
         jobTitle,
         location,
         tags: tagsText.split(',').map(t => t.trim()).filter(Boolean),
@@ -225,15 +276,16 @@ export default function ProfileDashboard() {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
       {/* Editor Side */}
       <div className="space-y-8">
-        <section className="p-8 rounded-[2rem] bg-zinc-900/40 border border-zinc-800">
+        <section className="relative overflow-hidden p-8 rounded-[2rem] bg-black/35 border border-white/10 backdrop-blur">
+          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-aura-gold/50 to-transparent" />
           <h3 className="text-sm font-bold uppercase tracking-widest text-aura-gold mb-6 flex items-center gap-2">
             <Share2 className="w-4 h-4" /> Identity & Bio
           </h3>
           
           <div className="space-y-6">
             {/* Elegant Profile Avatar Uploader */}
-            <div className="flex flex-col sm:flex-row items-center gap-6 p-5 rounded-2xl bg-zinc-950 border border-zinc-800/80 mb-2">
-              <div className="relative group w-24 h-24 rounded-full bg-zinc-900 border-2 border-zinc-800 flex items-center justify-center overflow-hidden shrink-0 shadow-lg cursor-pointer">
+            <div className="flex flex-col sm:flex-row items-center gap-6 p-5 rounded-2xl bg-white/[0.025] border border-white/10 mb-2">
+              <div className="relative group w-24 h-24 rounded-full bg-zinc-950 border-2 border-aura-gold/20 flex items-center justify-center overflow-hidden shrink-0 shadow-lg shadow-aura-gold/10 cursor-pointer">
                 {avatarUrl ? (
                   <img 
                     src={avatarUrl} 
@@ -247,8 +299,8 @@ export default function ProfileDashboard() {
                   </div>
                 )}
                 
-                <label className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-1 transition-opacity duration-200 cursor-pointer text-white">
-                  <Camera className="w-4 h-4 text-aura-gold" />
+                <label className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-1 transition-opacity duration-200 cursor-pointer text-white">
+                  <Camera className="w-4 h-4 text-aura-lime" />
                   <span className="text-[8px] font-bold uppercase tracking-wider">Change</span>
                   <input 
                     type="file" 
@@ -265,8 +317,8 @@ export default function ProfileDashboard() {
                   Make your tap profile distinct. Upload a custom photo. Supports dragging and standard uploading. Max: 8MB.
                 </p>
                 <div className="flex flex-wrap gap-2 justify-center sm:justify-start pt-1">
-                  <label className="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-aura-gold/30 rounded-lg text-[9px] font-bold uppercase tracking-wider text-zinc-300 hover:text-white cursor-pointer transition-all flex items-center gap-1.5">
-                    <Upload className="w-3 h-3 text-aura-gold" /> Upload Custom Photo
+                  <label className="px-3 py-1.5 bg-white/[0.035] hover:bg-white/[0.06] border border-white/10 hover:border-aura-lime/40 rounded-lg text-[9px] font-bold uppercase tracking-wider text-zinc-300 hover:text-white cursor-pointer transition-all flex items-center gap-1.5">
+                    <Upload className="w-3 h-3 text-aura-lime" /> Upload Custom Photo
                     <input 
                       type="file" 
                       accept="image/*" 
@@ -283,12 +335,56 @@ export default function ProfileDashboard() {
                         setMessage({ type: 'success', text: 'Photo cleared! Tap Save Profile to apply.' });
                         setTimeout(() => setMessage(null), 3000);
                       }}
-                      className="px-3 py-1.5 bg-zinc-900/30 hover:bg-red-950/20 hover:text-red-400 border border-zinc-800 hover:border-red-900/50 rounded-lg text-[9px] font-bold uppercase tracking-widest text-zinc-400 transition-all flex items-center gap-1.5"
+                      className="px-3 py-1.5 bg-white/[0.025] hover:bg-red-950/20 hover:text-red-400 border border-white/10 hover:border-red-900/50 rounded-lg text-[9px] font-bold uppercase tracking-widest text-zinc-400 transition-all flex items-center gap-1.5"
                     >
                       <Trash2 className="w-3 h-3" /> Clear Image
                     </button>
                   )}
                 </div>
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-2xl bg-white/[0.025] border border-white/10">
+              <div className="relative h-36 bg-zinc-900">
+                {bannerUrl ? (
+                  <img
+                    src={bannerUrl}
+                    alt="Profile banner"
+                    className="h-full w-full object-cover opacity-80"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="h-full w-full bg-[radial-gradient(circle_at_30%_20%,rgba(232,215,162,0.22),transparent_30%),radial-gradient(circle_at_78%_72%,rgba(184,255,44,0.12),transparent_28%),linear-gradient(135deg,#111114,#030304)]" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
+                <div className="absolute bottom-4 left-4">
+                  <div className="text-[10px] font-black uppercase tracking-[0.28em] text-aura-gold">Profile Banner</div>
+                  <p className="mt-1 text-[11px] text-zinc-400">This appears behind your public card profile.</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2 p-4">
+                <label className="px-3 py-1.5 bg-white/[0.035] hover:bg-white/[0.06] border border-white/10 hover:border-aura-lime/40 rounded-lg text-[9px] font-bold uppercase tracking-wider text-zinc-300 hover:text-white cursor-pointer transition-all flex items-center gap-1.5">
+                  <ImageIcon className="w-3 h-3 text-aura-lime" /> Upload Banner
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleBannerUpload} 
+                    className="hidden" 
+                  />
+                </label>
+                {bannerUrl && (
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setBannerUrl('');
+                      setMessage({ type: 'success', text: 'Banner cleared! Tap Save Profile to apply.' });
+                      setTimeout(() => setMessage(null), 3000);
+                    }}
+                    className="px-3 py-1.5 bg-white/[0.025] hover:bg-red-950/20 hover:text-red-400 border border-white/10 hover:border-red-900/50 rounded-lg text-[9px] font-bold uppercase tracking-widest text-zinc-400 transition-all flex items-center gap-1.5"
+                  >
+                    <Trash2 className="w-3 h-3" /> Clear Banner
+                  </button>
+                )}
               </div>
             </div>
 
@@ -301,7 +397,7 @@ export default function ProfileDashboard() {
                     type="text" 
                     value={username}
                     onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase())}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-9 pr-4 py-4 text-white focus:outline-none focus:border-aura-gold transition-colors text-sm" 
+                    className="w-full bg-white/[0.035] border border-white/10 rounded-xl pl-9 pr-4 py-4 text-white focus:outline-none focus:border-aura-lime transition-colors text-sm" 
                     placeholder="yourname" 
                   />
                 </div>
@@ -327,7 +423,7 @@ export default function ProfileDashboard() {
                 type="text" 
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-aura-gold transition-colors text-sm" 
+                className="w-full bg-white/[0.035] border border-white/10 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-aura-lime transition-colors text-sm" 
                 placeholder="John Doe" 
               />
             </div>
@@ -339,7 +435,7 @@ export default function ProfileDashboard() {
                   type="text" 
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-aura-gold transition-colors text-sm" 
+                  className="w-full bg-white/[0.035] border border-white/10 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-aura-lime transition-colors text-sm" 
                   placeholder="e.g. Stock Trader" 
                 />
               </div>
@@ -350,7 +446,7 @@ export default function ProfileDashboard() {
                   type="text" 
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-aura-gold transition-colors text-sm" 
+                  className="w-full bg-white/[0.035] border border-white/10 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-aura-lime transition-colors text-sm" 
                   placeholder="e.g. New York, NY" 
                 />
               </div>
@@ -362,7 +458,7 @@ export default function ProfileDashboard() {
                 type="text" 
                 value={tagsText}
                 onChange={(e) => setTagsText(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-aura-gold transition-colors text-sm" 
+                className="w-full bg-white/[0.035] border border-white/10 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-aura-lime transition-colors text-sm" 
                 placeholder="Real Estate, Investor, Stock Trading" 
               />
             </div>
@@ -372,14 +468,15 @@ export default function ProfileDashboard() {
               <textarea 
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-aura-gold transition-colors text-sm min-h-[100px] resize-none" 
+                className="w-full bg-white/[0.035] border border-white/10 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-aura-lime transition-colors text-sm min-h-[100px] resize-none" 
                 placeholder="Tell the world who you are..." 
               />
             </div>
           </div>
         </section>
 
-        <section className="p-8 rounded-[2rem] bg-zinc-900/40 border border-zinc-800">
+        <section className="relative overflow-hidden p-8 rounded-[2rem] bg-black/35 border border-white/10 backdrop-blur">
+          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-aura-gold/50 to-transparent" />
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-sm font-bold uppercase tracking-widest text-aura-gold flex items-center gap-2">
               <LinkIcon className="w-4 h-4" /> Social & Contact Links
@@ -394,12 +491,12 @@ export default function ProfileDashboard() {
 
           <div className="space-y-4">
             {links.map((link, idx) => (
-              <div key={idx} className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 space-y-4">
+              <div key={idx} className="p-4 rounded-xl bg-white/[0.025] border border-white/10 space-y-4">
                 <div className="flex items-center gap-3">
                   <select 
                     value={link.type}
                     onChange={(e) => updateLink(idx, 'type', e.target.value)}
-                    className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-zinc-400"
+                    className="bg-black/35 border border-white/10 rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-zinc-400"
                   >
                     {LINK_TYPES.map(type => (
                       <option key={type.id} value={type.id}>{type.id}</option>
@@ -424,12 +521,12 @@ export default function ProfileDashboard() {
                   value={link.value}
                   onChange={(e) => updateLink(idx, 'value', e.target.value)}
                   placeholder="URL or @handle"
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-xs text-zinc-400 focus:outline-none focus:border-zinc-700"
+                  className="w-full bg-black/35 border border-white/10 rounded-lg px-4 py-2 text-xs text-zinc-400 focus:outline-none focus:border-aura-lime"
                 />
               </div>
             ))}
             {links.length === 0 && (
-              <div className="text-center py-12 text-zinc-600 border-2 border-dashed border-zinc-800 rounded-2xl">
+              <div className="text-center py-12 text-zinc-600 border-2 border-dashed border-white/10 rounded-2xl bg-white/[0.015]">
                 <p className="text-xs">No links added yet. Tap (+) to start building your card.</p>
               </div>
             )}
@@ -439,7 +536,7 @@ export default function ProfileDashboard() {
         <div className="flex items-center gap-4">
           <button 
             onClick={() => setIsPreviewOpen(true)}
-            className="px-6 py-5 bg-zinc-900 text-white rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest"
+            className="px-6 py-5 bg-white/[0.035] text-white rounded-2xl border border-white/10 hover:border-aura-gold/40 transition-all flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest backdrop-blur"
           >
             <Eye className="w-4 h-4" /> Preview
           </button>
@@ -447,7 +544,7 @@ export default function ProfileDashboard() {
           <button 
             disabled={isSaving}
             onClick={handleUpdateProfile}
-            className="flex-1 py-5 bg-white text-aura-black rounded-2xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-aura-gold transition-all shadow-xl shadow-white/5"
+            className="flex-1 py-5 bg-aura-lime text-aura-black rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:bg-white transition-all shadow-xl shadow-aura-lime/20"
           >
             <Save className="w-4 h-4" />
             {isSaving ? 'Publishing...' : 'Publish Card'}
@@ -502,7 +599,7 @@ export default function ProfileDashboard() {
               <div className="absolute -top-12 right-0">
                 <button 
                   onClick={() => setIsPreviewOpen(false)}
-                  className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white"
+                  className="w-10 h-10 rounded-full bg-black/60 border border-white/10 flex items-center justify-center text-white"
                 >
                   <X />
                 </button>
