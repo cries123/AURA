@@ -144,12 +144,12 @@ export default function CinematicNavigationMenu({
           <Link to="/portal" onClick={onClose} className="hover:text-aura-gold">
             Client portal
           </Link>
-          <a href="/privacy-policy" onClick={onClose} className="hover:text-aura-gold">
+          <Link to="/privacy-policy" onClick={onClose} className="hover:text-aura-gold">
             Privacy policy
-          </a>
-          <a href="/refund-policy" onClick={onClose} className="hover:text-aura-gold">
+          </Link>
+          <Link to="/refund-policy" onClick={onClose} className="hover:text-aura-gold">
             Refund policy
-          </a>
+          </Link>
           <Link to="/warranty" onClick={onClose} className="hover:text-aura-gold">
             Warranty policy
           </Link>
