@@ -1,36 +1,64 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import type { FirebaseApp } from 'firebase/app';
+import { getAuth, type Auth } from 'firebase/auth';
+import { getFirestore, type Firestore } from 'firebase/firestore';
 
-const firebaseConfig = {
-  apiKey: import.meta.env?.VITE_FIREBASE_API_KEY || '',
-  authDomain: import.meta.env?.VITE_FIREBASE_AUTH_DOMAIN || '',
-  projectId: import.meta.env?.VITE_FIREBASE_PROJECT_ID || '',
-  storageBucket: import.meta.env?.VITE_FIREBASE_STORAGE_BUCKET || '',
-  messagingSenderId: import.meta.env?.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
-  appId: import.meta.env?.VITE_FIREBASE_APP_ID || '',
-  measurementId: import.meta.env?.VITE_FIREBASE_MEASUREMENT_ID || ''
+type FirebaseRuntimeConfig = {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  storageBucket?: string;
+  messagingSenderId?: string;
+  appId: string;
+  measurementId?: string;
+  databaseId?: string;
 };
 
-let appInstance: any = null;
-let dbInstance: any = null;
-let authInstance: any = null;
+let appInstance: FirebaseApp | null = null;
+export let db: Firestore | null = null;
+export let auth: Auth | null = null;
 
-if (firebaseConfig.apiKey && firebaseConfig.apiKey.length > 5 && firebaseConfig.projectId) {
+function hasRequiredConfig(config: FirebaseRuntimeConfig | null): config is FirebaseRuntimeConfig {
+  return Boolean(config?.apiKey && config.authDomain && config.projectId && config.appId);
+}
+
+async function loadFirebaseConfig(): Promise<FirebaseRuntimeConfig | null> {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    const response = await fetch('/.netlify/functions/firebase-config', {
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return await response.json();
+  } catch (err) {
+    console.warn('Firebase runtime config unavailable. Database features may be disabled.', err);
+    return null;
+  }
+}
+
+export const firebaseReady = loadFirebaseConfig().then((firebaseConfig) => {
+  if (!hasRequiredConfig(firebaseConfig)) {
+    console.warn('Firebase runtime config is missing or incomplete. Database features may be disabled.');
+    return;
+  }
+
   try {
     appInstance = initializeApp(firebaseConfig);
-    const customDbId = import.meta.env?.VITE_FIREBASE_DATABASE_ID || undefined;
-    dbInstance = customDbId ? getFirestore(appInstance, customDbId) : getFirestore(appInstance);
-    authInstance = getAuth(appInstance);
+    db = firebaseConfig.databaseId
+      ? getFirestore(appInstance, firebaseConfig.databaseId)
+      : getFirestore(appInstance);
+    auth = getAuth(appInstance);
   } catch (err) {
     console.error('Failed to initialize Firebase services:', err);
   }
-} else {
-  console.warn('Firebase core config is missing or incomplete. Run-time database operations may remain unavailable or require backend setup.');
-}
-
-export const db = dbInstance;
-export const auth = authInstance;
+});
 
 export enum OperationType {
   CREATE = 'create',
