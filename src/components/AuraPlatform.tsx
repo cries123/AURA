@@ -60,59 +60,31 @@ export default function AuraPlatform() {
              <div className="absolute inset-8 rounded-full border border-aura-gold/20 aura-spin-slow" />
              <div className="absolute inset-20 rounded-full border border-dashed border-aura-lime/30 aura-spin-slow-reverse" />
              <div className="absolute inset-0 rounded-full bg-aura-gold/10 blur-[90px]" />
-             <div className="relative w-full max-w-[520px] rounded-[2rem] border border-white/10 bg-black/55 p-4 shadow-[0_40px_120px_rgba(0,0,0,0.55)] backdrop-blur">
-               <div className="mb-4 flex items-center justify-between px-2">
-                 <div className="font-mono text-[10px] font-black uppercase tracking-[0.34em] text-aura-gold">Aura Dashboard</div>
-                 <div className="rounded-full border border-aura-lime/30 bg-aura-lime/5 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-aura-lime">Live Preview</div>
+             <div className="relative w-80 rounded-[2rem] border border-white/10 bg-black/45 p-8 shadow-[0_40px_120px_rgba(0,0,0,0.55)] backdrop-blur">
+               <div className="mb-8 flex items-center justify-between">
+                 <div className="font-mono text-[10px] font-black uppercase tracking-[0.34em] text-aura-gold">Live Profile</div>
+                 <div className="rounded-full border border-aura-lime/30 bg-aura-lime/5 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-aura-lime">Online</div>
                </div>
-               <div className="grid gap-3 md:grid-cols-[8rem_1fr]">
-                 <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-3">
-                   {['Profile', 'Links', 'Analytics', 'Team'].map((item, index) => (
-                     <div
-                       key={item}
-                       className={`mb-2 rounded-xl px-3 py-2 text-[9px] font-black uppercase tracking-[0.18em] ${index === 0 ? 'bg-aura-lime text-aura-black' : 'text-zinc-500'}`}
-                     >
-                       {item}
-                     </div>
-                   ))}
+               <div className="mb-6 flex items-center gap-4">
+                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-aura-gold/20 bg-aura-gold/10">
+                   <Smartphone className="h-7 w-7 text-aura-gold" />
                  </div>
-                 <div className="space-y-3">
-                   <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
-                     <div className="mb-4 flex items-center gap-4">
-                       <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-aura-gold/20 bg-aura-gold/10">
-                         <Smartphone className="h-6 w-6 text-aura-gold" />
-                       </div>
-                       <div>
-                         <div className="font-display text-xl font-black text-white">Jaryn Healey</div>
-                         <div className="text-xs text-aura-lime">aurataps.net/jaryn</div>
-                       </div>
-                     </div>
-                     <div className="grid gap-2 sm:grid-cols-2">
-                       {[
-                         'Headline: Founder / Sales',
-                         'Phone: Tap to save',
-                         'Email: business inbox',
-                         'CTA: Book a consult',
-                       ].map((field) => (
-                         <div key={field} className="rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-[10px] text-zinc-400">
-                           {field}
-                         </div>
-                       ))}
-                     </div>
-                   </div>
-                   <div className="grid gap-3 sm:grid-cols-3">
-                     {[
-                       { icon: <Layout className="h-4 w-4" />, label: '5 links' },
-                       { icon: <RefreshCw className="h-4 w-4" />, label: 'Live edits' },
-                       { icon: <Zap className="h-4 w-4" />, label: '248 taps' },
-                     ].map((item) => (
-                       <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.025] p-3 text-center text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-                         <div className="mb-2 flex justify-center text-aura-lime">{item.icon}</div>
-                         {item.label}
-                       </div>
-                     ))}
-                   </div>
+                 <div>
+                   <div className="font-display text-2xl font-black text-white">Aura Profile</div>
+                   <div className="text-xs text-zinc-500">aurataps.net/handle</div>
                  </div>
+               </div>
+               <div className="space-y-3">
+                 {[
+                   { icon: <Layout className="h-4 w-4" />, label: 'Links and contact info' },
+                   { icon: <RefreshCw className="h-4 w-4" />, label: 'Update anytime' },
+                   { icon: <Zap className="h-4 w-4" />, label: 'Instant tap handoff' },
+                 ].map((item) => (
+                   <div key={item.label} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3 text-xs text-zinc-400">
+                     <span className="text-aura-lime">{item.icon}</span>
+                     {item.label}
+                   </div>
+                 ))}
                </div>
              </div>
           </motion.div>
