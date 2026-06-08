@@ -198,7 +198,8 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
         .filter((visual): visual is HTMLElement => Boolean(visual));
       const totalSections = Math.max(sectionCount, panels.length, 1);
       const totalTransitions = Math.max(totalSections - 1, 1);
-      const scrollDistancePerPanel = window.innerWidth < 768 ? 0.42 : 0.34;
+      const scrollDistancePerPanel = window.innerWidth < 768 ? 0.72 : 0.68;
+      const snapCooldownMs = window.innerWidth < 768 ? 950 : 1050;
       const snapPoints = Array.from(
         { length: totalSections },
         (_, index) => index / totalTransitions,
@@ -298,6 +299,8 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
       });
       let isProgrammaticSnap = false;
       let touchStartY = 0;
+      let latestTouchY = 0;
+      let lastSnapAt = 0;
 
       const getScrollTrigger = () => timeline.scrollTrigger as ScrollTrigger | undefined;
       const isWithinPinnedRange = () => {
@@ -308,48 +311,59 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
       };
       const jumpToPanel = (direction: 1 | -1) => {
         const scrollTrigger = getScrollTrigger();
-        if (!scrollTrigger || isProgrammaticSnap) return;
+        const now = window.performance.now();
+        if (!scrollTrigger || isProgrammaticSnap || now - lastSnapAt < snapCooldownMs) return;
 
         const currentPanel = Math.round(scrollTrigger.progress * totalTransitions);
         const targetPanel = gsap.utils.clamp(0, totalSections - 1, currentPanel + direction);
         if (targetPanel === currentPanel) return;
 
         isProgrammaticSnap = true;
+        lastSnapAt = now;
         const targetProgress = targetPanel / totalTransitions;
         const targetScroll = scrollTrigger.start + (scrollTrigger.end - scrollTrigger.start) * targetProgress;
         window.scrollTo({ top: targetScroll, behavior: 'smooth' });
         window.setTimeout(() => {
           isProgrammaticSnap = false;
-        }, 520);
+        }, snapCooldownMs);
       };
       const handleWheel = (event: WheelEvent) => {
-        if (!isWithinPinnedRange() || Math.abs(event.deltaY) < 4) return;
+        if (!isWithinPinnedRange()) return;
 
         event.preventDefault();
+        if (Math.abs(event.deltaY) < 12) return;
         jumpToPanel(event.deltaY > 0 ? 1 : -1);
       };
       const handleTouchStart = (event: TouchEvent) => {
         touchStartY = event.touches[0]?.clientY ?? 0;
+        latestTouchY = touchStartY;
       };
       const handleTouchMove = (event: TouchEvent) => {
         if (!isWithinPinnedRange()) return;
 
-        const currentY = event.touches[0]?.clientY ?? touchStartY;
-        const deltaY = touchStartY - currentY;
-        if (Math.abs(deltaY) < 36) return;
-
         event.preventDefault();
+        latestTouchY = event.touches[0]?.clientY ?? latestTouchY;
+      };
+      const handleTouchEnd = () => {
+        if (!isWithinPinnedRange()) return;
+
+        const deltaY = touchStartY - latestTouchY;
+        if (Math.abs(deltaY) < 54) return;
+
         jumpToPanel(deltaY > 0 ? 1 : -1);
-        touchStartY = currentY;
       };
 
       window.addEventListener('wheel', handleWheel, { passive: false });
       window.addEventListener('touchstart', handleTouchStart, { passive: true });
       window.addEventListener('touchmove', handleTouchMove, { passive: false });
+      window.addEventListener('touchend', handleTouchEnd, { passive: true });
+      window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
       cleanupSnapControls = () => {
         window.removeEventListener('wheel', handleWheel);
         window.removeEventListener('touchstart', handleTouchStart);
         window.removeEventListener('touchmove', handleTouchMove);
+        window.removeEventListener('touchend', handleTouchEnd);
+        window.removeEventListener('touchcancel', handleTouchEnd);
       };
 
       for (let index = 1; index < totalSections; index += 1) {
