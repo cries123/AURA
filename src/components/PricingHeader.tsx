@@ -2,18 +2,19 @@ import { motion } from 'motion/react';
 
 export default function PricingHeader() {
   return (
-    <section className="pt-32 pb-16 bg-aura-black relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex flex-col lg:flex-row gap-12 items-center">
-          <div className="lg:w-1/2">
-            <div className="text-zinc-500 text-xs font-bold uppercase tracking-[0.3em] mb-4">Pricing</div>
+    <section className="relative overflow-hidden pb-16 pt-36">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_76%_12%,rgba(184,255,44,0.08),transparent_22%),radial-gradient(circle_at_18%_48%,rgba(232,215,162,0.12),transparent_24%)]" />
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="grid gap-16 lg:grid-cols-[1.05fr_0.95fr] items-center min-h-[62vh]">
+          <div>
+            <div className="text-aura-gold text-[10px] font-black uppercase tracking-[0.42em] mb-5">Pricing Command</div>
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-5xl md:text-7xl font-display font-medium text-white tracking-tight mb-8 leading-[0.9]"
+              className="font-display text-5xl md:text-7xl lg:text-8xl font-black uppercase text-white tracking-[-0.065em] mb-8 leading-[0.86]"
             >
-              Clear Pricing. <br />
-              <span className="text-aura-gold italic">Strong Return on Investment.</span>
+              Buy once. <br />
+              <span className="text-aura-gold">Tap forever.</span>
             </motion.h1>
             <p className="text-zinc-400 text-lg mb-10 max-w-xl leading-relaxed">
               One-time hardware pricing with Aura Platform dashboard access bundled into every card and wristband.
@@ -26,34 +27,44 @@ export default function PricingHeader() {
               ].map((tag) => (
                 <span 
                   key={tag} 
-                  className="px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 text-[10px] font-bold text-zinc-300 uppercase tracking-widest"
+                  className="px-4 py-2 rounded-full bg-white/[0.035] border border-white/10 text-[10px] font-bold text-zinc-300 uppercase tracking-widest backdrop-blur"
                 >
                   {tag}
                 </span>
               ))}
             </div>
           </div>
-          <div className="lg:w-1/2 relative">
-            <div className="aspect-[4/3] rounded-3xl overflow-hidden border border-zinc-800 bg-zinc-900 relative">
-              <img 
-                src="https://images.unsplash.com/photo-1606857521015-7f9f94a83959?auto=format&fit=crop&q=80&w=1200" 
-                alt="Hardware" 
-                className="w-full h-full object-cover grayscale opacity-40" 
-              />
-              <div className="absolute top-8 left-8 flex items-center gap-2">
-                 <div className="w-2 h-2 rounded-full bg-aura-gold animate-pulse" />
-                 <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Hardware</span>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1 }}
+            className="relative mx-auto flex aspect-square w-full max-w-lg items-center justify-center"
+          >
+            <div className="absolute inset-8 rounded-full border border-aura-gold/20 aura-spin-slow" />
+            <div className="absolute inset-20 rounded-full border border-dashed border-aura-lime/30 aura-spin-slow-reverse" />
+            <div className="absolute inset-0 rounded-full bg-aura-gold/10 blur-[90px]" />
+            <div className="relative w-80 rounded-[2rem] border border-white/10 bg-black/45 p-8 shadow-[0_40px_120px_rgba(0,0,0,0.55)] backdrop-blur">
+              <div className="mb-8 flex items-center justify-between">
+                <div className="font-mono text-[10px] font-black uppercase tracking-[0.34em] text-aura-gold">Best Value</div>
+                <div className="rounded-full border border-aura-lime/30 bg-aura-lime/5 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-aura-lime">Save $10</div>
+              </div>
+              <div className="mb-3 font-display text-3xl font-black text-white">Duo Bundle</div>
+              <div className="mb-8 flex items-end gap-3">
+                <span className="text-6xl font-black text-white">$40</span>
+                <span className="pb-2 text-xs uppercase tracking-widest text-zinc-500">Card + Band</span>
+              </div>
+              <div className="space-y-3 text-xs text-zinc-400">
+                {['Setup included', 'Ships in 3-5 days', 'No monthly fees'].map((item) => (
+                  <div key={item} className="flex items-center gap-3">
+                    <span className="h-1.5 w-1.5 rounded-full bg-aura-lime shadow-[0_0_12px_rgba(184,255,44,0.7)]" />
+                    {item}
+                  </div>
+                ))}
               </div>
             </div>
-            <p className="text-[10px] text-zinc-600 mt-6 md:text-right font-medium italic">
-              Professional-grade NFC cards and wristbands prepared for scalable team deployment.
-            </p>
-          </div>
+          </motion.div>
         </div>
       </div>
-      
-      {/* Background Glow */}
-      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[500px] h-[500px] bg-aura-gold/5 rounded-full blur-[120px] pointer-events-none" />
     </section>
   );
 }
