@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
 import { Users, Mail, Clock, ChevronRight, Search, Filter, ShieldCheck, MailWarning, Calendar, ExternalLink } from 'lucide-react';
-import { collection, onSnapshot, doc, updateDoc, setDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 
 export default function AdminDashboard() {
@@ -61,6 +61,32 @@ export default function AdminDashboard() {
       unsubscribeUsers();
     };
   }, []);
+
+  useEffect(() => {
+    if (!db || users.length === 0) return;
+
+    async function backfillUsernameMappings() {
+      for (const user of users) {
+        const handle = user.username?.toLowerCase();
+        const uid = user.uid || user.id;
+        if (!handle || !uid) continue;
+
+        try {
+          const usernameDoc = await getDoc(doc(db, 'usernames', handle));
+          if (!usernameDoc.exists() || usernameDoc.data().uid !== uid) {
+            await setDoc(doc(db, 'usernames', handle), {
+              uid,
+              claimedAt: new Date().toISOString(),
+            });
+          }
+        } catch (err) {
+          console.warn(`Could not backfill handle mapping for ${handle}:`, err);
+        }
+      }
+    }
+
+    backfillUsernameMappings();
+  }, [users]);
 
   const updateLeadStatus = async (leadId: string, status: string) => {
     try {

@@ -62,7 +62,11 @@ service cloud.firestore {
 
     match /usernames/{handle} {
       allow get: if true;
-      allow create: if isSignedIn() && (!exists(/databases/$(database)/documents/usernames/$(handle)) || isAdmin()) && incoming().uid == request.auth.uid;
+      allow create: if isSignedIn() && (
+        (incoming().uid == request.auth.uid && !exists(/databases/$(database)/documents/usernames/$(handle))) ||
+        isAdmin()
+      );
+      allow update: if isSignedIn() && (existing().uid == request.auth.uid || isAdmin());
       allow delete: if isSignedIn() && (existing().uid == request.auth.uid || isAdmin());
     }
 
