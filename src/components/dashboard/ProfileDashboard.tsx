@@ -29,6 +29,7 @@ export default function ProfileDashboard() {
   const [displayName, setDisplayName] = useState(userProfile?.displayName || '');
   const [links, setLinks] = useState<AuraLink[]>(userProfile?.links || []);
   const [avatarUrl, setAvatarUrl] = useState(userProfile?.avatarUrl || '');
+  const [bannerUrl, setBannerUrl] = useState(userProfile?.bannerUrl || '');
   const [jobTitle, setJobTitle] = useState(userProfile?.jobTitle || '');
   const [location, setLocation] = useState(userProfile?.location || '');
   const [tagsText, setTagsText] = useState(userProfile?.tags ? userProfile.tags.join(', ') : '');
@@ -43,6 +44,7 @@ export default function ProfileDashboard() {
       if (userProfile.displayName !== undefined) setDisplayName(userProfile.displayName || '');
       if (userProfile.links !== undefined) setLinks(userProfile.links || []);
       if (userProfile.avatarUrl !== undefined) setAvatarUrl(userProfile.avatarUrl || '');
+      if (userProfile.bannerUrl !== undefined) setBannerUrl(userProfile.bannerUrl || '');
       if (userProfile.jobTitle !== undefined) setJobTitle(userProfile.jobTitle || '');
       if (userProfile.location !== undefined) setLocation(userProfile.location || '');
       if (userProfile.tags !== undefined) setTagsText(userProfile.tags.join(', ') || '');
@@ -54,6 +56,7 @@ export default function ProfileDashboard() {
     bio,
     links,
     avatarUrl: avatarUrl,
+    bannerUrl,
     username: username || 'handle',
     jobTitle,
     location,
@@ -97,6 +100,53 @@ export default function ProfileDashboard() {
           const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
           setAvatarUrl(compressedBase64);
           setMessage({ type: 'success', text: 'Custom photo applied! Tap Save Profile to publish.' });
+          setTimeout(() => setMessage(null), 3500);
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleBannerUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 8 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'Banner image must be under 8MB.' });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const targetWidth = 900;
+        const targetHeight = 360;
+        const sourceRatio = img.width / img.height;
+        const targetRatio = targetWidth / targetHeight;
+        let sourceWidth = img.width;
+        let sourceHeight = img.height;
+        let sourceX = 0;
+        let sourceY = 0;
+
+        if (sourceRatio > targetRatio) {
+          sourceWidth = img.height * targetRatio;
+          sourceX = (img.width - sourceWidth) / 2;
+        } else {
+          sourceHeight = img.width / targetRatio;
+          sourceY = (img.height - sourceHeight) / 2;
+        }
+
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, targetWidth, targetHeight);
+          setBannerUrl(canvas.toDataURL('image/jpeg', 0.78));
+          setMessage({ type: 'success', text: 'Banner applied! Tap Save Profile to publish.' });
           setTimeout(() => setMessage(null), 3500);
         }
       };
@@ -184,6 +234,7 @@ export default function ProfileDashboard() {
         bio,
         links,
         avatarUrl,
+        bannerUrl,
         jobTitle,
         location,
         tags: tagsText.split(',').map(t => t.trim()).filter(Boolean),
@@ -289,6 +340,50 @@ export default function ProfileDashboard() {
                     </button>
                   )}
                 </div>
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-2xl bg-zinc-950 border border-zinc-800/80">
+              <div className="relative h-36 bg-zinc-900">
+                {bannerUrl ? (
+                  <img
+                    src={bannerUrl}
+                    alt="Profile banner"
+                    className="h-full w-full object-cover opacity-80"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="h-full w-full bg-[radial-gradient(circle_at_30%_20%,rgba(232,215,162,0.22),transparent_30%),radial-gradient(circle_at_78%_72%,rgba(184,255,44,0.12),transparent_28%),linear-gradient(135deg,#111114,#030304)]" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
+                <div className="absolute bottom-4 left-4">
+                  <div className="text-[10px] font-black uppercase tracking-[0.28em] text-aura-gold">Profile Banner</div>
+                  <p className="mt-1 text-[11px] text-zinc-400">This appears behind your public card profile.</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2 p-4">
+                <label className="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-aura-lime/40 rounded-lg text-[9px] font-bold uppercase tracking-wider text-zinc-300 hover:text-white cursor-pointer transition-all flex items-center gap-1.5">
+                  <ImageIcon className="w-3 h-3 text-aura-lime" /> Upload Banner
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleBannerUpload} 
+                    className="hidden" 
+                  />
+                </label>
+                {bannerUrl && (
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setBannerUrl('');
+                      setMessage({ type: 'success', text: 'Banner cleared! Tap Save Profile to apply.' });
+                      setTimeout(() => setMessage(null), 3000);
+                    }}
+                    className="px-3 py-1.5 bg-zinc-900/30 hover:bg-red-950/20 hover:text-red-400 border border-zinc-800 hover:border-red-900/50 rounded-lg text-[9px] font-bold uppercase tracking-widest text-zinc-400 transition-all flex items-center gap-1.5"
+                  >
+                    <Trash2 className="w-3 h-3" /> Clear Banner
+                  </button>
+                )}
               </div>
             </div>
 
