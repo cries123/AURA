@@ -309,30 +309,34 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
       const jumpToPanel = (direction: 1 | -1) => {
         const scrollTrigger = getScrollTrigger();
         const now = window.performance.now();
-        if (!scrollTrigger || isProgrammaticSnap || now - lastSnapAt < snapCooldownMs) return;
+        if (!scrollTrigger || isProgrammaticSnap || now - lastSnapAt < snapCooldownMs) return false;
 
         const currentPanel = Math.round(scrollTrigger.progress * totalTransitions);
         const targetPanel = gsap.utils.clamp(0, totalSections - 1, currentPanel + direction);
-        if (targetPanel === currentPanel) return;
+        if (targetPanel === currentPanel) return false;
 
         isProgrammaticSnap = true;
         lastSnapAt = now;
         const targetProgress = targetPanel / totalTransitions;
         const targetScroll = scrollTrigger.start + (scrollTrigger.end - scrollTrigger.start) * targetProgress;
-        window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+        scrollTrigger.scroll(targetScroll);
+        scrollTrigger.update();
         unlockAfterQuiet();
+        return true;
       };
       const handleWheel = (event: WheelEvent) => {
         if (!isWithinPinnedRange()) return;
 
-        event.preventDefault();
         if (Math.abs(event.deltaY) < 12) return;
         if (isProgrammaticSnap) {
+          event.preventDefault();
           unlockAfterQuiet();
           return;
         }
 
-        jumpToPanel(event.deltaY > 0 ? 1 : -1);
+        if (jumpToPanel(event.deltaY > 0 ? 1 : -1)) {
+          event.preventDefault();
+        }
       };
       const handleTouchStart = (event: TouchEvent) => {
         touchStartY = event.touches[0]?.clientY ?? 0;
@@ -350,7 +354,9 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
         const deltaY = touchStartY - latestTouchY;
         if (Math.abs(deltaY) < 54) return;
 
-        jumpToPanel(deltaY > 0 ? 1 : -1);
+        if (jumpToPanel(deltaY > 0 ? 1 : -1)) {
+          touchStartY = latestTouchY;
+        }
       };
 
       window.addEventListener('wheel', handleWheel, { passive: false });
