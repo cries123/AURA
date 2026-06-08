@@ -139,13 +139,14 @@ export default function UserProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-[#030304] text-white relative flex flex-col items-center">
-      {/* Background Ambience */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-lg aspect-square bg-aura-gold/5 rounded-full blur-[140px] -translate-y-1/2 pointer-events-none" />
-      
-      <motion.div 
-        initial={{ opacity: 0, y: 15 }}
+    <div className="min-h-screen bg-black text-white relative flex flex-col items-center overflow-x-hidden">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top,rgba(232,215,162,0.08),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(184,255,44,0.04),transparent_28%)]" />
+      <div className="pointer-events-none fixed inset-0 opacity-20 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
+
+      <motion.div
+        initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
         className="w-full relative z-10 flex-grow flex flex-col justify-stretch"
       >
         <ProfileCard data={profile} isMockup={false} />
