@@ -457,33 +457,39 @@ export default function Home() {
               }}
             >
               <div className={`relative w-full max-w-5xl ${panel.copyAlign}`}>
-                <div className={`mb-8 flex items-center gap-4 ${index > 1 ? 'justify-end' : ''}`}>
-                  <span className="font-mono text-xs text-aura-gold/80">{panel.chapter}</span>
-                  <span className="h-px w-16 bg-aura-gold/50" />
-                  <p className="text-[10px] font-black uppercase tracking-[0.46em] text-aura-gold">
-                    {panel.eyebrow}
-                  </p>
+                <div className={index === 1 ? 'grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_14rem]' : ''}>
+                  <div>
+                    <div className={`mb-8 flex items-center gap-4 ${index > 1 ? 'justify-end' : ''}`}>
+                      <span className="font-mono text-xs text-aura-gold/80">{panel.chapter}</span>
+                      <span className="h-px w-16 bg-aura-gold/50" />
+                      <p className="text-[10px] font-black uppercase tracking-[0.46em] text-aura-gold">
+                        {panel.eyebrow}
+                      </p>
+                    </div>
+                    <h1 className="cinematic-title font-display text-5xl font-bold uppercase leading-[0.9] tracking-[-0.065em] text-white sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl">
+                      {renderInteractiveTitle(panel.title)}
+                    </h1>
+                    <p className="mt-8 max-w-xl text-base font-medium leading-8 text-zinc-300/80 md:text-xl">
+                      {panel.body}
+                    </p>
+                  </div>
+                  {index === 1 && (
+                    <div className="flex justify-start lg:justify-end">
+                      <a
+                        href="/platform"
+                        className="chapter-buy-orbit pointer-events-auto inline-flex h-36 w-36 items-center justify-center rounded-full text-center text-[12px] font-black uppercase tracking-[0.18em] text-white transition hover:text-aura-lime md:h-44 md:w-44"
+                      >
+                        <span className="relative z-10">Explore</span>
+                      </a>
+                    </div>
+                  )}
                 </div>
-                <h1 className="cinematic-title font-display text-5xl font-bold uppercase leading-[0.9] tracking-[-0.065em] text-white sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl">
-                  {renderInteractiveTitle(panel.title)}
-                </h1>
-                <p className="mt-8 max-w-xl text-base font-medium leading-8 text-zinc-300/80 md:text-xl">
-                  {panel.body}
-                </p>
                 {index === 2 && (
                   <a
                     href="/pricing#products"
                     className="chapter-buy-orbit pointer-events-auto mt-12 inline-flex h-36 w-36 items-center justify-center rounded-full text-center text-[12px] font-black uppercase tracking-[0.18em] text-white transition hover:text-aura-lime md:h-44 md:w-44"
                   >
                     <span className="relative z-10">Buy Now</span>
-                  </a>
-                )}
-                {index === 1 && (
-                  <a
-                    href="/platform"
-                    className="chapter-buy-orbit pointer-events-auto mt-12 inline-flex h-36 w-36 items-center justify-center rounded-full text-center text-[12px] font-black uppercase tracking-[0.18em] text-white transition hover:text-aura-lime md:h-44 md:w-44"
-                  >
-                    <span className="relative z-10">Explore</span>
                   </a>
                 )}
                 {index === panels.length - 1 && (
