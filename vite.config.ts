@@ -3,6 +3,34 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig, loadEnv, type Plugin} from 'vite';
 
+function injectFirebaseConfig(env: Record<string, string>): Plugin {
+  return {
+    name: 'inject-firebase-config',
+    transformIndexHtml(html) {
+      const apiKey = env.VITE_FIREBASE_API_KEY || env.FIREBASE_API_KEY;
+      if (!apiKey) {
+        return html;
+      }
+
+      const config = JSON.stringify({
+        apiKey,
+        authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || env.FIREBASE_AUTH_DOMAIN,
+        projectId: env.VITE_FIREBASE_PROJECT_ID || env.FIREBASE_PROJECT_ID,
+        storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || env.FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || env.FIREBASE_MESSAGING_SENDER_ID,
+        appId: env.VITE_FIREBASE_APP_ID || env.FIREBASE_APP_ID,
+        measurementId: env.VITE_FIREBASE_MEASUREMENT_ID || env.FIREBASE_MEASUREMENT_ID,
+        databaseId: env.VITE_FIREBASE_DATABASE_ID || env.FIREBASE_DATABASE_ID || '',
+      });
+
+      return html.replace(
+        '</head>',
+        `<script>window.__AURA_FIREBASE_CONFIG__=${config}</script></head>`,
+      );
+    },
+  };
+}
+
 function firebaseConfigDevApi(env: Record<string, string>): Plugin {
   return {
     name: 'firebase-config-dev-api',
@@ -31,7 +59,24 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
-    plugins: [react(), tailwindcss(), firebaseConfigDevApi(env)],
+    plugins: [react(), tailwindcss(), injectFirebaseConfig(env), firebaseConfigDevApi(env)],
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules/firebase') || id.includes('@firebase')) {
+              return 'firebase';
+            }
+            if (id.includes('node_modules/three') || id.includes('@react-three/fiber')) {
+              return 'three';
+            }
+            if (id.includes('node_modules/recharts')) {
+              return 'recharts';
+            }
+          },
+        },
+      },
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

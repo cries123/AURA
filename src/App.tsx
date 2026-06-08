@@ -1,25 +1,43 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
-import { useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
-import Home from './pages/Home';
-import Platform from './pages/Platform';
-import Pricing from './pages/Pricing';
-import WarrantyPage from './pages/WarrantyPage';
-import FAQPage from './pages/FAQPage';
-import Affiliate from './pages/Affiliate';
-import Portal from './pages/Portal';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import RefundPolicy from './pages/RefundPolicy';
 import UserProfile from './pages/UserProfile';
 import LoadingScreen from './components/LoadingScreen';
+import ProfilePageSkeleton from './components/ProfilePageSkeleton';
 import CinematicStandardChrome from './components/CinematicStandardChrome';
 import FloatingCartControl from './components/FloatingCartControl';
+
+const Home = lazy(() => import('./pages/Home'));
+const Platform = lazy(() => import('./pages/Platform'));
+const Pricing = lazy(() => import('./pages/Pricing'));
+const WarrantyPage = lazy(() => import('./pages/WarrantyPage'));
+const FAQPage = lazy(() => import('./pages/FAQPage'));
+const Affiliate = lazy(() => import('./pages/Affiliate'));
+const Portal = lazy(() => import('./pages/Portal'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const RefundPolicy = lazy(() => import('./pages/RefundPolicy'));
 
 const navigationEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
 if (navigationEntry?.type === 'reload' && window.location.pathname !== '/') {
   window.history.replaceState(null, '', '/');
+}
+
+function RouteFallback() {
+  const location = useLocation();
+  const systemPaths = ['/', '/platform', '/pricing', '/faq', '/warranty', '/privacy-policy', '/refund-policy', '/affiliate', '/portal'];
+  const isProfilePage = !systemPaths.includes(location.pathname);
+
+  if (isProfilePage) {
+    return <ProfilePageSkeleton />;
+  }
+
+  return (
+    <div className="min-h-screen bg-[#030303] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-aura-gold/20 border-t-aura-gold rounded-full animate-spin" />
+    </div>
+  );
 }
 
 function AnimatedRoutes() {
@@ -27,7 +45,6 @@ function AnimatedRoutes() {
   
   return (
     <AnimatePresence mode="wait" initial={false}>
-      {/* @ts-ignore - key is used for AnimatePresence to trigger re-renders */}
       <Routes key={location.pathname} location={location}>
         <Route 
           path="/" 
@@ -153,7 +170,7 @@ function AnimatedRoutes() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.2 }}
             >
               <UserProfile />
             </motion.div>
@@ -179,7 +196,9 @@ function AppContent() {
       {!isProfilePage && !isCinematicHome && <CinematicStandardChrome />}
       {!isProfilePage && <FloatingCartControl />}
       <main className={!isProfilePage && !isCinematicHome ? 'relative z-10 [&_section]:bg-transparent' : undefined}>
-        <AnimatedRoutes />
+        <Suspense fallback={<RouteFallback />}>
+          <AnimatedRoutes />
+        </Suspense>
       </main>
     </div>
   );
