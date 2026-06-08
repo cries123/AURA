@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Smartphone, Layout, RefreshCw, Zap } from 'lucide-react';
+import { Layout, RefreshCw, Smartphone, Zap } from 'lucide-react';
 
 export default function AuraPlatform() {
   const steps = [
@@ -21,19 +21,17 @@ export default function AuraPlatform() {
   ];
 
   return (
-    <section id="platform" className="py-24 bg-aura-black">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex flex-col lg:flex-row gap-12 mb-20 items-center">
+    <section id="platform" className="relative overflow-hidden py-24">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_10%,rgba(232,215,162,0.12),transparent_24%),radial-gradient(circle_at_20%_58%,rgba(184,255,44,0.06),transparent_20%)]" />
+      <div className="relative z-10 max-w-7xl mx-auto px-6">
+        <div className="grid min-h-[66vh] items-center gap-16 lg:grid-cols-[1.05fr_0.95fr] mb-20">
           <motion.div 
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="lg:w-1/2"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
           >
-            <div className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4">The Aura Platform</div>
-            <h2 className="text-4xl md:text-6xl font-display font-bold mb-8 leading-tight">
-              More Than a Card. <br />
-              It Is Your <span className="text-aura-gold italic">Digital Dashboard.</span>
+            <div className="text-aura-gold text-[10px] font-black uppercase tracking-[0.42em] mb-5">The Aura Platform</div>
+            <h2 className="font-display text-5xl md:text-7xl lg:text-8xl font-black uppercase text-white tracking-[-0.065em] mb-8 leading-[0.86]">
+              Your tap has a control center.
             </h2>
             <p className="text-zinc-400 text-lg mb-8 max-w-xl">
               Aura Tap combines NFC hardware with a profile dashboard, so every tap leads to a page you can manage, update, and refine over time.
@@ -46,7 +44,7 @@ export default function AuraPlatform() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.3 + (i * 0.1) }}
-                  className="px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 text-[10px] font-bold text-zinc-300 uppercase tracking-widest"
+                  className={`px-4 py-2 rounded-full border text-[10px] font-bold uppercase tracking-widest backdrop-blur ${i === 0 ? 'border-aura-lime/30 bg-aura-lime/5 text-aura-lime' : 'border-white/10 bg-white/[0.035] text-zinc-300'}`}
                 >
                   {tag}
                 </motion.span>
@@ -54,24 +52,40 @@ export default function AuraPlatform() {
             </div>
           </motion.div>
           <motion.div 
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="lg:w-1/2"
-            style={{ willChange: 'transform, opacity' }}
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1 }}
+            className="relative mx-auto flex aspect-square w-full max-w-lg items-center justify-center"
           >
-             <div className="relative rounded-3xl overflow-hidden border border-zinc-800 group bg-zinc-900">
-                <img 
-                  src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1200" 
-                  alt="Dashboard" 
-                  className="w-full h-full object-cover opacity-30 group-hover:opacity-100 transition-opacity duration-700" 
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-aura-black/90 to-transparent" />
-                <div className="absolute bottom-6 left-6 text-white group-hover:translate-x-2 transition-transform duration-500">
-                   <p className="font-display font-medium text-lg">Professional-grade profiles</p>
-                   <p className="text-zinc-400 text-sm italic">Configured for maximum conversion</p>
-                </div>
+             <div className="absolute inset-8 rounded-full border border-aura-gold/20 aura-spin-slow" />
+             <div className="absolute inset-20 rounded-full border border-dashed border-aura-lime/30 aura-spin-slow-reverse" />
+             <div className="absolute inset-0 rounded-full bg-aura-gold/10 blur-[90px]" />
+             <div className="relative w-80 rounded-[2rem] border border-white/10 bg-black/45 p-8 shadow-[0_40px_120px_rgba(0,0,0,0.55)] backdrop-blur">
+               <div className="mb-8 flex items-center justify-between">
+                 <div className="font-mono text-[10px] font-black uppercase tracking-[0.34em] text-aura-gold">Live Profile</div>
+                 <div className="rounded-full border border-aura-lime/30 bg-aura-lime/5 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-aura-lime">Online</div>
+               </div>
+               <div className="mb-6 flex items-center gap-4">
+                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-aura-gold/20 bg-aura-gold/10">
+                   <Smartphone className="h-7 w-7 text-aura-gold" />
+                 </div>
+                 <div>
+                   <div className="font-display text-2xl font-black text-white">Aura Profile</div>
+                   <div className="text-xs text-zinc-500">aurataps.net/handle</div>
+                 </div>
+               </div>
+               <div className="space-y-3">
+                 {[
+                   { icon: <Layout className="h-4 w-4" />, label: 'Links and contact info' },
+                   { icon: <RefreshCw className="h-4 w-4" />, label: 'Update anytime' },
+                   { icon: <Zap className="h-4 w-4" />, label: 'Instant tap handoff' },
+                 ].map((item) => (
+                   <div key={item.label} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3 text-xs text-zinc-400">
+                     <span className="text-aura-lime">{item.icon}</span>
+                     {item.label}
+                   </div>
+                 ))}
+               </div>
              </div>
           </motion.div>
         </div>
@@ -89,7 +103,7 @@ export default function AuraPlatform() {
                 ease: [0.21, 0.47, 0.32, 0.98] 
               }}
               whileHover={{ y: -8, transition: { duration: 0.2 } }}
-              className="p-10 rounded-[2rem] bg-zinc-900/40 border border-zinc-800/80 hover:border-aura-gold/40 hover:bg-zinc-900/60 transition-all group"
+              className="p-10 rounded-[2rem] bg-white/[0.035] border border-white/10 hover:border-aura-gold/40 transition-all group backdrop-blur"
             >
               <div className="text-aura-gold text-xs font-bold mb-8 font-mono tracking-widest">{step.id}</div>
               <h3 className="text-2xl font-display font-medium text-white mb-6 group-hover:text-aura-gold transition-colors">{step.title}</h3>
