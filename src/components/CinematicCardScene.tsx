@@ -200,10 +200,6 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
       const totalTransitions = Math.max(totalSections - 1, 1);
       const scrollDistancePerPanel = window.innerWidth < 768 ? 0.72 : 0.68;
       const snapCooldownMs = window.innerWidth < 768 ? 950 : 1050;
-      const snapPoints = Array.from(
-        { length: totalSections },
-        (_, index) => index / totalTransitions,
-      );
       const dots = gsap.utils.toArray<HTMLElement>('[data-cinematic-dot]');
       const currentIndex = document.querySelector<HTMLElement>('[data-cinematic-index]');
       const currentTitle = document.querySelector<HTMLElement>('[data-cinematic-title]');
@@ -289,18 +285,13 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
           onUpdate: (self) => {
             setActiveChapter(Math.round(self.progress * totalTransitions));
           },
-          snap: {
-            snapTo: snapPoints,
-            duration: { min: 0.2, max: 0.45 },
-            delay: 0.02,
-            ease: 'power3.inOut',
-          },
         },
       });
       let isProgrammaticSnap = false;
       let touchStartY = 0;
       let latestTouchY = 0;
       let lastSnapAt = 0;
+      let unlockSnapTimer = 0;
 
       const getScrollTrigger = () => timeline.scrollTrigger as ScrollTrigger | undefined;
       const isWithinPinnedRange = () => {
@@ -308,6 +299,12 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
         if (!scrollTrigger) return false;
 
         return window.scrollY >= scrollTrigger.start - 2 && window.scrollY <= scrollTrigger.end + 2;
+      };
+      const unlockAfterQuiet = (delay = snapCooldownMs) => {
+        window.clearTimeout(unlockSnapTimer);
+        unlockSnapTimer = window.setTimeout(() => {
+          isProgrammaticSnap = false;
+        }, delay);
       };
       const jumpToPanel = (direction: 1 | -1) => {
         const scrollTrigger = getScrollTrigger();
@@ -323,15 +320,18 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
         const targetProgress = targetPanel / totalTransitions;
         const targetScroll = scrollTrigger.start + (scrollTrigger.end - scrollTrigger.start) * targetProgress;
         window.scrollTo({ top: targetScroll, behavior: 'smooth' });
-        window.setTimeout(() => {
-          isProgrammaticSnap = false;
-        }, snapCooldownMs);
+        unlockAfterQuiet();
       };
       const handleWheel = (event: WheelEvent) => {
         if (!isWithinPinnedRange()) return;
 
         event.preventDefault();
         if (Math.abs(event.deltaY) < 12) return;
+        if (isProgrammaticSnap) {
+          unlockAfterQuiet();
+          return;
+        }
+
         jumpToPanel(event.deltaY > 0 ? 1 : -1);
       };
       const handleTouchStart = (event: TouchEvent) => {
@@ -359,6 +359,7 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
       window.addEventListener('touchend', handleTouchEnd, { passive: true });
       window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
       cleanupSnapControls = () => {
+        window.clearTimeout(unlockSnapTimer);
         window.removeEventListener('wheel', handleWheel);
         window.removeEventListener('touchstart', handleTouchStart);
         window.removeEventListener('touchmove', handleTouchMove);
