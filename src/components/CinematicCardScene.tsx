@@ -283,7 +283,8 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
           anticipatePin: 1,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
-            setActiveChapter(Math.round(self.progress * totalTransitions));
+            activePanel = Math.round(self.progress * totalTransitions);
+            setActiveChapter(activePanel);
           },
         },
       });
@@ -291,6 +292,7 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
       let touchStartY = 0;
       let latestTouchY = 0;
       let lastSnapAt = 0;
+      let activePanel = 0;
       let unlockSnapTimer = 0;
 
       const getScrollTrigger = () => timeline.scrollTrigger as ScrollTrigger | undefined;
@@ -300,7 +302,7 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
 
         return window.scrollY >= scrollTrigger.start - 2 && window.scrollY <= scrollTrigger.end + 2;
       };
-      const unlockAfterQuiet = (delay = snapCooldownMs) => {
+      const unlockAfterDelay = (delay = snapCooldownMs) => {
         window.clearTimeout(unlockSnapTimer);
         unlockSnapTimer = window.setTimeout(() => {
           isProgrammaticSnap = false;
@@ -311,17 +313,19 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
         const now = window.performance.now();
         if (!scrollTrigger || isProgrammaticSnap || now - lastSnapAt < snapCooldownMs) return false;
 
-        const currentPanel = Math.round(scrollTrigger.progress * totalTransitions);
+        const currentPanel = activePanel;
         const targetPanel = gsap.utils.clamp(0, totalSections - 1, currentPanel + direction);
         if (targetPanel === currentPanel) return false;
 
         isProgrammaticSnap = true;
         lastSnapAt = now;
+        activePanel = targetPanel;
+        setActiveChapter(targetPanel);
         const targetProgress = targetPanel / totalTransitions;
         const targetScroll = scrollTrigger.start + (scrollTrigger.end - scrollTrigger.start) * targetProgress;
-        scrollTrigger.scroll(targetScroll);
+        window.scrollTo({ top: targetScroll, behavior: 'auto' });
         scrollTrigger.update();
-        unlockAfterQuiet();
+        unlockAfterDelay();
         return true;
       };
       const handleWheel = (event: WheelEvent) => {
@@ -330,7 +334,6 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
         if (Math.abs(event.deltaY) < 12) return;
         if (isProgrammaticSnap) {
           event.preventDefault();
-          unlockAfterQuiet();
           return;
         }
 
