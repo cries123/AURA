@@ -9,7 +9,7 @@ export default function AdminDashboard() {
   const [applications, setApplications] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeView, setActiveView] = useState<'leads' | 'requests' | 'users'>('leads');
+  const [activeView, setActiveView] = useState<'leads' | 'requests' | 'users'>('users');
 
   function handleFirestoreError(error: unknown, operationType: string, path: string | null) {
     const errInfo = {
@@ -120,7 +120,13 @@ export default function AdminDashboard() {
       </div>
 
       {/* Admin Nav */}
-      <div className="flex items-center gap-4 bg-zinc-950 border border-zinc-800 p-1.5 rounded-2xl w-fit">
+      <div className="flex flex-wrap items-center gap-2 bg-zinc-950 border border-zinc-800 p-1.5 rounded-2xl w-fit max-w-full">
+        <button 
+          onClick={() => setActiveView('users')}
+          className={`px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${activeView === 'users' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+        >
+          Users & Handles ({users.length})
+        </button>
         <button 
           onClick={() => setActiveView('leads')}
           className={`px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${activeView === 'leads' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
@@ -132,12 +138,6 @@ export default function AdminDashboard() {
           className={`px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${activeView === 'requests' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
         >
           Enrollment Requests ({applications.filter(a => a.status === 'pending').length})
-        </button>
-        <button 
-          onClick={() => setActiveView('users')}
-          className={`px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${activeView === 'users' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
-        >
-          Users & Handles ({users.length})
         </button>
       </div>
 
