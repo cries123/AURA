@@ -18,8 +18,8 @@ type CinematicNavigationMenuProps = {
 const homeStoryChapters: StoryChapter[] = [
   { id: 'intro', chapter: '01', label: 'Genesis' },
   { id: 'science', chapter: '02', label: 'Science' },
-  { id: 'system', chapter: '03', label: 'System' },
-  { id: 'contact', chapter: '04', label: 'Network' },
+  { id: 'system', chapter: '03', label: 'Pricing' },
+  { id: 'contact', chapter: '04', label: 'Affiliate' },
 ];
 
 const siteNavLinks = [
@@ -143,6 +143,15 @@ export default function CinematicNavigationMenu({
           </Link>
           <Link to="/portal" onClick={onClose} className="hover:text-aura-gold">
             Client portal
+          </Link>
+          <Link to="/privacy-policy" onClick={onClose} className="hover:text-aura-gold">
+            Privacy policy
+          </Link>
+          <Link to="/refund-policy" onClick={onClose} className="hover:text-aura-gold">
+            Refund policy
+          </Link>
+          <Link to="/warranty" onClick={onClose} className="hover:text-aura-gold">
+            Warranty policy
           </Link>
           <span className="md:ml-auto">Aura Tap</span>
         </div>

@@ -10,6 +10,8 @@ import WarrantyPage from './pages/WarrantyPage';
 import FAQPage from './pages/FAQPage';
 import Affiliate from './pages/Affiliate';
 import Portal from './pages/Portal';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import RefundPolicy from './pages/RefundPolicy';
 import UserProfile from './pages/UserProfile';
 import LoadingScreen from './components/LoadingScreen';
 import CinematicStandardChrome from './components/CinematicStandardChrome';
@@ -92,6 +94,32 @@ function AnimatedRoutes() {
             </motion.div>
           } 
         />
+        <Route
+          path="/privacy-policy"
+          element={
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              <PrivacyPolicy />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/refund-policy"
+          element={
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              <RefundPolicy />
+            </motion.div>
+          }
+        />
         <Route 
           path="/affiliate" 
           element={
@@ -138,7 +166,7 @@ function AnimatedRoutes() {
 
 function AppContent() {
   const location = useLocation();
-  const systemPaths = ['/', '/platform', '/pricing', '/faq', '/warranty', '/affiliate', '/portal'];
+  const systemPaths = ['/', '/platform', '/pricing', '/faq', '/warranty', '/privacy-policy', '/refund-policy', '/affiliate', '/portal'];
   const isProfilePage = !systemPaths.includes(location.pathname);
   const isCinematicHome = location.pathname === '/';
 
@@ -158,7 +186,7 @@ function AppContent() {
 }
 
 export default function App() {
-  const systemPaths = ['/', '/platform', '/pricing', '/faq', '/warranty', '/affiliate', '/portal'];
+  const systemPaths = ['/', '/platform', '/pricing', '/faq', '/warranty', '/privacy-policy', '/refund-policy', '/affiliate', '/portal'];
   const path = window.location.pathname.replace(/\/$/, '') || '/';
   const isProfilePage = !systemPaths.includes(path);
   const [isLoading, setIsLoading] = useState(!isProfilePage);

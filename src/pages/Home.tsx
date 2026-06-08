@@ -30,22 +30,22 @@ const panels = [
   {
     id: 'system',
     chapter: '03',
-    eyebrow: 'LIVE PROFILE SYSTEM',
-    ghost: 'PULSE',
-    label: 'System',
-    title: 'A physical card with a living backend.',
-    body: 'Update offers, routing, team details, and analytics from Aura Platform while the card in your hand stays the same.',
+    eyebrow: 'PRICING AND PURCHASE',
+    ghost: 'BUY',
+    label: 'Pricing',
+    title: 'Choose your tap and check out fast.',
+    body: 'Pick a card, wristband, or Duo Bundle with clear savings, no monthly fees, setup included, and hardware shipping in 3-5 days.',
     align: 'items-end text-right',
     copyAlign: 'ml-auto',
   },
   {
     id: 'contact',
     chapter: '04',
-    eyebrow: 'DEPLOY THE NETWORK',
-    ghost: 'AURA',
-    label: 'Network',
-    title: 'Make every introduction measurable.',
-    body: 'Equip founders, sales teams, and creators with a reusable networking layer that feels premium before the link even opens.',
+    eyebrow: 'AFFILIATE PROGRAM',
+    ghost: 'EARN',
+    label: 'Affiliate',
+    title: 'Apply to resell Aura Taps.',
+    body: 'Join the affiliate program, unlock reseller discounts, and use the portal to apply, track approvals, and grow your local network.',
     align: 'items-end text-right',
     copyAlign: 'ml-auto',
   },
@@ -470,12 +470,28 @@ export default function Home() {
                 <p className="mt-8 max-w-xl text-base font-medium leading-8 text-zinc-300/80 md:text-xl">
                   {panel.body}
                 </p>
+                {index === 2 && (
+                  <a
+                    href="/pricing#products"
+                    className="chapter-buy-orbit pointer-events-auto mt-12 inline-flex h-36 w-36 items-center justify-center rounded-full text-center text-[12px] font-black uppercase tracking-[0.18em] text-white transition hover:text-aura-lime md:h-44 md:w-44"
+                  >
+                    <span className="relative z-10">Buy Now</span>
+                  </a>
+                )}
+                {index === 1 && (
+                  <a
+                    href="/platform"
+                    className="chapter-buy-orbit pointer-events-auto mt-12 inline-flex h-36 w-36 items-center justify-center rounded-full text-center text-[12px] font-black uppercase tracking-[0.18em] text-white transition hover:text-aura-lime md:h-44 md:w-44"
+                  >
+                    <span className="relative z-10">Explore</span>
+                  </a>
+                )}
                 {index === panels.length - 1 && (
                   <a
-                    href="mailto:sales@auratap.net"
-                    className="pointer-events-auto mt-10 inline-flex rounded-full border border-aura-lime/60 bg-aura-lime px-7 py-3 text-[11px] font-black uppercase tracking-[0.28em] text-black shadow-[0_0_42px_rgba(184,255,44,0.22)] transition hover:bg-white"
+                    href="/affiliate"
+                    className="chapter-buy-orbit pointer-events-auto mt-12 inline-flex h-36 w-36 items-center justify-center rounded-full text-center text-[12px] font-black uppercase tracking-[0.18em] text-white transition hover:text-aura-lime md:h-44 md:w-44"
                   >
-                    Start the rollout
+                    <span className="relative z-10">Apply</span>
                   </a>
                 )}
               </div>

@@ -198,11 +198,8 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
         .filter((visual): visual is HTMLElement => Boolean(visual));
       const totalSections = Math.max(sectionCount, panels.length, 1);
       const totalTransitions = Math.max(totalSections - 1, 1);
-      const scrollDistancePerPanel = window.innerWidth < 768 ? 0.42 : 0.34;
-      const snapPoints = Array.from(
-        { length: totalSections },
-        (_, index) => index / totalTransitions,
-      );
+      const scrollDistancePerPanel = window.innerWidth < 768 ? 0.72 : 0.68;
+      const snapCooldownMs = window.innerWidth < 768 ? 720 : 760;
       const dots = gsap.utils.toArray<HTMLElement>('[data-cinematic-dot]');
       const currentIndex = document.querySelector<HTMLElement>('[data-cinematic-index]');
       const currentTitle = document.querySelector<HTMLElement>('[data-cinematic-title]');
@@ -286,18 +283,17 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
           anticipatePin: 1,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
-            setActiveChapter(Math.round(self.progress * totalTransitions));
-          },
-          snap: {
-            snapTo: snapPoints,
-            duration: { min: 0.2, max: 0.45 },
-            delay: 0.02,
-            ease: 'power3.inOut',
+            activePanel = Math.round(self.progress * totalTransitions);
+            setActiveChapter(activePanel);
           },
         },
       });
       let isProgrammaticSnap = false;
       let touchStartY = 0;
+      let latestTouchY = 0;
+      let lastSnapAt = 0;
+      let activePanel = 0;
+      let unlockSnapTimer = 0;
 
       const getScrollTrigger = () => timeline.scrollTrigger as ScrollTrigger | undefined;
       const isWithinPinnedRange = () => {
@@ -306,50 +302,78 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
 
         return window.scrollY >= scrollTrigger.start - 2 && window.scrollY <= scrollTrigger.end + 2;
       };
+      const unlockAfterDelay = (delay = snapCooldownMs) => {
+        window.clearTimeout(unlockSnapTimer);
+        unlockSnapTimer = window.setTimeout(() => {
+          isProgrammaticSnap = false;
+        }, delay);
+      };
       const jumpToPanel = (direction: 1 | -1) => {
         const scrollTrigger = getScrollTrigger();
-        if (!scrollTrigger || isProgrammaticSnap) return;
+        const now = window.performance.now();
+        if (!scrollTrigger || isProgrammaticSnap || now - lastSnapAt < snapCooldownMs) return false;
 
-        const currentPanel = Math.round(scrollTrigger.progress * totalTransitions);
+        const currentPanel = activePanel;
         const targetPanel = gsap.utils.clamp(0, totalSections - 1, currentPanel + direction);
-        if (targetPanel === currentPanel) return;
+        if (targetPanel === currentPanel) return false;
 
         isProgrammaticSnap = true;
+        lastSnapAt = now;
+        activePanel = targetPanel;
+        setActiveChapter(targetPanel);
         const targetProgress = targetPanel / totalTransitions;
         const targetScroll = scrollTrigger.start + (scrollTrigger.end - scrollTrigger.start) * targetProgress;
-        window.scrollTo({ top: targetScroll, behavior: 'smooth' });
-        window.setTimeout(() => {
-          isProgrammaticSnap = false;
-        }, 520);
+        window.scrollTo({ top: targetScroll, behavior: 'auto' });
+        scrollTrigger.update();
+        unlockAfterDelay();
+        return true;
       };
       const handleWheel = (event: WheelEvent) => {
-        if (!isWithinPinnedRange() || Math.abs(event.deltaY) < 4) return;
+        if (!isWithinPinnedRange()) return;
 
-        event.preventDefault();
-        jumpToPanel(event.deltaY > 0 ? 1 : -1);
+        if (Math.abs(event.deltaY) < 12) return;
+        if (isProgrammaticSnap) {
+          event.preventDefault();
+          return;
+        }
+
+        if (jumpToPanel(event.deltaY > 0 ? 1 : -1)) {
+          event.preventDefault();
+        }
       };
       const handleTouchStart = (event: TouchEvent) => {
         touchStartY = event.touches[0]?.clientY ?? 0;
+        latestTouchY = touchStartY;
       };
       const handleTouchMove = (event: TouchEvent) => {
         if (!isWithinPinnedRange()) return;
 
-        const currentY = event.touches[0]?.clientY ?? touchStartY;
-        const deltaY = touchStartY - currentY;
-        if (Math.abs(deltaY) < 36) return;
-
         event.preventDefault();
-        jumpToPanel(deltaY > 0 ? 1 : -1);
-        touchStartY = currentY;
+        latestTouchY = event.touches[0]?.clientY ?? latestTouchY;
+      };
+      const handleTouchEnd = () => {
+        if (!isWithinPinnedRange()) return;
+
+        const deltaY = touchStartY - latestTouchY;
+        if (Math.abs(deltaY) < 54) return;
+
+        if (jumpToPanel(deltaY > 0 ? 1 : -1)) {
+          touchStartY = latestTouchY;
+        }
       };
 
       window.addEventListener('wheel', handleWheel, { passive: false });
       window.addEventListener('touchstart', handleTouchStart, { passive: true });
       window.addEventListener('touchmove', handleTouchMove, { passive: false });
+      window.addEventListener('touchend', handleTouchEnd, { passive: true });
+      window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
       cleanupSnapControls = () => {
+        window.clearTimeout(unlockSnapTimer);
         window.removeEventListener('wheel', handleWheel);
         window.removeEventListener('touchstart', handleTouchStart);
         window.removeEventListener('touchmove', handleTouchMove);
+        window.removeEventListener('touchend', handleTouchEnd);
+        window.removeEventListener('touchcancel', handleTouchEnd);
       };
 
       for (let index = 1; index < totalSections; index += 1) {
