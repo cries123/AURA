@@ -5,6 +5,7 @@ import { Share2, ExternalLink, AlertCircle } from 'lucide-react';
 import { db, firebaseReady } from '../lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import ProfileCard from '../components/ProfileCard';
+import ProfilePageSkeleton from '../components/ProfilePageSkeleton';
 
 export default function UserProfile() {
   const { username } = useParams<{ username: string }>();
@@ -71,7 +72,7 @@ export default function UserProfile() {
         })();
 
         const timeoutPromise = new Promise<{ error?: string; data?: any }>((_, reject) =>
-          setTimeout(() => reject(new Error('Network timeout')), 4000)
+          setTimeout(() => reject(new Error('Network timeout')), 10000)
         );
 
         const result = await Promise.race([fetchPromise, timeoutPromise]);
@@ -111,13 +112,8 @@ export default function UserProfile() {
     };
   }, [username, lowerUsername, cacheKey]);
 
-  // Minimal subtle loading spinner
   if (loading && !profile) {
-    return (
-      <div id="loading-spinner-container" className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div id="subtle-spinner" className="w-6 h-6 border-2 border-aura-gold/20 border-t-aura-gold rounded-full animate-spin" />
-      </div>
-    );
+    return <ProfilePageSkeleton />;
   }
 
   if (error || !profile) {
@@ -146,7 +142,7 @@ export default function UserProfile() {
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.22, ease: 'easeOut' }}
         className="w-full relative z-10 flex-grow flex flex-col justify-stretch"
       >
         <ProfileCard data={profile} isMockup={false} />
