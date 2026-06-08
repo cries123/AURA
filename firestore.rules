@@ -10,9 +10,14 @@ service cloud.firestore {
     function isSignedIn() { return request.auth != null; }
     function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
     function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isAdminEmail(email) {
+      return email.lower() == 'jaryn.b.healey@gmail.com' ||
+             email.lower() == 'criesemail123@gmail.com';
+    }
+
     function isAdmin() { 
       return isSignedIn() && (
-        (request.auth.token.keys().contains('email') && request.auth.token.email.lower() == 'jaryn.b.healey@gmail.com') ||
+        (request.auth.token.keys().contains('email') && isAdminEmail(request.auth.token.email)) ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
       );
@@ -48,6 +53,7 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow get: if true;
+      allow list: if isAdmin();
       allow create: if isSignedIn() && isValidUser(incoming());
       allow update: if (isOwner(userId) && (
         incoming().diff(existing()).affectedKeys().hasAny(['displayName', 'username', 'bio', 'profileImage', 'links'])

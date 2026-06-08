@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
-import { Users, Mail, Clock, CheckCircle2, ChevronRight, Search, Filter, ShieldCheck, MailWarning, Calendar, XCircle, Package } from 'lucide-react';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, getDocs, limit, setDoc } from 'firebase/firestore';
+import { Users, Mail, Clock, ChevronRight, Search, Filter, ShieldCheck, MailWarning, Calendar, ExternalLink } from 'lucide-react';
+import { collection, onSnapshot, doc, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 
 export default function AdminDashboard() {
@@ -9,6 +9,7 @@ export default function AdminDashboard() {
   const [applications, setApplications] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [usersError, setUsersError] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<'leads' | 'requests' | 'users'>('users');
 
   function handleFirestoreError(error: unknown, operationType: string, path: string | null) {
@@ -25,20 +26,33 @@ export default function AdminDashboard() {
       setLoading(false);
       return;
     }
-    const qLeads = query(collection(db, 'leads'), orderBy('createdAt', 'desc'));
-    const unsubscribeLeads = onSnapshot(qLeads, (snapshot) => {
-      setLeads(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    const unsubscribeLeads = onSnapshot(collection(db, 'leads'), (snapshot) => {
+      setLeads(
+        snapshot.docs
+          .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
+          .sort((a: any, b: any) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))
+      );
     }, (err) => handleFirestoreError(err, 'list', 'leads'));
 
-    const qApps = query(collection(db, 'affiliate_applications'), orderBy('createdAt', 'desc'));
-    const unsubscribeApps = onSnapshot(qApps, (snapshot) => {
-      setApplications(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    const unsubscribeApps = onSnapshot(collection(db, 'affiliate_applications'), (snapshot) => {
+      setApplications(
+        snapshot.docs
+          .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
+          .sort((a: any, b: any) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))
+      );
     }, (err) => handleFirestoreError(err, 'list', 'affiliate_applications'));
 
-    const qUsers = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
-    const unsubscribeUsers = onSnapshot(qUsers, (snapshot) => {
-      setUsers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    }, (err) => handleFirestoreError(err, 'list', 'users'));
+    const unsubscribeUsers = onSnapshot(collection(db, 'users'), (snapshot) => {
+      setUsersError(null);
+      setUsers(
+        snapshot.docs
+          .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
+          .sort((a: any, b: any) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))
+      );
+    }, (err) => {
+      handleFirestoreError(err, 'list', 'users');
+      setUsersError(err instanceof Error ? err.message : 'Unable to load users. Deploy the latest Firestore rules, then refresh.');
+    });
 
     setLoading(false);
     return () => {
@@ -293,7 +307,12 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {loading ? (
+            {usersError ? (
+              <div className="py-16 text-center border border-red-500/20 bg-red-500/5 rounded-[2rem]">
+                <h4 className="text-lg font-bold text-red-400 mb-2">Could not load user directory</h4>
+                <p className="text-xs text-zinc-500 max-w-lg mx-auto">{usersError}</p>
+              </div>
+            ) : loading ? (
               <div className="py-20 text-center">
                 <div className="w-8 h-8 border-2 border-aura-lime border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                 <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">Loading users...</p>
@@ -306,37 +325,53 @@ export default function AdminDashboard() {
               </div>
             ) : (
               <div className="overflow-hidden rounded-[2rem] border border-zinc-800">
-                <div className="hidden md:grid grid-cols-[1.2fr_1fr_0.7fr_1.2fr] gap-4 bg-zinc-950/70 px-6 py-4 text-[10px] font-bold uppercase tracking-[0.24em] text-zinc-600">
+                <div className="hidden md:grid grid-cols-[1.2fr_1fr_1fr_0.7fr] gap-4 bg-zinc-950/70 px-6 py-4 text-[10px] font-bold uppercase tracking-[0.24em] text-zinc-600">
                   <span>User</span>
                   <span>Handle</span>
+                  <span>Profile Link</span>
                   <span>Role</span>
-                  <span>UID</span>
                 </div>
                 <div className="divide-y divide-zinc-900">
                   {users.map((user) => {
                     const handle = user.username ? `@${user.username}` : 'No handle set';
+                    const profileUrl = user.username ? `https://aurataps.net/${user.username}` : null;
 
                     return (
                       <motion.div
                         key={user.id}
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="grid grid-cols-1 gap-4 bg-zinc-950/35 px-6 py-5 text-sm transition-colors hover:bg-zinc-900/45 md:grid-cols-[1.2fr_1fr_0.7fr_1.2fr] md:items-center"
+                        className="grid grid-cols-1 gap-4 bg-zinc-950/35 px-6 py-5 text-sm transition-colors hover:bg-zinc-900/45 md:grid-cols-[1.2fr_1fr_1fr_0.7fr] md:items-center"
                       >
                         <div>
                           <div className="font-bold text-white">{user.displayName || user.email || 'Unnamed user'}</div>
                           <div className="mt-1 text-[11px] text-zinc-500">{user.email || 'No email'}</div>
+                          <div className="mt-1 truncate font-mono text-[10px] text-zinc-600" title={user.uid || user.id}>
+                            {user.uid || user.id}
+                          </div>
                         </div>
                         <div className={`font-mono text-xs font-bold ${user.username ? 'text-aura-lime' : 'text-zinc-600'}`}>
                           {handle}
                         </div>
                         <div>
+                          {profileUrl ? (
+                            <a
+                              href={profileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 text-xs font-semibold text-aura-gold hover:text-white transition-colors"
+                            >
+                              aurataps.net/{user.username}
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          ) : (
+                            <span className="text-[11px] text-zinc-600">No public profile yet</span>
+                          )}
+                        </div>
+                        <div>
                           <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
                             {user.role || 'user'}
                           </span>
-                        </div>
-                        <div className="truncate font-mono text-[10px] text-zinc-600" title={user.uid || user.id}>
-                          {user.uid || user.id}
                         </div>
                       </motion.div>
                     );
