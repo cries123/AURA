@@ -19,6 +19,8 @@ export default function AdminDashboard() {
   const [applications, setApplications] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [authUsers, setAuthUsers] = useState<AuthUserSummary[]>([]);
+  const [authUsersStatus, setAuthUsersStatus] = useState<'idle' | 'loading' | 'loaded' | 'error'>('idle');
+  const [authUsersError, setAuthUsersError] = useState('');
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<'leads' | 'requests' | 'users'>('users');
 
@@ -29,6 +31,41 @@ export default function AdminDashboard() {
       path
     };
     console.error('Firestore Error: ', JSON.stringify(errInfo));
+  }
+
+  async function loadAuthUsers() {
+    setAuthUsersStatus('loading');
+    setAuthUsersError('');
+
+    try {
+      const token = await auth?.currentUser?.getIdToken();
+      if (!token) {
+        setAuthUsersStatus('error');
+        setAuthUsersError('No Firebase ID token is available yet. Sign out and sign back in as an admin.');
+        return;
+      }
+
+      const response = await fetch('/.netlify/functions/admin-auth-users', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        const message = await response.text();
+        setAuthUsersStatus('error');
+        setAuthUsersError(message || `Auth user sync failed with status ${response.status}.`);
+        return;
+      }
+
+      const payload = await response.json();
+      setAuthUsers(Array.isArray(payload.users) ? payload.users : []);
+      setAuthUsersStatus('loaded');
+    } catch (err) {
+      setAuthUsersStatus('error');
+      setAuthUsersError(err instanceof Error ? err.message : 'Failed to load Firebase Auth users.');
+    }
   }
 
   const mergedUsers = (() => {
@@ -83,30 +120,6 @@ export default function AdminDashboard() {
     const unsubscribeUsers = onSnapshot(qUsers, (snapshot) => {
       setUsers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     }, (err) => handleFirestoreError(err, 'list', 'users'));
-
-    async function loadAuthUsers() {
-      try {
-        const token = await auth?.currentUser?.getIdToken();
-        if (!token) return;
-
-        const response = await fetch('/.netlify/functions/admin-auth-users', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          cache: 'no-store',
-        });
-
-        if (!response.ok) {
-          console.warn('Admin auth user list unavailable:', await response.text());
-          return;
-        }
-
-        const payload = await response.json();
-        setAuthUsers(Array.isArray(payload.users) ? payload.users : []);
-      } catch (err) {
-        console.warn('Failed to load Firebase Auth users:', err);
-      }
-    }
 
     loadAuthUsers();
     setLoading(false);
@@ -169,6 +182,38 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8 pb-12">
       {/* Admin Stats */}
+      {authUsersStatus === 'error' && (
+        <div className="rounded-2xl border border-amber-500/25 bg-amber-500/10 p-5">
+          <div className="mb-2 text-[10px] font-black uppercase tracking-[0.24em] text-amber-400">
+            Firebase Auth user sync is not connected
+          </div>
+          <p className="text-xs leading-6 text-zinc-400">
+            The table is currently showing Firestore profile documents only. To list every Firebase Auth signup, configure the Netlify Function service account env vars:
+            <span className="font-mono text-aura-gold"> FIREBASE_SERVICE_ACCOUNT_JSON</span> or
+            <span className="font-mono text-aura-gold"> FIREBASE_CLIENT_EMAIL</span>,
+            <span className="font-mono text-aura-gold"> FIREBASE_PRIVATE_KEY</span>, and
+            <span className="font-mono text-aura-gold"> FIREBASE_PROJECT_ID</span>.
+          </p>
+          {authUsersError && (
+            <pre className="mt-3 max-h-28 overflow-auto rounded-xl bg-black/35 p-3 text-[10px] text-amber-200/80">
+              {authUsersError}
+            </pre>
+          )}
+          <button
+            onClick={loadAuthUsers}
+            className="mt-4 rounded-xl border border-amber-500/30 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-amber-400 transition hover:bg-amber-500/10"
+          >
+            Retry Auth Sync
+          </button>
+        </div>
+      )}
+
+      {authUsersStatus === 'loaded' && (
+        <div className="rounded-2xl border border-aura-lime/25 bg-aura-lime/5 px-5 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-aura-lime">
+          Firebase Auth sync connected - {authUsers.length} auth account{authUsers.length === 1 ? '' : 's'} loaded.
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
           { label: 'Total Leads', value: leads.length, icon: <Mail />, color: 'text-aura-gold' },

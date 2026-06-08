@@ -32,7 +32,7 @@ function getAdminApp() {
 
   const serviceAccount = getServiceAccount();
   if (!serviceAccount) {
-    throw new Error('Firebase Admin service account is not configured.');
+    throw new Error('Firebase Admin service account is not configured. Add FIREBASE_SERVICE_ACCOUNT_JSON, or FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY + FIREBASE_PROJECT_ID, in Netlify environment variables.');
   }
 
   return admin.initializeApp({
