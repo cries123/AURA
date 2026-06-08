@@ -480,10 +480,10 @@ export default function Home() {
                 )}
                 {index === panels.length - 1 && (
                   <a
-                    href="mailto:sales@auratap.net"
-                    className="pointer-events-auto mt-10 inline-flex rounded-full border border-aura-lime/60 bg-aura-lime px-7 py-3 text-[11px] font-black uppercase tracking-[0.28em] text-black shadow-[0_0_42px_rgba(184,255,44,0.22)] transition hover:bg-white"
+                    href="/affiliate"
+                    className="chapter-buy-orbit pointer-events-auto mt-12 inline-flex h-36 w-36 items-center justify-center rounded-full text-center text-[12px] font-black uppercase tracking-[0.18em] text-white transition hover:text-aura-lime md:h-44 md:w-44"
                   >
-                    Start the rollout
+                    <span className="relative z-10">Apply</span>
                   </a>
                 )}
               </div>
