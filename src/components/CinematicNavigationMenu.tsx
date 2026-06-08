@@ -18,8 +18,8 @@ type CinematicNavigationMenuProps = {
 const homeStoryChapters: StoryChapter[] = [
   { id: 'intro', chapter: '01', label: 'Genesis' },
   { id: 'science', chapter: '02', label: 'Science' },
-  { id: 'system', chapter: '03', label: 'System' },
-  { id: 'contact', chapter: '04', label: 'Network' },
+  { id: 'system', chapter: '03', label: 'Pricing' },
+  { id: 'contact', chapter: '04', label: 'Affiliate' },
 ];
 
 const siteNavLinks = [

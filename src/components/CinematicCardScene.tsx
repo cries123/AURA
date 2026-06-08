@@ -199,7 +199,7 @@ function CardRig({ pinContainerRef, sectionCount }: CinematicCardSceneProps) {
       const totalSections = Math.max(sectionCount, panels.length, 1);
       const totalTransitions = Math.max(totalSections - 1, 1);
       const scrollDistancePerPanel = window.innerWidth < 768 ? 0.72 : 0.68;
-      const snapCooldownMs = window.innerWidth < 768 ? 950 : 1050;
+      const snapCooldownMs = window.innerWidth < 768 ? 720 : 760;
       const dots = gsap.utils.toArray<HTMLElement>('[data-cinematic-dot]');
       const currentIndex = document.querySelector<HTMLElement>('[data-cinematic-index]');
       const currentTitle = document.querySelector<HTMLElement>('[data-cinematic-title]');
