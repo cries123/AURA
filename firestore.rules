@@ -50,13 +50,26 @@ service cloud.firestore {
       allow get: if true;
       allow create: if isSignedIn() && isValidUser(incoming());
       allow update: if (isOwner(userId) && (
-        incoming().diff(existing()).affectedKeys().hasAny(['displayName', 'username', 'bio', 'profileImage', 'links'])
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'displayName',
+          'username',
+          'bio',
+          'profileImage',
+          'avatarUrl',
+          'bannerUrl',
+          'links',
+          'jobTitle',
+          'location',
+          'tags',
+          'updatedAt'
+        ])
       )) || isAdmin();
     }
 
     match /usernames/{handle} {
       allow get: if true;
       allow create: if isSignedIn() && (!exists(/databases/$(database)/documents/usernames/$(handle)) || isAdmin()) && incoming().uid == request.auth.uid;
+      allow update: if isSignedIn() && (existing().uid == request.auth.uid || isAdmin()) && incoming().uid == request.auth.uid;
       allow delete: if isSignedIn() && (existing().uid == request.auth.uid || isAdmin());
     }
 
