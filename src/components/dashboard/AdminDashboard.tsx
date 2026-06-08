@@ -4,55 +4,7 @@ import { Users, Mail, Clock, CheckCircle2, ChevronRight, Search, Filter, ShieldC
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, getDocs, limit, setDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 
-const demoUsers = [
-  {
-    id: 'demo-admin',
-    uid: 'demo-admin-uid',
-    displayName: 'Jaryn Healey',
-    email: 'jaryn.b.healey@gmail.com',
-    username: 'jaryn',
-    role: 'admin',
-  },
-  {
-    id: 'demo-user-1',
-    uid: 'demo-user-1-uid',
-    displayName: 'Maya Torres',
-    email: 'maya@example.com',
-    username: 'maya-taps',
-    role: 'user',
-  },
-  {
-    id: 'demo-affiliate',
-    uid: 'demo-affiliate-uid',
-    displayName: 'Coastal Reseller',
-    email: 'partner@example.com',
-    username: 'coastal',
-    role: 'affiliate',
-  },
-];
-
-const demoLeads = [
-  {
-    id: 'demo-lead',
-    name: 'Demo Lead',
-    company: 'Preview Co.',
-    email: 'lead@example.com',
-    bundleName: 'Growth Team',
-    status: 'new',
-  },
-];
-
-const demoApplications = [
-  {
-    id: 'demo-app',
-    uid: 'demo-affiliate-uid',
-    email: 'partner@example.com',
-    status: 'pending',
-    createdAt: new Date().toISOString(),
-  },
-];
-
-export default function AdminDashboard({ demoMode = false }: { demoMode?: boolean }) {
+export default function AdminDashboard() {
   const [leads, setLeads] = useState<any[]>([]);
   const [applications, setApplications] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
@@ -69,14 +21,6 @@ export default function AdminDashboard({ demoMode = false }: { demoMode?: boolea
   }
 
   useEffect(() => {
-    if (demoMode) {
-      setLeads(demoLeads);
-      setApplications(demoApplications);
-      setUsers(demoUsers);
-      setLoading(false);
-      return;
-    }
-
     if (!db) {
       setLoading(false);
       return;
@@ -105,11 +49,6 @@ export default function AdminDashboard({ demoMode = false }: { demoMode?: boolea
   }, []);
 
   const updateLeadStatus = async (leadId: string, status: string) => {
-    if (demoMode) {
-      setLeads((current) => current.map((lead) => lead.id === leadId ? { ...lead, status } : lead));
-      return;
-    }
-
     try {
       await updateDoc(doc(db, 'leads', leadId), { status });
     } catch (err) {
@@ -127,11 +66,6 @@ export default function AdminDashboard({ demoMode = false }: { demoMode?: boolea
   };
 
   const handleApproveApp = async (app: any) => {
-    if (demoMode) {
-      setApplications((current) => current.map((item) => item.id === app.id ? { ...item, status: 'approved' } : item));
-      return;
-    }
-
     try {
       const code = generateAffiliateCode();
       await updateDoc(doc(db, 'users', app.uid), { 
@@ -156,11 +90,6 @@ export default function AdminDashboard({ demoMode = false }: { demoMode?: boolea
   };
 
   const handleRejectApp = async (appId: string) => {
-    if (demoMode) {
-      setApplications((current) => current.map((item) => item.id === appId ? { ...item, status: 'rejected' } : item));
-      return;
-    }
-
     try {
       await updateDoc(doc(db, 'affiliate_applications', appId), { status: 'rejected' });
     } catch (err) {
@@ -171,12 +100,6 @@ export default function AdminDashboard({ demoMode = false }: { demoMode?: boolea
   return (
     <div className="space-y-8 pb-12">
       {/* Admin Stats */}
-      {demoMode && (
-        <div className="rounded-2xl border border-aura-lime/25 bg-aura-lime/5 px-5 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-aura-lime">
-          Preview mode - sample users and handles shown. Real data appears after admin login.
-        </div>
-      )}
-
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
           { label: 'Total Leads', value: leads.length, icon: <Mail />, color: 'text-aura-gold' },

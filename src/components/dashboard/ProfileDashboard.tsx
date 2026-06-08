@@ -5,6 +5,7 @@ import { db } from '../../lib/firebase';
 import { doc, updateDoc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 import ProfileCard from '../ProfileCard';
+import { isAdminEmail } from '../../lib/adminAccess';
 
 interface AuraLink {
   type: string;
@@ -196,8 +197,7 @@ export default function ProfileDashboard() {
           if (usernameDoc.exists()) {
             const existingUid = usernameDoc.data().uid;
             if (existingUid !== user.uid) {
-              const isUserAdmin = user.email?.toLowerCase() === 'jaryn.b.healey@gmail.com';
-              if (isUserAdmin) {
+              if (isAdminEmail(user.email)) {
                 // Admin override! Delete the conflicting handle mapping first, releasing the handle
                 try {
                   await deleteDoc(doc(db, 'usernames', lowerUsername));

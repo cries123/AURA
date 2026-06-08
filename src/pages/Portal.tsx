@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, Briefcase, LogIn, UserPlus, ArrowRight, LayoutDashboard, LogOut } from 'lucide-react';
+import { Shield, Users, Briefcase, LogIn, UserPlus, ArrowRight, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { auth, db } from '../lib/firebase';
 import { signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
@@ -8,8 +8,9 @@ import { doc, setDoc, getDoc, collection, query, where, getDocs, addDoc } from '
 import AffiliateDashboard from '../components/dashboard/AffiliateDashboard';
 import AdminDashboard from '../components/dashboard/AdminDashboard';
 import ProfileDashboard from '../components/dashboard/ProfileDashboard';
+import { isAdminEmail } from '../lib/adminAccess';
 
-type PortalView = 'selection' | 'login' | 'enroll' | 'dashboard' | 'adminPreview';
+type PortalView = 'selection' | 'login' | 'enroll' | 'dashboard';
 type UserRole = 'user' | 'affiliate' | 'admin';
 type DashboardTab = 'admin' | 'affiliate' | 'profile' | 'selection';
 
@@ -85,13 +86,12 @@ export default function Portal() {
     try {
       if (view === 'enroll') {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const isAdminBootstrap = email.toLowerCase() === 'jaryn.b.healey@gmail.com';
         const profilePath = `users/${userCredential.user.uid}`;
         try {
           await setDoc(doc(db, 'users', userCredential.user.uid), {
             uid: userCredential.user.uid,
             email: email,
-            role: isAdminBootstrap ? 'admin' : selectedRole,
+            role: isAdminEmail(email) ? 'admin' : selectedRole,
             createdAt: new Date().toISOString()
           });
         } catch (err) {
@@ -237,35 +237,6 @@ export default function Portal() {
     );
   }
 
-  if (view === 'adminPreview') {
-    return (
-      <div id="portal-top" className="min-h-screen bg-transparent pt-28 px-6 pb-12">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
-            <div>
-              <div className="text-aura-gold text-[10px] font-bold uppercase tracking-[0.3em] mb-2">Preview Workspace</div>
-              <h1 className="text-4xl font-display font-bold italic">
-                Aura <span className="text-aura-gold-light">Terminal.</span>
-              </h1>
-              <p className="mt-3 text-xs text-zinc-500">
-                No login required. This preview uses sample users so you can inspect the admin dashboard layout.
-              </p>
-            </div>
-            
-            <button 
-              onClick={() => setView('selection')}
-              className="flex items-center gap-2 px-6 py-3 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 transition-all rounded-xl text-xs font-bold uppercase tracking-widest"
-            >
-              ← Back to Portal
-            </button>
-          </div>
-
-          <AdminDashboard demoMode />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div id="portal-top" className="min-h-screen bg-transparent pt-40 px-6 pb-24 relative overflow-y-auto">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl aspect-square bg-aura-gold/5 rounded-full blur-[120px] -translate-y-1/2" />
@@ -309,20 +280,6 @@ export default function Portal() {
                   <ArrowRight className="w-5 h-5 ml-auto text-zinc-700 group-hover:text-aura-gold transition-all group-hover:translate-x-1" />
                 </button>
               ))}
-
-              <button 
-                onClick={() => setView('adminPreview')}
-                className="w-full p-6 rounded-3xl bg-aura-lime/5 border border-aura-lime/30 flex items-center gap-6 group hover:bg-aura-lime/10 transition-all text-left"
-              >
-                <div className="w-14 h-14 rounded-2xl bg-aura-lime/10 border border-aura-lime/30 flex items-center justify-center text-aura-lime transition-colors">
-                  <LayoutDashboard />
-                </div>
-                <div>
-                  <h3 className="font-bold text-white group-hover:text-aura-lime transition-colors">Preview Admin Dashboard</h3>
-                  <p className="text-xs text-zinc-500">See users, handles, leads, and requests without logging in.</p>
-                </div>
-                <ArrowRight className="w-5 h-5 ml-auto text-aura-lime transition-all group-hover:translate-x-1" />
-              </button>
 
               <div className="pt-8 text-center">
                 <button 
@@ -435,15 +392,6 @@ export default function Portal() {
                   Continue with Google
                 </button>
               </div>
-
-              <button
-                type="button"
-                onClick={() => setView('adminPreview')}
-                className="mt-4 w-full py-4 bg-aura-lime/5 border border-aura-lime/30 text-aura-lime rounded-xl font-bold text-xs flex items-center justify-center gap-3 hover:bg-aura-lime/10 transition-all uppercase tracking-widest"
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                Preview Admin Dashboard
-              </button>
 
               <div className="mt-8 text-center">
                 <button 
