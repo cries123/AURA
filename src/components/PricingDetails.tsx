@@ -143,24 +143,6 @@ export default function PricingDetails() {
             ))}
           </div>
 
-          <div className="mt-12 p-10 rounded-[2rem] bg-black/35 border border-aura-gold/15 flex flex-col md:flex-row justify-between items-center gap-8 backdrop-blur">
-             <div className="flex items-center gap-6">
-                <div className="w-14 h-14 rounded-full bg-aura-gold/10 flex items-center justify-center text-aura-gold font-bold font-mono">
-                  $99
-                </div>
-                <div>
-                  <h5 className="text-white font-bold mb-1 font-display">One-Time Setup Fee</h5>
-                  <p className="text-zinc-500 text-xs">Included in all bundle prices. Covers platform config & team onboarding.</p>
-                </div>
-             </div>
-             <button 
-               onClick={() => setSelectedBundle("Custom Enterprise Rollout")}
-               className="px-8 py-4 bg-aura-lime hover:bg-white text-aura-black font-bold rounded-xl text-sm transition-all shadow-lg shadow-aura-lime/20"
-             >
-                Tailor an Enterprise Quote
-             </button>
-          </div>
-
           <div className="mt-20 p-12 rounded-[2.5rem] bg-aura-gold/5 border border-aura-gold/20 flex flex-col md:flex-row items-center justify-between gap-8 backdrop-blur">
              <div className="max-w-xl">
                 <h3 className="text-2xl font-display font-medium text-white mb-4">Want to resell Aura products?</h3>
