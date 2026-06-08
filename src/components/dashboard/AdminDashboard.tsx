@@ -2,12 +2,23 @@ import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
 import { Users, Mail, Clock, CheckCircle2, ChevronRight, Search, Filter, ShieldCheck, MailWarning, Calendar, XCircle, Package } from 'lucide-react';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, getDocs, limit, setDoc } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import { auth, db } from '../../lib/firebase';
+
+type AuthUserSummary = {
+  uid: string;
+  email: string;
+  displayName: string;
+  disabled: boolean;
+  creationTime: string;
+  lastSignInTime: string;
+  providerIds: string[];
+};
 
 export default function AdminDashboard() {
   const [leads, setLeads] = useState<any[]>([]);
   const [applications, setApplications] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [authUsers, setAuthUsers] = useState<AuthUserSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<'leads' | 'requests' | 'users'>('users');
 
@@ -19,6 +30,39 @@ export default function AdminDashboard() {
     };
     console.error('Firestore Error: ', JSON.stringify(errInfo));
   }
+
+  const mergedUsers = (() => {
+    const usersByUid = new Map<string, any>();
+
+    authUsers.forEach((authUser) => {
+      usersByUid.set(authUser.uid, {
+        id: authUser.uid,
+        uid: authUser.uid,
+        email: authUser.email,
+        displayName: authUser.displayName,
+        role: 'auth user',
+        username: '',
+        authOnly: true,
+        disabled: authUser.disabled,
+        creationTime: authUser.creationTime,
+        lastSignInTime: authUser.lastSignInTime,
+      });
+    });
+
+    users.forEach((user) => {
+      usersByUid.set(user.uid || user.id, {
+        ...usersByUid.get(user.uid || user.id),
+        ...user,
+        authOnly: false,
+      });
+    });
+
+    return Array.from(usersByUid.values()).sort((a, b) => {
+      const aDate = new Date(a.createdAt || a.creationTime || 0).getTime();
+      const bDate = new Date(b.createdAt || b.creationTime || 0).getTime();
+      return bDate - aDate;
+    });
+  })();
 
   useEffect(() => {
     if (!db) {
@@ -40,6 +84,31 @@ export default function AdminDashboard() {
       setUsers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     }, (err) => handleFirestoreError(err, 'list', 'users'));
 
+    async function loadAuthUsers() {
+      try {
+        const token = await auth?.currentUser?.getIdToken();
+        if (!token) return;
+
+        const response = await fetch('/.netlify/functions/admin-auth-users', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          cache: 'no-store',
+        });
+
+        if (!response.ok) {
+          console.warn('Admin auth user list unavailable:', await response.text());
+          return;
+        }
+
+        const payload = await response.json();
+        setAuthUsers(Array.isArray(payload.users) ? payload.users : []);
+      } catch (err) {
+        console.warn('Failed to load Firebase Auth users:', err);
+      }
+    }
+
+    loadAuthUsers();
     setLoading(false);
     return () => {
       unsubscribeLeads();
@@ -104,7 +173,7 @@ export default function AdminDashboard() {
         {[
           { label: 'Total Leads', value: leads.length, icon: <Mail />, color: 'text-aura-gold' },
           { label: 'Pending Partners', value: applications.filter(a => a.status === 'pending').length, icon: <Clock />, color: 'text-amber-500' },
-          { label: 'Total Users', value: users.length, icon: <Users />, color: 'text-aura-lime' },
+          { label: 'Total Users', value: mergedUsers.length, icon: <Users />, color: 'text-aura-lime' },
           { label: 'System Status', value: 'Live', icon: <ShieldCheck />, color: 'text-emerald-500' }
         ].map((stat, i) => (
           <div key={i} className="p-8 rounded-3xl bg-zinc-900/40 border border-zinc-800">
@@ -125,7 +194,7 @@ export default function AdminDashboard() {
           onClick={() => setActiveView('users')}
           className={`px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${activeView === 'users' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
         >
-          Users & Handles ({users.length})
+          Users & Handles ({mergedUsers.length})
         </button>
         <button 
           onClick={() => setActiveView('leads')}
@@ -289,7 +358,7 @@ export default function AdminDashboard() {
                 <p className="text-xs text-zinc-500">All registered users and their public Aura handles.</p>
               </div>
               <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-600">
-                {users.length} total accounts
+                {mergedUsers.length} total accounts
               </div>
             </div>
 
@@ -298,11 +367,11 @@ export default function AdminDashboard() {
                 <div className="w-8 h-8 border-2 border-aura-lime border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                 <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">Loading users...</p>
               </div>
-            ) : users.length === 0 ? (
+            ) : mergedUsers.length === 0 ? (
               <div className="py-24 text-center border border-dashed border-zinc-800 rounded-[2rem]">
                 <Users className="w-12 h-12 text-zinc-700 mx-auto mb-6" />
                 <h4 className="text-xl font-bold text-zinc-500">No users found.</h4>
-                <p className="text-xs text-zinc-600 mt-2">New portal accounts will appear here.</p>
+                <p className="text-xs text-zinc-600 mt-2">Portal accounts and Firebase Auth users will appear here.</p>
               </div>
             ) : (
               <div className="overflow-hidden rounded-[2rem] border border-zinc-800">
@@ -313,7 +382,7 @@ export default function AdminDashboard() {
                   <span>UID</span>
                 </div>
                 <div className="divide-y divide-zinc-900">
-                  {users.map((user) => {
+                  {mergedUsers.map((user) => {
                     const handle = user.username ? `@${user.username}` : 'No handle set';
 
                     return (
@@ -334,6 +403,11 @@ export default function AdminDashboard() {
                           <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
                             {user.role || 'user'}
                           </span>
+                          {user.authOnly && (
+                            <span className="ml-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-amber-500">
+                              Auth only
+                            </span>
+                          )}
                         </div>
                         <div className="truncate font-mono text-[10px] text-zinc-600" title={user.uid || user.id}>
                           {user.uid || user.id}
