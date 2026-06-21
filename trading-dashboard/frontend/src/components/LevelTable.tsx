@@ -34,8 +34,16 @@ export function LevelTable({ snapshot, onSelectLevel, selectedLevel }: LevelTabl
           <span>Score</span>
         </div>
         {pairs.map((pair) => (
-          <div key={pair.timeframe} className="pair-row">
-            <span className="tf-cell">{pair.timeframe.toUpperCase()}</span>
+          <div
+            key={pair.timeframe}
+            className={`pair-row ${pair.bracket_valid === false ? "pair-invalid" : ""}`}
+          >
+            <span className="tf-cell">
+              {pair.timeframe.toUpperCase()}
+              {pair.bracket_valid === false && (
+                <span className="validity-badge stale">stale</span>
+              )}
+            </span>
             <PairCell
               level={pair.eql}
               type="EQL"
@@ -86,6 +94,11 @@ function PairCell({
       <span className="pair-meta">
         {level.touches}t · {level.distance_pct?.toFixed(2) ?? "—"}%
       </span>
+      {level.validity && (
+        <span className={`validity-badge ${level.validity.status}`}>
+          {level.validity.status}
+        </span>
+      )}
       <span className="flags">
         {level.proximity && <span className="flag prox">NEAR</span>}
         {level.sweep_reclaim && <span className="flag sweep">SWP</span>}

@@ -9,7 +9,7 @@ import {
 } from "lightweight-charts";
 import type { Bar, LiquidityLevel, ZeroDTEContext } from "../types";
 import type { IndicatorToggles } from "../lib/indicatorToggles";
-import { buildLevelPairs, pairForTimeframe } from "../lib/levelPairs";
+import { buildLevelPairs, isLevelActionable, pairForTimeframe } from "../lib/levelPairs";
 
 interface ChartPanelProps {
   symbol: string;
@@ -116,8 +116,8 @@ export function ChartPanel({
 
     if (indicators.eql_eqh) {
       const bracketLevels: LiquidityLevel[] = [];
-      if (activePair?.eql) bracketLevels.push(activePair.eql);
-      if (activePair?.eqh) bracketLevels.push(activePair.eqh);
+      if (activePair?.eql && isLevelActionable(activePair.eql)) bracketLevels.push(activePair.eql);
+      if (activePair?.eqh && isLevelActionable(activePair.eqh)) bracketLevels.push(activePair.eqh);
 
       bracketLevels.forEach((level) => {
         const color = level.level_type === "EQH" ? "#f85149" : "#58a6ff";
@@ -152,7 +152,13 @@ export function ChartPanel({
     };
 
     if (bars.length >= 2) {
-      if (indicators.eql_eqh && activePair?.eql && activePair?.eqh) {
+      if (
+        indicators.eql_eqh &&
+        activePair?.eql &&
+        activePair?.eqh &&
+        isLevelActionable(activePair.eql) &&
+        isLevelActionable(activePair.eqh)
+      ) {
         const top = Math.max(activePair.eql.price, activePair.eqh.price);
         const bottom = Math.min(activePair.eql.price, activePair.eqh.price);
         addHLine(top, "rgba(88, 166, 255, 0.35)", LineStyle.Solid, "Bracket Top");

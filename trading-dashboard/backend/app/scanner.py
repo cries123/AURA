@@ -8,6 +8,7 @@ from app.analysis.candle_patterns import detect_candle_patterns
 from app.analysis.divergence import compute_index_divergence
 from app.analysis.events import event_gate_allows_alert, get_event_context
 from app.analysis.options_context import get_options_context
+from app.analysis.level_validity import assess_level_validity, is_level_actionable
 from app.analysis.patterns import (
     LiquidityLevel,
     compute_dealing_range,
@@ -139,6 +140,17 @@ class ScannerService:
             )
             prox = detect_proximity(last_price, level.price, settings.proximity_alert_pct)
             accept = detect_acceptance(df, level.price, level.level_type)
+            validity = assess_level_validity(
+                df=df,
+                level_type=level.level_type,
+                level_price=level.price,
+                timeframe=level.timeframe,
+                tolerance_pct=settings.equal_tolerance_pct,
+                last_price=last_price,
+            )
+
+            if not is_level_actionable(validity):
+                continue
 
             extra_factors: list[str] = []
             bonus = 0
@@ -155,6 +167,10 @@ class ScannerService:
                 if zerodte.get("vwap", {}).get("position") == "above" and level.level_type == "EQL":
                     bonus += 1
                     extra_factors.append("above VWAP at EQL")
+
+            if validity.get("status") == "testing":
+                bonus += 1
+                extra_factors.append("testing level")
 
             score, factors = score_level(
                 level=level,
@@ -184,6 +200,7 @@ class ScannerService:
                 "sweep_reclaim": sweep,
                 "proximity": prox,
                 "acceptance": accept,
+                "validity": validity,
                 "candle_patterns": patterns,
                 "velocity": velocity,
                 "distance_pct": round(abs(last_price - level.price) / level.price * 100, 3)

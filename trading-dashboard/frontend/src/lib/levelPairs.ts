@@ -1,5 +1,12 @@
 import type { LiquidityLevel } from "../types";
 
+export function isLevelActionable(level: LiquidityLevel | null | undefined): boolean {
+  if (!level) return false;
+  const v = level.validity;
+  if (!v) return true;
+  return v.is_valid && (v.status === "valid" || v.status === "testing");
+}
+
 export interface LevelPair {
   timeframe: string;
   eql: LiquidityLevel | null;
@@ -7,6 +14,7 @@ export interface LevelPair {
   range?: number | null;
   mid?: number | null;
   combined_score?: number;
+  bracket_valid?: boolean;
 }
 
 export function buildLevelPairs(
@@ -17,6 +25,7 @@ export function buildLevelPairs(
   const byTf: Record<string, { eql: LiquidityLevel[]; eqh: LiquidityLevel[] }> = {};
 
   for (const level of levels) {
+    if (!isLevelActionable(level)) continue;
     const tf = level.timeframe;
     if (!byTf[tf]) byTf[tf] = { eql: [], eqh: [] };
     if (level.level_type === "EQL") byTf[tf].eql.push(level);
@@ -52,18 +61,22 @@ export function buildLevelPairs(
 
 function pickEql(levels: LiquidityLevel[], price: number): LiquidityLevel | null {
   if (!levels.length) return null;
-  const below = levels.filter((l) => l.price <= price);
+  const actionable = levels.filter(isLevelActionable);
+  const pool = actionable.length ? actionable : levels;
+  const below = pool.filter((l) => l.price <= price);
   if (below.length) return below.reduce((a, b) => (a.price > b.price ? a : b));
-  return levels.reduce((a, b) =>
+  return pool.reduce((a, b) =>
     Math.abs(a.price - price) < Math.abs(b.price - price) ? a : b
   );
 }
 
 function pickEqh(levels: LiquidityLevel[], price: number): LiquidityLevel | null {
   if (!levels.length) return null;
-  const above = levels.filter((l) => l.price >= price);
+  const actionable = levels.filter(isLevelActionable);
+  const pool = actionable.length ? actionable : levels;
+  const above = pool.filter((l) => l.price >= price);
   if (above.length) return above.reduce((a, b) => (a.price < b.price ? a : b));
-  return levels.reduce((a, b) =>
+  return pool.reduce((a, b) =>
     Math.abs(a.price - price) < Math.abs(b.price - price) ? a : b
   );
 }

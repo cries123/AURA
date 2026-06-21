@@ -6,6 +6,12 @@ export interface LiquidityLevel {
   touches: number;
   score: number;
   score_factors: string[];
+  validity?: {
+    is_valid: boolean;
+    status: "valid" | "testing" | "stale" | "invalidated";
+    reason?: string;
+    bars_since_touch?: number;
+  };
   structure?: string;
   session_label?: string;
   proximity?: boolean;
@@ -91,6 +97,7 @@ export interface LevelPair {
   range?: number | null;
   mid?: number | null;
   combined_score?: number;
+  bracket_valid?: boolean;
 }
 
 export interface Snapshot {

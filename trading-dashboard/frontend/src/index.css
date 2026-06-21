@@ -327,6 +327,22 @@ button {
   color: #e6edf3;
 }
 
+.pair-row.pair-invalid { opacity: 0.55; }
+
+.validity-badge {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-left: 4px;
+}
+
+.validity-badge.valid { background: #1a2e1a; color: #3fb950; }
+.validity-badge.testing { background: #2d2a1a; color: #d29922; }
+.validity-badge.stale { background: #21262d; color: #8b949e; }
+.validity-badge.invalidated { background: #3d1f1f; color: #f85149; }
+
 .pair-table {
   display: flex;
   flex-direction: column;

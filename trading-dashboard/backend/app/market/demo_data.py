@@ -61,6 +61,7 @@ def build_demo_snapshots() -> list[dict]:
                         "proximity": abs(last - eql) / eql * 100 < 0.5,
                         "acceptance": False,
                         "distance_pct": round(abs(last - eql) / eql * 100, 3),
+                        "validity": {"is_valid": True, "status": "valid", "reason": "untested", "bars_since_touch": 5},
                         "updated_at": datetime.utcnow().isoformat(),
                     },
                     {
@@ -81,6 +82,7 @@ def build_demo_snapshots() -> list[dict]:
                         "proximity": False,
                         "acceptance": False,
                         "distance_pct": round(abs(last - eqh) / eqh * 100, 3),
+                        "validity": {"is_valid": True, "status": "valid", "reason": "holding", "bars_since_touch": 8},
                         "updated_at": datetime.utcnow().isoformat(),
                     },
                 ],
