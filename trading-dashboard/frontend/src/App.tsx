@@ -30,6 +30,7 @@ import { TradeIdeaPanel } from "./components/TradeIdeaPanel";
 import { JournalPanel } from "./components/JournalPanel";
 import { SessionLevelsPanel } from "./components/SessionLevelsPanel";
 import { IndicatorToggleBar } from "./components/IndicatorToggleBar";
+import { HelpGuideModal } from "./components/HelpGuideModal";
 import {
   DEFAULT_INDICATORS,
   loadIndicatorToggles,
@@ -58,6 +59,7 @@ export default function App() {
   const [dataSource, setDataSource] = useState("");
   const [alertTierFilter, setAlertTierFilter] = useState<string>("");
   const [indicators, setIndicators] = useState<IndicatorToggles>(() => loadIndicatorToggles());
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const selectedSnapshot = useMemo(
     () => snapshots.find((s) => s.symbol === selectedSymbol) ?? null,
@@ -139,6 +141,9 @@ export default function App() {
         </div>
         <div className="topbar-actions">
           <span className="muted">Updated {lastRefresh || "—"}</span>
+          <button type="button" className="btn help-btn" onClick={() => setHelpOpen(true)}>
+            How to read alerts
+          </button>
           <button className="btn primary" onClick={handleScan} disabled={scanning}>
             {scanning ? "Scanning…" : "Run Scan"}
           </button>
@@ -209,9 +214,11 @@ export default function App() {
             </button>
           ))}
         </div>
-        <AlertFeed alerts={alerts} />
+        <AlertFeed alerts={alerts} onOpenHelp={() => setHelpOpen(true)} />
         <JournalPanel entries={journal} />
       </section>
+
+      <HelpGuideModal open={helpOpen} onClose={() => setHelpOpen(false)} />
     </div>
   );
 }

@@ -2,18 +2,26 @@ import type { Alert } from "../types";
 
 interface AlertFeedProps {
   alerts: Alert[];
+  onOpenHelp?: () => void;
 }
 
 function formatTime(iso: string): string {
   return new Date(iso).toLocaleString();
 }
 
-export function AlertFeed({ alerts }: AlertFeedProps) {
+export function AlertFeed({ alerts, onOpenHelp }: AlertFeedProps) {
   return (
     <div className="panel alert-panel">
       <div className="panel-header">
         <h3>Live Alert Feed</h3>
-        <span className="muted">{alerts.length} events</span>
+        <div className="panel-header-actions">
+          <span className="muted">{alerts.length} events</span>
+          {onOpenHelp && (
+            <button type="button" className="help-trigger" onClick={onOpenHelp}>
+              How to read alerts
+            </button>
+          )}
+        </div>
       </div>
       <div className="alert-list">
         {alerts.length === 0 && <p className="muted empty">No alerts yet — scanner runs every 5 min.</p>}
