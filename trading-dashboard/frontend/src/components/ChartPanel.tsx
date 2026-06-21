@@ -8,6 +8,7 @@ import {
   LineStyle,
 } from "lightweight-charts";
 import type { Bar, LiquidityLevel, ZeroDTEContext } from "../types";
+import type { IndicatorToggles } from "../lib/indicatorToggles";
 import { buildLevelPairs, pairForTimeframe } from "../lib/levelPairs";
 
 interface ChartPanelProps {
@@ -16,6 +17,7 @@ interface ChartPanelProps {
   bars: Bar[];
   levels: LiquidityLevel[];
   lastPrice?: number;
+  indicators: IndicatorToggles;
   dealingRange?: {
     high?: number;
     low?: number;
@@ -31,6 +33,7 @@ export function ChartPanel({
   bars,
   levels,
   lastPrice,
+  indicators,
   dealingRange,
   zerodte,
 }: ChartPanelProps) {
@@ -109,92 +112,25 @@ export function ChartPanel({
     levelLinesRef.current.forEach((line) => chartRef.current?.removeSeries(line));
     levelLinesRef.current = [];
 
-    const bracketLevels: LiquidityLevel[] = [];
-    if (activePair?.eql) bracketLevels.push(activePair.eql);
-    if (activePair?.eqh) bracketLevels.push(activePair.eqh);
+    const session = zerodte?.session_levels;
 
-    // Draw EQL and EQH as adjacent price lines on the same scale (labels stack together)
-    bracketLevels.forEach((level) => {
-      const color = level.level_type === "EQH" ? "#f85149" : "#58a6ff";
-      const pl = seriesRef.current!.createPriceLine({
-        price: level.price,
-        color,
-        lineWidth: level.proximity ? 2 : 1,
-        lineStyle: level.proximity ? LineStyle.Solid : LineStyle.Dashed,
-        axisLabelVisible: true,
-        title: `${level.level_type} ${level.price.toFixed(2)}`,
-      });
-      priceLineRefs.current.push(pl);
-    });
+    if (indicators.eql_eqh) {
+      const bracketLevels: LiquidityLevel[] = [];
+      if (activePair?.eql) bracketLevels.push(activePair.eql);
+      if (activePair?.eqh) bracketLevels.push(activePair.eqh);
 
-    // Shaded bracket between EQL and EQH
-    if (activePair?.eql && activePair?.eqh && bars.length >= 2) {
-      const top = Math.max(activePair.eql.price, activePair.eqh.price);
-      const bottom = Math.min(activePair.eql.price, activePair.eqh.price);
-      const topLine = chartRef.current!.addLineSeries({
-        color: "rgba(88, 166, 255, 0.25)",
-        lineWidth: 1,
-        lineStyle: LineStyle.Solid,
-        priceLineVisible: false,
-        lastValueVisible: false,
-        crosshairMarkerVisible: false,
-      });
-      const bottomLine = chartRef.current!.addLineSeries({
-        color: "rgba(88, 166, 255, 0.25)",
-        lineWidth: 1,
-        lineStyle: LineStyle.Solid,
-        priceLineVisible: false,
-        lastValueVisible: false,
-        crosshairMarkerVisible: false,
-      });
-      const t0 = bars[0].time as CandlestickData["time"];
-      const t1 = bars[bars.length - 1].time as CandlestickData["time"];
-      topLine.setData([
-        { time: t0, value: top },
-        { time: t1, value: top },
-      ]);
-      bottomLine.setData([
-        { time: t0, value: bottom },
-        { time: t1, value: bottom },
-      ]);
-      levelLinesRef.current.push(topLine, bottomLine);
-
-      if (activePair.mid != null) {
-        const midLine = chartRef.current!.addLineSeries({
-          color: "#8b949e",
-          lineWidth: 1,
-          lineStyle: LineStyle.Dotted,
-          title: "Bracket Mid",
-          priceLineVisible: false,
-          lastValueVisible: false,
+      bracketLevels.forEach((level) => {
+        const color = level.level_type === "EQH" ? "#f85149" : "#58a6ff";
+        const pl = seriesRef.current!.createPriceLine({
+          price: level.price,
+          color,
+          lineWidth: level.proximity ? 2 : 1,
+          lineStyle: level.proximity ? LineStyle.Solid : LineStyle.Dashed,
+          axisLabelVisible: true,
+          title: `${level.level_type} ${level.price.toFixed(2)}`,
         });
-        midLine.setData([
-          { time: t0, value: activePair.mid },
-          { time: t1, value: activePair.mid },
-        ]);
-        levelLinesRef.current.push(midLine);
-      }
-    }
-
-    if (dealingRange?.equilibrium && !activePair?.mid) {
-      const eqLine = chartRef.current.addLineSeries({
-        color: "#8b949e",
-        lineWidth: 1,
-        lineStyle: LineStyle.Dotted,
-        title: "Equilibrium",
-        priceLineVisible: false,
-        lastValueVisible: false,
+        priceLineRefs.current.push(pl);
       });
-      if (bars.length >= 2) {
-        eqLine.setData([
-          { time: bars[0].time as CandlestickData["time"], value: dealingRange.equilibrium },
-          {
-            time: bars[bars.length - 1].time as CandlestickData["time"],
-            value: dealingRange.equilibrium,
-          },
-        ]);
-      }
-      levelLinesRef.current.push(eqLine);
     }
 
     const addHLine = (price: number, color: string, lineStyle: LineStyle, title: string) => {
@@ -215,15 +151,54 @@ export function ChartPanel({
       levelLinesRef.current.push(line);
     };
 
-    if (zerodte?.vwap?.vwap) addHLine(zerodte.vwap.vwap, "#d29922", LineStyle.Solid, "VWAP");
-    if (zerodte?.session_levels?.or_15m_high)
-      addHLine(zerodte.session_levels.or_15m_high, "#a371f7", LineStyle.Dashed, "OR15 H");
-    if (zerodte?.session_levels?.or_15m_low)
-      addHLine(zerodte.session_levels.or_15m_low, "#a371f7", LineStyle.Dashed, "OR15 L");
-    if (zerodte?.chain?.max_pain) addHLine(zerodte.chain.max_pain, "#f0883e", LineStyle.Dotted, "Max Pain");
+    if (bars.length >= 2) {
+      if (indicators.eql_eqh && activePair?.eql && activePair?.eqh) {
+        const top = Math.max(activePair.eql.price, activePair.eqh.price);
+        const bottom = Math.min(activePair.eql.price, activePair.eqh.price);
+        addHLine(top, "rgba(88, 166, 255, 0.35)", LineStyle.Solid, "Bracket Top");
+        addHLine(bottom, "rgba(88, 166, 255, 0.35)", LineStyle.Solid, "Bracket Bot");
+      }
+
+      if (indicators.bracket_mid && activePair?.mid != null) {
+        addHLine(activePair.mid, "#8b949e", LineStyle.Dotted, "Bracket Mid");
+      }
+    }
+
+    if (indicators.equilibrium && dealingRange?.equilibrium) {
+      addHLine(dealingRange.equilibrium, "#8b949e", LineStyle.Dotted, "Equilibrium");
+    }
+
+    if (indicators.vwap && zerodte?.vwap?.vwap) {
+      addHLine(zerodte.vwap.vwap, "#d29922", LineStyle.Solid, "VWAP");
+    }
+
+    if (indicators.or15) {
+      if (session?.or_15m_high) addHLine(session.or_15m_high, "#a371f7", LineStyle.Dashed, "OR15 H");
+      if (session?.or_15m_low) addHLine(session.or_15m_low, "#a371f7", LineStyle.Dashed, "OR15 L");
+    }
+
+    if (indicators.or5) {
+      if (session?.or_5m_high) addHLine(session.or_5m_high, "#bc8cff", LineStyle.Dotted, "OR5 H");
+      if (session?.or_5m_low) addHLine(session.or_5m_low, "#bc8cff", LineStyle.Dotted, "OR5 L");
+    }
+
+    if (indicators.premarket) {
+      if (session?.premarket_high) addHLine(session.premarket_high, "#79c0ff", LineStyle.Dashed, "PMH");
+      if (session?.premarket_low) addHLine(session.premarket_low, "#79c0ff", LineStyle.Dashed, "PML");
+    }
+
+    if (indicators.prior_day) {
+      if (session?.prior_day_high) addHLine(session.prior_day_high, "#ffa657", LineStyle.Dashed, "PDH");
+      if (session?.prior_day_low) addHLine(session.prior_day_low, "#ffa657", LineStyle.Dashed, "PDL");
+      if (session?.prior_day_close) addHLine(session.prior_day_close, "#ffa657", LineStyle.Dotted, "PDC");
+    }
+
+    if (indicators.max_pain && zerodte?.chain?.max_pain) {
+      addHLine(zerodte.chain.max_pain, "#f0883e", LineStyle.Dotted, "Max Pain");
+    }
 
     chartRef.current.timeScale().fitContent();
-  }, [bars, activePair, dealingRange, zerodte]);
+  }, [bars, activePair, dealingRange, zerodte, indicators]);
 
   return (
     <div className="chart-panel">
@@ -245,11 +220,6 @@ export function ChartPanel({
             )}
           </div>
         )}
-        <div className="chart-legend">
-          <span className="legend-eqh">EQH</span>
-          <span className="legend-eql">EQL</span>
-          <span className="legend-eq">Bracket</span>
-        </div>
       </div>
       <div ref={containerRef} className="chart-container" />
     </div>

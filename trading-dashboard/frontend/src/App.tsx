@@ -29,6 +29,14 @@ import { DivergencePanel } from "./components/DivergencePanel";
 import { TradeIdeaPanel } from "./components/TradeIdeaPanel";
 import { JournalPanel } from "./components/JournalPanel";
 import { SessionLevelsPanel } from "./components/SessionLevelsPanel";
+import { IndicatorToggleBar } from "./components/IndicatorToggleBar";
+import {
+  DEFAULT_INDICATORS,
+  loadIndicatorToggles,
+  saveIndicatorToggles,
+  type IndicatorKey,
+  type IndicatorToggles,
+} from "./lib/indicatorToggles";
 
 const TIMEFRAMES = ["1m", "5m", "15m", "1h", "4h", "1d"];
 
@@ -49,6 +57,7 @@ export default function App() {
   const [demoMode, setDemoMode] = useState(false);
   const [dataSource, setDataSource] = useState("");
   const [alertTierFilter, setAlertTierFilter] = useState<string>("");
+  const [indicators, setIndicators] = useState<IndicatorToggles>(() => loadIndicatorToggles());
 
   const selectedSnapshot = useMemo(
     () => snapshots.find((s) => s.symbol === selectedSymbol) ?? null,
@@ -90,6 +99,20 @@ export default function App() {
   useEffect(() => {
     setSelectedLevel(null);
   }, [selectedSymbol]);
+
+  const handleIndicatorChange = (key: IndicatorKey, enabled: boolean) => {
+    setIndicators((prev) => {
+      const next = { ...prev, [key]: enabled };
+      saveIndicatorToggles(next);
+      return next;
+    });
+  };
+
+  const handleIndicatorReset = () => {
+    const defaults = { ...DEFAULT_INDICATORS };
+    setIndicators(defaults);
+    saveIndicatorToggles(defaults);
+  };
 
   const handleScan = async () => {
     setScanning(true);
@@ -144,12 +167,18 @@ export default function App() {
               </button>
             ))}
           </div>
+          <IndicatorToggleBar
+            toggles={indicators}
+            onChange={handleIndicatorChange}
+            onReset={handleIndicatorReset}
+          />
           <ChartPanel
             symbol={selectedSymbol}
             timeframe={timeframe}
             bars={bars}
             levels={selectedSnapshot?.levels ?? []}
             lastPrice={selectedSnapshot?.last_price}
+            indicators={indicators}
             dealingRange={selectedSnapshot?.dealing_range}
             zerodte={selectedSnapshot?.zerodte}
           />
