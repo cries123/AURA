@@ -4,6 +4,8 @@ const API = "/api";
 
 export async function fetchSnapshots(): Promise<{
   snapshots: Snapshot[];
+  demo_mode?: boolean;
+  data_source?: string;
   divergence?: DivergenceData;
   events?: EventsData;
   breadth?: BreadthData;

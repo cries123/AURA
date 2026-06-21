@@ -46,6 +46,8 @@ export default function App() {
   const [selectedLevel, setSelectedLevel] = useState<LiquidityLevel | null>(null);
   const [scanning, setScanning] = useState(false);
   const [lastRefresh, setLastRefresh] = useState("");
+  const [demoMode, setDemoMode] = useState(false);
+  const [dataSource, setDataSource] = useState("");
   const [alertTierFilter, setAlertTierFilter] = useState<string>("");
 
   const selectedSnapshot = useMemo(
@@ -61,6 +63,8 @@ export default function App() {
       fetchClusterSummary(),
     ]);
     setSnapshots(snapRes.snapshots);
+    setDemoMode(!!snapRes.demo_mode);
+    setDataSource(snapRes.data_source || "");
     setDivergence(snapRes.divergence);
     setEvents(snapRes.events);
     setBreadth(snapRes.breadth);
@@ -104,8 +108,10 @@ export default function App() {
         <div>
           <h1>Liquidity Dashboard</h1>
           <p className="subtitle">0DTE Pro · EQL/EQH · GEX · VWAP · chain heatmap · tiered alerts</p>
-          {selectedSnapshot?.options_context?.note?.includes("Demo") && (
-            <p className="demo-banner">Demo mode — connect live feed for real market data</p>
+          {demoMode ? (
+            <p className="demo-banner">Demo mode — market feed unreachable. Check backend network or add POLYGON_API_KEY.</p>
+          ) : (
+            <p className="live-banner">Live data · {dataSource || "yahoo"}</p>
           )}
         </div>
         <div className="topbar-actions">

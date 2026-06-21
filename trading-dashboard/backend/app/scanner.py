@@ -23,7 +23,7 @@ from app.analysis.sessions import session_label
 from app.analysis.zerodte_pack import build_zerodte_context, classify_alert_tier
 from app.config import settings
 from app.market.demo_data import build_demo_snapshots
-from app.market.market_data import fetch_last_price, fetch_ohlcv, fetch_quote_meta
+from app.market.market_data import active_data_source, fetch_last_price, fetch_ohlcv, fetch_quote_meta, is_live_available
 from app.db import database as db
 from app.notifications import send_notifications
 from app.watchlist import CORRELATION_CLUSTERS, TIMEFRAMES, WATCHLIST, ZERODTE_SYMBOLS
@@ -35,18 +35,20 @@ class ScannerService:
         pending_notifications: list[tuple[int, str]] = []
         live_count = 0
 
-        for symbol in WATCHLIST:
-            try:
-                snapshot, alerts = await asyncio.to_thread(self._scan_symbol, symbol)
-                if snapshot.get("levels") or snapshot.get("last_price"):
-                    live_count += 1
-                results.append(snapshot)
-                pending_notifications.extend(alerts)
-            except Exception as exc:
-                results.append({"symbol": symbol, "error": str(exc)})
-
-        if live_count == 0:
+        if not is_live_available():
             results = self._seed_demo_snapshots()
+            demo_mode = True
+        else:
+            demo_mode = False
+            for symbol in WATCHLIST:
+                try:
+                    snapshot, alerts = await asyncio.to_thread(self._scan_symbol, symbol)
+                    if snapshot.get("last_price"):
+                        live_count += 1
+                    results.append(snapshot)
+                    pending_notifications.extend(alerts)
+                except Exception as exc:
+                    results.append({"symbol": symbol, "error": str(exc)})
 
         divergence = compute_index_divergence(results)
         events = get_event_context()
@@ -59,7 +61,8 @@ class ScannerService:
         return {
             "scanned": len(results),
             "results": results,
-            "demo_mode": live_count == 0,
+            "demo_mode": demo_mode,
+            "data_source": "demo" if demo_mode else active_data_source(),
             "divergence": divergence,
             "events": events,
             "at": datetime.utcnow().isoformat(),
@@ -206,7 +209,9 @@ class ScannerService:
 
         confluence = aggregate_confluence_score(all_levels, alert_tf)
 
-        primary_df = bars_by_tf.get(alert_tf) or bars_by_tf.get("5m")
+        primary_df = bars_by_tf.get(alert_tf)
+        if primary_df is None or primary_df.empty:
+            primary_df = bars_by_tf.get("5m")
         dealing_range = (
             compute_dealing_range(primary_df)
             if primary_df is not None and not primary_df.empty
@@ -238,6 +243,7 @@ class ScannerService:
             "symbol": symbol,
             "quote": quote,
             "last_price": last_price,
+            "data_source": quote.get("data_source", active_data_source()),
             "cluster": cluster,
             "confluence_score": confluence,
             "structures": structures,

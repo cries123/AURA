@@ -28,7 +28,7 @@ def build_zerodte_context(
     vwap = vwap_context(bars_5m if not bars_5m.empty else bars_1m, last_price)
     avwap = anchored_vwap(bars_5m if not bars_5m.empty else bars_1m, 0)
 
-    chain = build_chain_heatmap(symbol, last_price, level_prices)
+    chain = build_chain_heatmap(symbol, last_price, level_prices, bars_5m if bars_5m is not None and not bars_5m.empty else bars_1m)
     em = em_consumed(last_price, open_price or last_price, chain.get("expected_move"))
 
     nearest = min(scored_levels, key=lambda x: x.get("distance_pct") or 999) if scored_levels else None

@@ -53,6 +53,12 @@ button {
   font-size: 0.85rem;
 }
 
+.live-banner {
+  margin: 6px 0 0;
+  color: #3fb950;
+  font-size: 0.85rem;
+}
+
 .topbar-actions {
   display: flex;
   align-items: center;
