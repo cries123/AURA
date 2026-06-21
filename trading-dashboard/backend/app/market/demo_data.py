@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from app.watchlist import WATCHLIST
+from app.watchlist import WATCHLIST, ZERODTE_SYMBOLS
 
 
 def build_demo_snapshots() -> list[dict]:
@@ -105,11 +105,66 @@ def build_demo_snapshots() -> list[dict]:
                     "em_vs_distance_ratio": 1.2,
                     "note": "Demo data — connect live feed for real values",
                 },
-                "primary_timeframe": "1h",
+                "primary_timeframe": "5m" if symbol in ZERODTE_SYMBOLS else "1h",
+                "zerodte": _demo_zerodte(symbol, last, eql, eqh) if symbol in ZERODTE_SYMBOLS else None,
                 "updated_at": datetime.utcnow().isoformat(),
             }
         )
     return snapshots
+
+
+def _demo_zerodte(symbol: str, last: float, eql: float, eqh: float) -> dict:
+    em = round(last * 0.012, 2)
+    return {
+        "session_levels": {
+            "prior_day_high": eqh * 1.01,
+            "prior_day_low": eql * 0.99,
+            "prior_day_close": last,
+            "premarket_high": eqh,
+            "premarket_low": eql,
+            "or_5m_high": eqh * 0.998,
+            "or_5m_low": eql * 1.002,
+            "or_15m_high": eqh,
+            "or_15m_low": eql,
+        },
+        "session_level_hits": ["or_15m_low"],
+        "vwap": {"vwap": round(last * 0.998, 2), "position": "above", "distance_pct": 0.2},
+        "anchored_vwap": {"anchor_time": datetime.utcnow().isoformat(), "avwap": round(last * 0.997, 2)},
+        "chain": {
+            "expiry": datetime.utcnow().strftime("%Y-%m-%d"),
+            "is_0dte": True,
+            "expected_move": em,
+            "expected_move_pct": round(em / last * 100, 2),
+            "max_pain": round(last),
+            "gex": {"net_oi_bias": 1200, "regime": "positive", "gamma_flip_estimate": round(last * 0.995, 2)},
+            "strikes": [
+                {"strike": round(last) + i, "call_oi": 4000 - i * 200, "put_oi": 3500 + i * 150,
+                 "call_volume": 900, "put_volume": 800, "net_oi": 500, "at_liquidity_level": i == 0, "wall": i == 0}
+                for i in range(-3, 4)
+            ],
+            "note": "Demo 0DTE chain",
+        },
+        "em_consumed": {"traveled": round(last * 0.008, 2), "consumed_pct": 68.0, "remaining": round(em * 0.32, 2)},
+        "pin_risk": {"pin_risk": "normal", "distance_to_pin": 0.5, "pull_direction": "at_pin"},
+        "candle_patterns": [{"pattern": "bullish_engulfing", "bias": "bullish"}],
+        "velocity": {"velocity_pct_per_min": 0.02, "velocity_dollars_per_min": 0.08, "minutes_to_level": 4.5, "approaching": True},
+        "time_at_level": {"bars_at_level": 2, "minutes_at_level": 10},
+        "trade_idea": {
+            "structure": "bull_put_spread",
+            "bias": "bullish",
+            "description": f"Bull put spread below EQL {eql:.2f}",
+            "short_strike": round(eql) - 2,
+            "long_strike": round(eql) - 4,
+            "max_loss_estimate": 200,
+            "breakeven_estimate": round(eql) - 2.5,
+            "risk_pct_account": 1.0,
+            "filters": ["3 touches", "above VWAP at EQL"],
+        },
+        "backtest": {"rule": "eql_sweep_reclaim", "trades": 24, "win_rate": 62.5, "avg_move_15b": 0.42},
+        "events": {"is_rth": True, "is_power_hour": False, "is_blocked_window": False, "today_events": []},
+        "breadth": {"tick": 412, "add": 628, "vold": 0.82, "bias": "risk_on", "confirms_long": True},
+        "is_power_hour": False,
+    }
 
 
 def _cluster_for(symbol: str) -> str:

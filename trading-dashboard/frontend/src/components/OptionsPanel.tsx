@@ -32,6 +32,8 @@ export function OptionsPanel({ snapshot, selectedLevel }: OptionsPanelProps) {
         <Stat label="IV Rank" value={ctx.iv_rank != null ? `${ctx.iv_rank}%` : "—"} />
         <Stat label="Expected Move" value={ctx.expected_move != null ? `$${ctx.expected_move}` : "—"} />
         <Stat label="Dist to Level" value={fmtPct(ctx.distance_to_level_pct)} />
+        <Stat label="EM Consumed" value={ctx.em_consumed_pct != null ? `${ctx.em_consumed_pct}%` : "—"} />
+        <Stat label="Max Pain" value={fmt(ctx.max_pain)} />
         <Stat label="EM vs Distance" value={fmtRatio(ctx.em_vs_distance_ratio)} />
       </div>
 

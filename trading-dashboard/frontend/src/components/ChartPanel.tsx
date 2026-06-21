@@ -7,7 +7,7 @@ import {
   CandlestickData,
   LineStyle,
 } from "lightweight-charts";
-import type { Bar, LiquidityLevel } from "../types";
+import type { Bar, LiquidityLevel, ZeroDTEContext } from "../types";
 
 interface ChartPanelProps {
   symbol: string;
@@ -20,9 +20,10 @@ interface ChartPanelProps {
     equilibrium?: number;
     premium_discount?: string;
   };
+  zerodte?: ZeroDTEContext | null;
 }
 
-export function ChartPanel({ symbol, timeframe, bars, levels, dealingRange }: ChartPanelProps) {
+export function ChartPanel({ symbol, timeframe, bars, levels, dealingRange, zerodte }: ChartPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
@@ -130,8 +131,26 @@ export function ChartPanel({ symbol, timeframe, bars, levels, dealingRange }: Ch
       levelLinesRef.current.push(eqLine);
     }
 
+    const addHLine = (price: number, color: string, lineStyle: LineStyle, title: string) => {
+      const line = chartRef.current!.addLineSeries({
+        color, lineWidth: 1, lineStyle, title, priceLineVisible: false, lastValueVisible: false,
+      });
+      if (bars.length >= 2) {
+        line.setData([
+          { time: bars[0].time as CandlestickData["time"], value: price },
+          { time: bars[bars.length - 1].time as CandlestickData["time"], value: price },
+        ]);
+      }
+      levelLinesRef.current.push(line);
+    };
+
+    if (zerodte?.vwap?.vwap) addHLine(zerodte.vwap.vwap, "#d29922", LineStyle.Solid, "VWAP");
+    if (zerodte?.session_levels?.or_15m_high) addHLine(zerodte.session_levels.or_15m_high, "#a371f7", LineStyle.Dashed, "OR15 H");
+    if (zerodte?.session_levels?.or_15m_low) addHLine(zerodte.session_levels.or_15m_low, "#a371f7", LineStyle.Dashed, "OR15 L");
+    if (zerodte?.chain?.max_pain) addHLine(zerodte.chain.max_pain, "#f0883e", LineStyle.Dotted, "Max Pain");
+
     chartRef.current.timeScale().fitContent();
-  }, [bars, levels, timeframe, dealingRange]);
+  }, [bars, levels, timeframe, dealingRange, zerodte]);
 
   return (
     <div className="chart-panel">
@@ -143,6 +162,8 @@ export function ChartPanel({ symbol, timeframe, bars, levels, dealingRange }: Ch
           <span className="legend-eqh">EQH</span>
           <span className="legend-eql">EQL</span>
           <span className="legend-eq">Equilibrium</span>
+          <span className="legend-vwap">VWAP</span>
+          <span className="legend-or">OR15</span>
         </div>
       </div>
       <div ref={containerRef} className="chart-container" />

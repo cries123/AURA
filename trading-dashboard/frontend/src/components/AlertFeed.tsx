@@ -20,6 +20,7 @@ export function AlertFeed({ alerts }: AlertFeedProps) {
         {alerts.map((alert) => (
           <div key={alert.id} className="alert-item">
             <div className="alert-top">
+              <span className={`tier-badge tier-${(alert.tier || "B").toLowerCase()}`}>T{alert.tier || "B"}</span>
               <span className="alert-symbol">{alert.symbol}</span>
               <span className="alert-event">{alert.event_type.replace("_", " ")}</span>
               <span className="score-badge">{alert.score}</span>
