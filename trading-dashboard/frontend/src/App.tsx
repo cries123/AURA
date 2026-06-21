@@ -149,6 +149,7 @@ export default function App() {
             timeframe={timeframe}
             bars={bars}
             levels={selectedSnapshot?.levels ?? []}
+            lastPrice={selectedSnapshot?.last_price}
             dealingRange={selectedSnapshot?.dealing_range}
             zerodte={selectedSnapshot?.zerodte}
           />

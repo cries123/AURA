@@ -20,6 +20,7 @@ from app.analysis.patterns import (
 )
 from app.analysis.scoring import aggregate_confluence_score, score_level
 from app.analysis.sessions import session_label
+from app.analysis.level_pairs import build_level_pairs, sort_levels_paired
 from app.analysis.zerodte_pack import build_zerodte_context, classify_alert_tier
 from app.config import settings
 from app.market.demo_data import build_demo_snapshots
@@ -247,7 +248,8 @@ class ScannerService:
             "cluster": cluster,
             "confluence_score": confluence,
             "structures": structures,
-            "levels": sorted(scored_levels, key=lambda x: x["score"], reverse=True),
+            "levels": sort_levels_paired(scored_levels),
+            "level_pairs": build_level_pairs(scored_levels, last_price),
             "dealing_range": dealing_range,
             "fvgs": fvgs,
             "options_context": options_ctx,

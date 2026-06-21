@@ -84,6 +84,15 @@ export interface TradeIdea {
   filters?: string[];
 }
 
+export interface LevelPair {
+  timeframe: string;
+  eql: LiquidityLevel | null;
+  eqh: LiquidityLevel | null;
+  range?: number | null;
+  mid?: number | null;
+  combined_score?: number;
+}
+
 export interface Snapshot {
   symbol: string;
   last_price?: number;
@@ -92,6 +101,7 @@ export interface Snapshot {
   quote?: { last?: number; change?: number; change_pct?: number };
   structures?: Record<string, { structure: string; last_swing_high?: number; last_swing_low?: number }>;
   levels: LiquidityLevel[];
+  level_pairs?: LevelPair[];
   dealing_range?: { high?: number; low?: number; equilibrium?: number; premium_discount?: string };
   fvgs?: Array<{ type: string; top: number; bottom: number; time: string }>;
   options_context?: OptionsContext;

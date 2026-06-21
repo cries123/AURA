@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   createChart,
   ColorType,
@@ -8,12 +8,14 @@ import {
   LineStyle,
 } from "lightweight-charts";
 import type { Bar, LiquidityLevel, ZeroDTEContext } from "../types";
+import { buildLevelPairs, pairForTimeframe } from "../lib/levelPairs";
 
 interface ChartPanelProps {
   symbol: string;
   timeframe: string;
   bars: Bar[];
   levels: LiquidityLevel[];
+  lastPrice?: number;
   dealingRange?: {
     high?: number;
     low?: number;
@@ -23,11 +25,25 @@ interface ChartPanelProps {
   zerodte?: ZeroDTEContext | null;
 }
 
-export function ChartPanel({ symbol, timeframe, bars, levels, dealingRange, zerodte }: ChartPanelProps) {
+export function ChartPanel({
+  symbol,
+  timeframe,
+  bars,
+  levels,
+  lastPrice,
+  dealingRange,
+  zerodte,
+}: ChartPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
   const levelLinesRef = useRef<ReturnType<IChartApi["addLineSeries"]>[]>([]);
+  const priceLineRefs = useRef<ReturnType<ISeriesApi<"Candlestick">["createPriceLine"]>[]>([]);
+
+  const activePair = useMemo(() => {
+    const pairs = buildLevelPairs(levels, lastPrice);
+    return pairForTimeframe(pairs, timeframe);
+  }, [levels, lastPrice, timeframe]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -71,11 +87,15 @@ export function ChartPanel({ symbol, timeframe, bars, levels, dealingRange, zero
       chartRef.current = null;
       seriesRef.current = null;
       levelLinesRef.current = [];
+      priceLineRefs.current = [];
     };
   }, []);
 
   useEffect(() => {
     if (!seriesRef.current || !chartRef.current) return;
+
+    priceLineRefs.current.forEach((pl) => seriesRef.current?.removePriceLine(pl));
+    priceLineRefs.current = [];
 
     const candleData: CandlestickData[] = bars.map((b) => ({
       time: b.time as CandlestickData["time"],
@@ -89,28 +109,74 @@ export function ChartPanel({ symbol, timeframe, bars, levels, dealingRange, zero
     levelLinesRef.current.forEach((line) => chartRef.current?.removeSeries(line));
     levelLinesRef.current = [];
 
-    const tfLevels = levels.filter((l) => l.timeframe === timeframe);
+    const bracketLevels: LiquidityLevel[] = [];
+    if (activePair?.eql) bracketLevels.push(activePair.eql);
+    if (activePair?.eqh) bracketLevels.push(activePair.eqh);
 
-    tfLevels.forEach((level) => {
+    // Draw EQL and EQH as adjacent price lines on the same scale (labels stack together)
+    bracketLevels.forEach((level) => {
       const color = level.level_type === "EQH" ? "#f85149" : "#58a6ff";
-      const line = chartRef.current!.addLineSeries({
+      const pl = seriesRef.current!.createPriceLine({
+        price: level.price,
         color,
         lineWidth: level.proximity ? 2 : 1,
         lineStyle: level.proximity ? LineStyle.Solid : LineStyle.Dashed,
-        title: `${level.level_type} ${level.price.toFixed(2)} (${level.touches})`,
-        priceLineVisible: false,
-        lastValueVisible: true,
+        axisLabelVisible: true,
+        title: `${level.level_type} ${level.price.toFixed(2)}`,
       });
-      if (bars.length >= 2) {
-        line.setData([
-          { time: bars[0].time as CandlestickData["time"], value: level.price },
-          { time: bars[bars.length - 1].time as CandlestickData["time"], value: level.price },
-        ]);
-      }
-      levelLinesRef.current.push(line);
+      priceLineRefs.current.push(pl);
     });
 
-    if (dealingRange?.equilibrium) {
+    // Shaded bracket between EQL and EQH
+    if (activePair?.eql && activePair?.eqh && bars.length >= 2) {
+      const top = Math.max(activePair.eql.price, activePair.eqh.price);
+      const bottom = Math.min(activePair.eql.price, activePair.eqh.price);
+      const topLine = chartRef.current!.addLineSeries({
+        color: "rgba(88, 166, 255, 0.25)",
+        lineWidth: 1,
+        lineStyle: LineStyle.Solid,
+        priceLineVisible: false,
+        lastValueVisible: false,
+        crosshairMarkerVisible: false,
+      });
+      const bottomLine = chartRef.current!.addLineSeries({
+        color: "rgba(88, 166, 255, 0.25)",
+        lineWidth: 1,
+        lineStyle: LineStyle.Solid,
+        priceLineVisible: false,
+        lastValueVisible: false,
+        crosshairMarkerVisible: false,
+      });
+      const t0 = bars[0].time as CandlestickData["time"];
+      const t1 = bars[bars.length - 1].time as CandlestickData["time"];
+      topLine.setData([
+        { time: t0, value: top },
+        { time: t1, value: top },
+      ]);
+      bottomLine.setData([
+        { time: t0, value: bottom },
+        { time: t1, value: bottom },
+      ]);
+      levelLinesRef.current.push(topLine, bottomLine);
+
+      if (activePair.mid != null) {
+        const midLine = chartRef.current!.addLineSeries({
+          color: "#8b949e",
+          lineWidth: 1,
+          lineStyle: LineStyle.Dotted,
+          title: "Bracket Mid",
+          priceLineVisible: false,
+          lastValueVisible: false,
+        });
+        midLine.setData([
+          { time: t0, value: activePair.mid },
+          { time: t1, value: activePair.mid },
+        ]);
+        levelLinesRef.current.push(midLine);
+      }
+    }
+
+    if (dealingRange?.equilibrium && !activePair?.mid) {
       const eqLine = chartRef.current.addLineSeries({
         color: "#8b949e",
         lineWidth: 1,
@@ -133,7 +199,12 @@ export function ChartPanel({ symbol, timeframe, bars, levels, dealingRange, zero
 
     const addHLine = (price: number, color: string, lineStyle: LineStyle, title: string) => {
       const line = chartRef.current!.addLineSeries({
-        color, lineWidth: 1, lineStyle, title, priceLineVisible: false, lastValueVisible: false,
+        color,
+        lineWidth: 1,
+        lineStyle,
+        title,
+        priceLineVisible: false,
+        lastValueVisible: false,
       });
       if (bars.length >= 2) {
         line.setData([
@@ -145,12 +216,14 @@ export function ChartPanel({ symbol, timeframe, bars, levels, dealingRange, zero
     };
 
     if (zerodte?.vwap?.vwap) addHLine(zerodte.vwap.vwap, "#d29922", LineStyle.Solid, "VWAP");
-    if (zerodte?.session_levels?.or_15m_high) addHLine(zerodte.session_levels.or_15m_high, "#a371f7", LineStyle.Dashed, "OR15 H");
-    if (zerodte?.session_levels?.or_15m_low) addHLine(zerodte.session_levels.or_15m_low, "#a371f7", LineStyle.Dashed, "OR15 L");
+    if (zerodte?.session_levels?.or_15m_high)
+      addHLine(zerodte.session_levels.or_15m_high, "#a371f7", LineStyle.Dashed, "OR15 H");
+    if (zerodte?.session_levels?.or_15m_low)
+      addHLine(zerodte.session_levels.or_15m_low, "#a371f7", LineStyle.Dashed, "OR15 L");
     if (zerodte?.chain?.max_pain) addHLine(zerodte.chain.max_pain, "#f0883e", LineStyle.Dotted, "Max Pain");
 
     chartRef.current.timeScale().fitContent();
-  }, [bars, levels, timeframe, dealingRange, zerodte]);
+  }, [bars, activePair, dealingRange, zerodte]);
 
   return (
     <div className="chart-panel">
@@ -158,12 +231,24 @@ export function ChartPanel({ symbol, timeframe, bars, levels, dealingRange, zero
         <h2>
           {symbol} <span className="muted">{timeframe.toUpperCase()}</span>
         </h2>
+        {activePair && (activePair.eql || activePair.eqh) && (
+          <div className="bracket-chip">
+            {activePair.eql && (
+              <span className="eql">EQL {activePair.eql.price.toFixed(2)}</span>
+            )}
+            <span className="bracket-sep">↔</span>
+            {activePair.eqh && (
+              <span className="eqh">EQH {activePair.eqh.price.toFixed(2)}</span>
+            )}
+            {activePair.range != null && (
+              <span className="muted">(${activePair.range.toFixed(2)} range)</span>
+            )}
+          </div>
+        )}
         <div className="chart-legend">
           <span className="legend-eqh">EQH</span>
           <span className="legend-eql">EQL</span>
-          <span className="legend-eq">Equilibrium</span>
-          <span className="legend-vwap">VWAP</span>
-          <span className="legend-or">OR15</span>
+          <span className="legend-eq">Bracket</span>
         </div>
       </div>
       <div ref={containerRef} className="chart-container" />

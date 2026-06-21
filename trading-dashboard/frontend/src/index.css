@@ -248,10 +248,66 @@ button {
 
 .chart-header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
   margin-bottom: 8px;
 }
+
+.bracket-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.bracket-sep { color: #8b949e; }
+
+.pair-table {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pair-row {
+  display: grid;
+  grid-template-columns: 0.5fr 1.2fr 1.2fr 0.7fr 0.5fr;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.pair-row.header {
+  color: #8b949e;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  padding: 0 4px 4px;
+}
+
+.pair-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #21262d;
+  background: #161b22;
+  text-align: left;
+  color: inherit;
+  min-height: 52px;
+  cursor: pointer;
+}
+
+.pair-cell.eql { border-left: 3px solid #58a6ff; }
+.pair-cell.eqh { border-left: 3px solid #f85149; }
+.pair-cell.selected { background: #1c2a3a; }
+.pair-cell.empty { justify-content: center; color: #8b949e; background: transparent; border: 1px dashed #21262d; cursor: default; }
+
+.pair-price { font-weight: 700; font-size: 0.95rem; }
+.pair-meta { font-size: 0.7rem; color: #8b949e; }
+.tf-cell { font-weight: 600; align-self: center; }
+.range-cell { align-self: center; font-size: 0.85rem; color: #8b949e; }
 
 .chart-header h2 {
   margin: 0;
