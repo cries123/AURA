@@ -2,8 +2,12 @@ from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, Query
 
+from app.analysis.breadth import fetch_breadth
+from app.analysis.divergence import compute_index_divergence
+from app.analysis.events import get_event_context
+from app.config import settings
 from app.market.demo_data import build_demo_snapshots
-from app.market.market_data import fetch_ohlcv
+from app.market.market_data import fetch_ohlcv, fetch_quote_meta
 from app.db import database as db
 from app.scanner import scanner
 from app.watchlist import CORRELATION_CLUSTERS, WATCHLIST, TIMEFRAMES
@@ -24,7 +28,33 @@ async def get_watchlist():
 @router.get("/snapshots")
 async def get_snapshots():
     snapshots = db.get_latest_snapshots()
-    return {"snapshots": snapshots, "count": len(snapshots)}
+    from app.market.market_data import active_data_source, is_live_available
+
+    demo = not is_live_available()
+    return {
+        "snapshots": snapshots,
+        "count": len(snapshots),
+        "demo_mode": demo,
+        "data_source": "demo" if demo else active_data_source(),
+        "divergence": compute_index_divergence(snapshots),
+        "events": get_event_context(),
+        "breadth": fetch_breadth(),
+    }
+
+
+@router.get("/status")
+async def get_status():
+    from app.market.market_data import active_data_source, is_live_available
+
+    live = is_live_available()
+    quote = fetch_quote_meta("SPY") if live else {}
+    return {
+        "live": live,
+        "data_source": active_data_source() if live else "demo",
+        "spy_last": quote.get("last"),
+        "provider": settings.data_provider,
+        "polygon_configured": bool(settings.polygon_api_key),
+    }
 
 
 @router.get("/snapshots/{symbol}")
@@ -49,8 +79,30 @@ async def get_levels(
 async def get_alerts(
     limit: int = Query(100, ge=1, le=500),
     min_score: int = Query(0, ge=0, le=20),
+    tier: str | None = None,
 ):
-    return {"alerts": db.get_alerts(limit=limit, min_score=min_score)}
+    return {"alerts": db.get_alerts(limit=limit, min_score=min_score, tier=tier)}
+
+
+@router.get("/journal")
+async def get_journal(limit: int = Query(100, ge=1, le=500)):
+    return {"entries": db.get_journal(limit=limit)}
+
+
+@router.get("/divergence")
+async def get_divergence():
+    snapshots = db.get_latest_snapshots()
+    return compute_index_divergence(snapshots)
+
+
+@router.get("/events")
+async def get_events():
+    return get_event_context()
+
+
+@router.get("/breadth")
+async def get_breadth():
+    return fetch_breadth()
 
 
 @router.get("/bars/{symbol}")

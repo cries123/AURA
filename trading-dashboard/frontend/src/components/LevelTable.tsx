@@ -1,4 +1,5 @@
 import type { LiquidityLevel, Snapshot } from "../types";
+import { buildLevelPairs } from "../lib/levelPairs";
 
 interface LevelTableProps {
   snapshot: Snapshot | null;
@@ -10,48 +11,98 @@ export function LevelTable({ snapshot, onSelectLevel, selectedLevel }: LevelTabl
   if (!snapshot?.levels?.length) {
     return (
       <div className="panel level-panel">
-        <h3>EQL / EQH Levels</h3>
+        <h3>EQL / EQH Brackets</h3>
         <p className="muted">No levels detected yet.</p>
       </div>
     );
   }
 
+  const pairs = snapshot.level_pairs ?? buildLevelPairs(snapshot.levels, snapshot.last_price);
+
   return (
     <div className="panel level-panel">
       <div className="panel-header">
-        <h3>EQL / EQH Levels</h3>
-        <span className="muted">{snapshot.levels.length} levels</span>
+        <h3>EQL / EQH Brackets</h3>
+        <span className="muted">{pairs.length} timeframes</span>
       </div>
-      <div className="level-table">
-        <div className="level-row header">
+      <div className="pair-table">
+        <div className="pair-row header">
           <span>TF</span>
-          <span>Type</span>
-          <span>Price</span>
-          <span>Touches</span>
+          <span>EQL</span>
+          <span>EQH</span>
+          <span>Range</span>
           <span>Score</span>
-          <span>Dist%</span>
-          <span>Flags</span>
         </div>
-        {snapshot.levels.map((level, i) => (
-          <button
-            key={`${level.timeframe}-${level.level_type}-${level.price}-${i}`}
-            className={`level-row ${selectedLevel === level ? "selected" : ""}`}
-            onClick={() => onSelectLevel(level)}
+        {pairs.map((pair) => (
+          <div
+            key={pair.timeframe}
+            className={`pair-row ${pair.bracket_valid === false ? "pair-invalid" : ""}`}
           >
-            <span>{level.timeframe}</span>
-            <span className={level.level_type === "EQH" ? "eqh" : "eql"}>{level.level_type}</span>
-            <span>{level.price.toFixed(2)}</span>
-            <span>{level.touches}</span>
-            <span className="score-badge">{level.score}</span>
-            <span>{level.distance_pct?.toFixed(3) ?? "—"}</span>
-            <span className="flags">
-              {level.proximity && <span className="flag prox">NEAR</span>}
-              {level.sweep_reclaim && <span className="flag sweep">SWP</span>}
-              {level.acceptance && <span className="flag acc">ACC</span>}
+            <span className="tf-cell">
+              {pair.timeframe.toUpperCase()}
+              {pair.bracket_valid === false && (
+                <span className="validity-badge stale">stale</span>
+              )}
             </span>
-          </button>
+            <PairCell
+              level={pair.eql}
+              type="EQL"
+              selectedLevel={selectedLevel}
+              onSelect={onSelectLevel}
+            />
+            <PairCell
+              level={pair.eqh}
+              type="EQH"
+              selectedLevel={selectedLevel}
+              onSelect={onSelectLevel}
+            />
+            <span className="range-cell">
+              {pair.range != null ? `$${pair.range.toFixed(2)}` : "—"}
+            </span>
+            <span className="score-badge">{pair.combined_score ?? 0}</span>
+          </div>
         ))}
       </div>
     </div>
+  );
+}
+
+function PairCell({
+  level,
+  type,
+  selectedLevel,
+  onSelect,
+}: {
+  level: LiquidityLevel | null;
+  type: "EQL" | "EQH";
+  selectedLevel: LiquidityLevel | null;
+  onSelect: (l: LiquidityLevel) => void;
+}) {
+  if (!level) {
+    return <span className="pair-cell empty">—</span>;
+  }
+
+  const isSelected = selectedLevel === level;
+
+  return (
+    <button
+      type="button"
+      className={`pair-cell ${type === "EQH" ? "eqh" : "eql"} ${isSelected ? "selected" : ""}`}
+      onClick={() => onSelect(level)}
+    >
+      <span className="pair-price">{level.price.toFixed(2)}</span>
+      <span className="pair-meta">
+        {level.touches}t · {level.distance_pct?.toFixed(2) ?? "—"}%
+      </span>
+      {level.validity && (
+        <span className={`validity-badge ${level.validity.status}`}>
+          {level.validity.status}
+        </span>
+      )}
+      <span className="flags">
+        {level.proximity && <span className="flag prox">NEAR</span>}
+        {level.sweep_reclaim && <span className="flag sweep">SWP</span>}
+      </span>
+    </button>
   );
 }

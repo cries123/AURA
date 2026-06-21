@@ -10,9 +10,11 @@ def score_level(
     has_sweep_reclaim: bool,
     is_proximity: bool,
     has_acceptance: bool,
+    zerodte_bonus: int = 0,
+    extra_factors: list[str] | None = None,
 ) -> tuple[int, list[str]]:
     score = 0
-    factors: list[str] = []
+    factors: list[str] = list(extra_factors or [])
 
     if level.touches >= 3:
         score += 2
@@ -54,6 +56,9 @@ def score_level(
     if has_acceptance:
         score += 1
         factors.append("acceptance beyond level")
+
+    if zerodte_bonus:
+        score += zerodte_bonus
 
     return score, factors
 

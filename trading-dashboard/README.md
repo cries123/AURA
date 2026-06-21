@@ -4,17 +4,28 @@ Options-trader dashboard for monitoring EQL/EQH (Equal Lows / Equal Highs), mult
 
 ## Features
 
+### Core
 - **Watchlist scanner** for QQQ, SPY, SPX, INTC, CRWV, MRVL, HOOD, MSTR, ORCL, PLTR, SPCX, RIVN, IMSR, RDW
-- **Multi-timeframe analysis** (15m, 1H, 4H, D)
+- **Multi-timeframe analysis** (1m, 5m, 15m, 1H, 4H, D)
 - **EQL/EQH detection** with swing pivots and equal-level clustering
-- **Setup scoring** (touches, confluence, sweep+reclaim, structure, proximity)
-- **Alerts** for proximity, sweep+reclaim, and acceptance beyond levels
-- **Options panel** — nearest strike, DTE, IV rank, expected move vs distance
-- **Market structure** — bullish / bearish / ranging per timeframe
-- **Dealing range** — premium/discount zone
-- **Fair Value Gaps** near price
-- **Correlation clusters** — index, momentum, semis
-- **Notifications** via Telegram and/or Discord webhooks
+- **Setup scoring** with tiered alerts (A/B/C)
+
+### 0DTE Pro Pack (SPY / QQQ / SPX)
+- **0DTE chain heatmap** — OI/volume by strike, walls at liquidity levels
+- **Expected move consumed** — % of EM used vs distance to EQL/EQH
+- **GEX proxy** — net OI regime + gamma flip estimate
+- **Session levels** — premarket, opening range (5/15/30m), prior day H/L/C
+- **VWAP + anchored VWAP** overlays on chart
+- **Max pain + pin risk** into close
+- **Candle patterns** — engulfing, failed breakout, wick rejection
+- **Approach velocity** — $/min and minutes-to-level
+- **Index divergence** — SPY/QQQ/SPX leadership signals
+- **Breadth panel** — $TICK/$ADD proxy (upgrade to Polygon for live)
+- **Trade idea generator** — bull put / bear call spread suggestions
+- **Playbook backtester** — EQL sweep+reclaim stats
+- **Event/time gates** — block alerts in first/last 5 min, high-impact days
+- **Session journal** — auto-logs every alert for review
+- **Tier A push alerts** — only top setups notify via Telegram/Discord
 
 ## Architecture
 

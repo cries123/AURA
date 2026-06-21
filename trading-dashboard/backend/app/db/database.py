@@ -74,8 +74,30 @@ def init_db() -> None:
                 key TEXT PRIMARY KEY,
                 last_sent_at TEXT NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS journal (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                alert_id INTEGER,
+                symbol TEXT NOT NULL,
+                setup TEXT,
+                level_price REAL,
+                score INTEGER,
+                tier TEXT,
+                outcome_15m REAL,
+                outcome_30m REAL,
+                outcome_60m REAL,
+                notes TEXT,
+                created_at TEXT NOT NULL
+            );
             """
         )
+        _migrate_alerts_tier(conn)
+
+
+def _migrate_alerts_tier(conn: sqlite3.Connection) -> None:
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(alerts)").fetchall()}
+    if "tier" not in cols:
+        conn.execute("ALTER TABLE alerts ADD COLUMN tier TEXT DEFAULT 'B'")
 
 
 def upsert_level(level: dict[str, Any]) -> None:
@@ -120,8 +142,8 @@ def insert_alert(alert: dict[str, Any]) -> int:
             """
             INSERT INTO alerts (
                 symbol, timeframe, event_type, level_type, level_price,
-                message, score, score_factors, options_context, created_at, notified
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                message, score, score_factors, options_context, created_at, notified, tier
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 alert["symbol"],
@@ -135,9 +157,39 @@ def insert_alert(alert: dict[str, Any]) -> int:
                 json.dumps(alert.get("options_context")),
                 alert.get("created_at", datetime.utcnow().isoformat()),
                 alert.get("notified", 0),
+                alert.get("tier", "B"),
             ),
         )
         return int(cur.lastrowid)
+
+
+def insert_journal(entry: dict[str, Any]) -> int:
+    with get_connection() as conn:
+        cur = conn.execute(
+            """
+            INSERT INTO journal (alert_id, symbol, setup, level_price, score, tier, notes, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                entry.get("alert_id"),
+                entry["symbol"],
+                entry.get("setup"),
+                entry.get("level_price"),
+                entry.get("score", 0),
+                entry.get("tier", "C"),
+                entry.get("notes"),
+                entry.get("created_at", datetime.utcnow().isoformat()),
+            ),
+        )
+        return int(cur.lastrowid)
+
+
+def get_journal(limit: int = 100) -> list[dict[str, Any]]:
+    with get_connection() as conn:
+        rows = conn.execute(
+            "SELECT * FROM journal ORDER BY created_at DESC LIMIT ?", (limit,)
+        ).fetchall()
+    return [dict(row) for row in rows]
 
 
 def save_snapshot(symbol: str, data: dict[str, Any]) -> None:
@@ -188,15 +240,16 @@ def get_levels(symbol: str | None = None, timeframe: str | None = None) -> list[
     return [_row_to_level(row) for row in rows]
 
 
-def get_alerts(limit: int = 100, min_score: int = 0) -> list[dict[str, Any]]:
+def get_alerts(limit: int = 100, min_score: int = 0, tier: str | None = None) -> list[dict[str, Any]]:
+    query = "SELECT * FROM alerts WHERE score >= ?"
+    params: list[Any] = [min_score]
+    if tier:
+        query += " AND tier = ?"
+        params.append(tier)
+    query += " ORDER BY created_at DESC LIMIT ?"
+    params.append(limit)
     with get_connection() as conn:
-        rows = conn.execute(
-            """
-            SELECT * FROM alerts WHERE score >= ?
-            ORDER BY created_at DESC LIMIT ?
-            """,
-            (min_score, limit),
-        ).fetchall()
+        rows = conn.execute(query, params).fetchall()
     return [_row_to_alert(row) for row in rows]
 
 
@@ -260,4 +313,5 @@ def _row_to_alert(row: sqlite3.Row) -> dict[str, Any]:
         "options_context": json.loads(row["options_context"]) if row["options_context"] else None,
         "created_at": row["created_at"],
         "notified": bool(row["notified"]),
+        "tier": row["tier"] if "tier" in row.keys() else "B",
     }

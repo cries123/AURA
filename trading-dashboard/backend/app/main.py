@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from contextlib import asynccontextmanager
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -26,8 +27,7 @@ async def lifespan(app: FastAPI):
         replace_existing=True,
     )
     scheduler.start()
-    # Run initial scan on startup
-    await scanner.run_scan()
+    asyncio.create_task(scanner.run_scan())
     yield
     scheduler.shutdown(wait=False)
 

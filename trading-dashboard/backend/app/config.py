@@ -4,14 +4,22 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
+    data_provider: str = "yahoo"  # yahoo | polygon | yfinance
+
     scan_interval_minutes: int = 5
-    primary_alert_timeframe: str = "1h"
+    primary_alert_timeframe: str = "5m"
+    zerodte_alert_timeframe: str = "5m"
     equal_tolerance_pct: float = 0.15
     min_touches: int = 2
     swing_lookback: int = 5
     proximity_alert_pct: float = 0.15
     alert_cooldown_minutes: int = 30
     min_setup_score: int = 5
+    tier_a_min_score: int = 8
+    block_first_last_minutes: int = 5
+    power_hour_start_et: int = 15
+
+    polygon_api_key: str = ""
 
     telegram_bot_token: str = ""
     telegram_chat_id: str = ""
